@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="MEXPRESS - Visualization and integration of TCGA data.">
+	<title>MEXPRESS</title>
+	<link href="https://fonts.googleapis.com/css?family=Lato:400,400i,700" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Montserrat:700" rel="stylesheet">
+	<link rel="stylesheet" type="text/css" href="css/global.css">
+	<link rel="stylesheet" type="text/css" href="css/index.css">
+	<!--[if lt IE 9]>
+	<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+</head>
+<body>
+	<aside>
+		<header>
+			<h1>MEXPRESS</h1>
+			<h3>visualizing DNA methylation, expression and clinical data</h3>
+		</header>
+		<div class="user-input">
+			<section class="select-gene">
+				<p><strong>Enter a gene or miRNA name</strong></p>
+				<input type="text" id="name-input" value="NDRG2">
+			</section>
+			<section class='select-cancer-type'>
+				<p><strong>Select a cancer type</strong></p>
+				<ul>
+					<li>
+						<div class="short-name">ERROR</div>
+						<div class="long-name">could not load the cancer types</div>
+					</li>
+				</ul>
+				<div class="scroll-button">
+					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevrons-down"><polyline points="7 13 12 18 17 13"></polyline><polyline points="7 6 12 11 17 6"></polyline></svg>
+				</div>
+			</section>
+			<section>
+				<div class="button button--plot button--inactive">
+					<div class="button__text">plot</div>
+					<div class="loader"></div>
+				</div>
+			</section>
+		</div>
+	</aside>
+	<main>
+		<nav>
+			<ul>
+				<li><a href="index.html">home</a></li>
+				<li><a href="about.html">about</a></li>
+				<li><a href="https://bmcgenomics.biomedcentral.com/articles/10.1186/s12864-015-1847-z" target="_blank">publication</a></li>
+				<li><a href="#">code</a></li>
+				<li><a href="contact.html">contact</a></li>
+			</ul>
+		</nav>
+		<div class="toolbar">
+			<ul>
+				<li>
+					<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-shuffle">
+						<polyline points="16 3 21 3 21 8"></polyline>
+						<line x1="4" y1="20" x2="21" y2="3"></line>
+						<polyline points="21 16 21 21 16 21"></polyline>
+						<line x1="15" y1="15" x2="21" y2="21"></line>
+						<line x1="4" y1="4" x2="9" y2="9"></line>
+					</svg>
+					Sort the samples by
+					<select class="toolbar--select-sorter">
+						<option value="region_expression" selected>expression</option>
+					</select>
+				</li>
+				<li>
+					<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-filter">
+						<polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+					</svg>
+					Filter the samples by
+					<select class="toolbar--select-filter">
+						<option selected value="no filter">no filter</option>
+					</select>
+				</li>
+				<li>
+					<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-info">
+						<circle cx="12" cy="12" r="10"></circle>
+						<line x1="12" y1="16" x2="12" y2="12"></line>
+						<line x1="12" y1="8" x2="12" y2="8"></line>
+					</svg>
+					Show data information for
+					<select class="toolbar--select-data-type">
+						<option selected value="no data type selected">no data type selected</option>
+						<option value="gene expression">gene expression data</option>
+						<option value="mirna expression">miRNA expression</option>
+						<option value="cnv">CNV data</option>
+						<option value="methylation 450">DNA methylation data (450)</option>
+						<option value="phenotype">phenotype data</option>
+						<option value="survival">survival data</option>
+					</select>
+				</li>
+			</ul>
+		</div>
+		<div class="plot-window">
+			<div class="select-filter overlay hidden">
+				<div class="select-filter__content data-summary"></div>
+				<div class="select-filter__content">
+					Select the samples where the <span class="sample-filter"></span> is <ul class="filter-options filter-list"></ul>
+				</div>
+				<div class="select-filter__content">
+					<div class="button button--filter button--small button--inactive">
+						<div class="button__text">filter</div>
+					</div>
+					<div class="button button--cancel button--small button--secondary">
+						<div class="button__text">cancel</div>
+					</div>
+				</div>
+				<div class="select-filter__content select-filter__info">
+					<p>
+						Here you can select which samples should be shown in the plot. For example, to show only those samples for which there is expression data available, i.e. where the expression is not null, select "&ne;" and type "null" in the text box.
+					</p>
+					<p>
+						Tip: for numeric variables (such as expression), you can click on one of the summary values to use it as a filter value.
+					</p>
+				</div>
+				<div class="hidden">
+					<div id="sample-sorter"></div>
+					<div id="sample-filter"></div>
+				</div>
+			</div>
+			<div class="data-type-information overlay hidden">
+				<div class="data-type-information__content">
+				</div>
+				<div class="button button--cancel button--small button--secondary">
+					<div class="button__text">close</div>
+				</div>
+			</div>
+			<div class="message message--error hidden">
+				<div class="message__close-x">
+					<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
+						<line x1="18" y1="6" x2="6" y2="18"></line>
+						<line x1="6" y1="6" x2="18" y2="18"></line>
+					</svg>
+				</div>
+			</div>
+		</div>
+		<footer>
+			<p>
+				By downloading, analyzing, and/or utilizing TCGA data for publication purposes, the user accepts the data use restrictions and requirements as outlined in the TCGA Publication Guidelines. See <a href="http://cancergenome.nih.gov/abouttcga/policies/publicationguidelines" target="_blank">http://cancergenome.nih.gov/abouttcga/policies/publicationguidelines</a> for additional information.
+			</p>
+			<p>
+				If you would like to use a MEXPRESS plot in your publication (and we hope you do!), please cite our paper <a href="https://bmcgenomics.biomedcentral.com/articles/10.1186/s12864-015-1847-z" target="_blank">MEXPRESS: visualizing expression, DNA methylation and clinical TCGA data</a>.
+			</p>
+			<p>
+				MEXPRESS is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
+			</p>
+			<p>
+				The MEXPRESS code is available on <a href="#" target="_blank">GitHub</a>.
+			</p>
+			<p>
+				Developed by Alexander Koch @ Maastricht University. Contact: <a href="mailto:a.koch@maastrichtuniversity.nl">a.koch@maastrichtuniversity.nl</a> or <a href="https://twitter.com/monsieurKoch" target="_blank">@monsieurKoch</a>
+			</p>
+		</footer>
+	</main>
+	<script type="text/javascript" src="js/jquery-3.2.1.min.js"></script>
+	<script type="text/javascript" src="js/d3.min.js"></script>
+	<script type="text/javascript" src="js/jquery.autocomplete.min.js"></script>
+	<script type="text/javascript" src="js/mexpressGlobalVariables.js"></script>
+	<script type="text/javascript" src="js/mexpressFunctions.js"></script>
+	<script type="text/javascript" src="js/statistics.js"></script>
+	<script type="text/javascript" src="js/mexpress.js"></script>
+</body>
+</html>

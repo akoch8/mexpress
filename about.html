@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="About MEXPRESS - Visualization and integration of TCGA data.">
+	<title>ABOUT</title>
+	<link href="https://fonts.googleapis.com/css?family=Lato:400,400i,700" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Montserrat:700" rel="stylesheet">
+	<link rel="stylesheet" type="text/css" href="css/global.css">
+	<link rel="stylesheet" type="text/css" href="css/about.css">
+	<!--[if lt IE 9]>
+	<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+</head>
+<body>
+	<main>
+		<nav>
+			<ul>
+				<li><a href="index.html">home</a></li>
+				<li><a href="about.html">about</a></li>
+				<li><a href="https://bmcgenomics.biomedcentral.com/articles/10.1186/s12864-015-1847-z" target="_blank">publication</a></li>
+				<li><a href="#">code</a></li>
+				<li><a href="contact.html">contact</a></li>
+			</ul>
+		</nav>
+		<article>
+			<h1>MEXPRESS</h1>
+			<h3>visualizing DNA methylation, expression and clinical data</h3>
+			<section>
+				<h2>What?</h2>
+				<p>
+					MEXPRESS is a data visualization tool designed for the easy visualization of TCGA expression, DNA methylation and clinical data, as well as the relationships between them. You can find all the details in our <a href="https://bmcgenomics.biomedcentral.com/articles/10.1186/s12864-015-1847-z" target="_blank">publication</a>.
+				</p>
+			</section>
+			<section>
+				<h2>How?</h2>
+				<p>
+					Easy! Just enter the name of the gene or miRNA you are interested in, select the cancer type you are interested in, and click the plot button. MEXPRESS will then plot the corresponding expression, DNA methylation, and clinical data. Done!
+				</p>
+			</section>
+		</article>
+		<footer>
+			<p>
+				By downloading, analyzing, and/or utilizing TCGA data for publication purposes, the user accepts the data use restrictions and requirements as outlined in the TCGA Publication Guidelines. See <a href="http://cancergenome.nih.gov/abouttcga/policies/publicationguidelines" target="_blank">http://cancergenome.nih.gov/abouttcga/policies/publicationguidelines</a> for additional information.
+			</p>
+			<p>
+				If you would like to use a MEXPRESS plot in your publication (and we hope you do!), please cite our paper <a href="https://bmcgenomics.biomedcentral.com/articles/10.1186/s12864-015-1847-z" target="_blank">MEXPRESS: visualizing expression, DNA methylation and clinical TCGA data</a>.
+			</p>
+			<p>
+				MEXPRESS is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
+			</p>
+			<p>
+				The MEXPRESS code is available on <a href="#" target="_blank">GitHub</a>.
+			</p>
+			<p>
+				Developed by Alexander Koch @ Maastricht University. Contact: <a href="mailto:a.koch@maastrichtuniversity.nl">a.koch@maastrichtuniversity.nl</a> or <a href="https://twitter.com/monsieurKoch" target="_blank">@monsieurKoch</a>
+			</p>
+		</footer>
+	</main>
+	<script type="text/javascript" src="js/jquery-3.2.1.min.js"></script>
+	<script type="text/javascript" src="js/d3.min.js"></script>
+	<script type="text/javascript" src="js/jquery.autocomplete.min.js"></script>
+	<script type="text/javascript" src="js/mexpressGlobalVariables.js"></script>
+	<script type="text/javascript" src="js/mexpressFunctions.js"></script>
+	<script type="text/javascript" src="js/statistics.js"></script>
+	<script type="text/javascript" src="js/mexpress.js"></script>
+</body>
+</html>

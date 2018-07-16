@@ -1,0 +1,8 @@
+.DS_Store
+.Rapp.history
+data/
+*.ini
+img/design/
+img/feather/
+*.ai
+*.pyc
