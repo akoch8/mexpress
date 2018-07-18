@@ -30,6 +30,13 @@ try {
 		$result['suggestions'][] = array('value' => $row['gene_stable_id']);
 	}
 
+	// Find matching Entrez IDs.
+	$query = $db -> prepare("SELECT DISTINCT(entrez_id) FROM gene_transcript_annotation WHERE entrez_id = :search OR entrez_id LIKE :searchIncomplete ORDER BY entrez_id LIMIT 20");
+	$query -> execute(array(':search' => $geneQuery, ':searchIncomplete' => $geneQuery.'%'));
+	while ($row = $query -> fetch(PDO::FETCH_ASSOC)) {
+		$result['suggestions'][] = array('value' => $row['entrez_id']);
+	}
+
 	// Find matchin miRNA names.
 	$query = $db -> prepare("SELECT DISTINCT(name) FROM mirna_annotation WHERE name = :search OR name LIKE :searchIncomplete ORDER BY name LIMIT 20");
 	$query -> execute(array(':search' => $geneQuery, ':searchIncomplete' => $geneQuery.'%'));

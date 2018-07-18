@@ -21,18 +21,19 @@ try {
 	// Check if the name provided by the user is a HGNC symbol. Since PDO can't deal with repeating
 	// parameters, we have to use a workaround (name1, name2). Look here for more information:
 	// https://stackoverflow.com/questions/7603896/php-pdo-prepare-repetitive-variables
-	$query = $db -> prepare("SELECT COUNT(*) FROM gene_transcript_annotation WHERE hgnc_symbol = :name1 OR gene_stable_id = :name2");
-	$query -> execute(array(':name1' => $name, ':name2' => $name));
+	$query = $db -> prepare("SELECT COUNT(*) FROM gene_transcript_annotation WHERE hgnc_symbol = :name1 OR gene_stable_id = :name2 OR entrez_id = :name3");
+	$query -> execute(array(':name1' => $name, ':name2' => $name, ':name3' => $name));
 	$nrow = $query -> fetchColumn();
 	if ($nrow > 0) {
 		// Get the gene annotation.
 		$regionType = 'gene';
-		$query = $db -> prepare("SELECT * FROM gene_transcript_annotation WHERE hgnc_symbol = :name1 OR gene_stable_id = :name2");
-		$query -> execute(array(':name1' => $name, ':name2' => $name));
+		$query = $db -> prepare("SELECT * FROM gene_transcript_annotation WHERE hgnc_symbol = :name1 OR gene_stable_id = :name2 OR entrez_id = :name3");
+		$query -> execute(array(':name1' => $name, ':name2' => $name, ':name3' => $name));
 		$transcripts = array();
 		while ($row = $query -> fetch(PDO::FETCH_ASSOC)) {
 			$ensemblId = $row['gene_stable_id'];
 			$hgncSymbol = $row['hgnc_symbol'];
+			$entrezId = $row['entrez_id'];
 			$chromosome = $row['chr'];
 			$regionStart = $row['gene_start'];
 			$regionEnd = $row['gene_end'];
@@ -40,11 +41,13 @@ try {
 			$transcriptId = $row['transcript_stable_id'];
 			$transcriptStart = $row['transcript_start'];
 			$transcriptEnd = $row['transcript_end'];
-			$transcripts[$transcriptId] = array('start' => $transcriptStart, 'end' => $transcriptEnd, 'exons' => array());
+			$transcripts[$transcriptId] = array('start' => $transcriptStart,
+				'end' => $transcriptEnd, 'exons' => array());
 		}
 		$result['region_annotation'] = array(
 			'region_type' => $regionType,
 			'ensembl_id' => $ensemblId,
+			'entrez_id' => $entrezId,
 			'name' => $hgncSymbol,
 			'chr' => $chromosome,
 			'start' => $regionStart,
@@ -52,7 +55,8 @@ try {
 			'strand' => $strand
 		);
 
-		// Add the exon annotation. See comment higher up for the explanation on repeating parameters.
+		// Add the exon annotation. See comment higher up for the explanation on repeating
+		// parameters.
 		foreach ($transcripts as $id => $transcriptAnnotation) {
 			$query = $db -> prepare("SELECT * FROM transcript_exon_annotation WHERE transcript_stable_id = :id ORDER BY exon_start");
 			$query -> execute(array(':id' => $id));
@@ -87,7 +91,8 @@ try {
 				'strand' => $row[0]['strand']
 			);
 		} else {
-			$result['msg'] = 'The provided gene or miRNA name <strong>'.$name.'</strong> was not recognized.';
+			$result['msg'] = 'The provided gene or miRNA name <strong>'.$name.
+				'</strong> was not recognized.';
 			echo(json_encode($result));
 			die;
 		}
@@ -113,7 +118,8 @@ try {
 	// Add the CpG island annotation. See comment higher up for the explanation on repeating
 	// parameters.
 	$query = $db -> prepare("SELECT * FROM cpgi_annotation WHERE chr = :chr AND ((cpgi_start BETWEEN :plotStart1 AND :plotEnd1) OR (cpgi_end BETWEEN :plotStart2 AND :plotEnd2))");
-	$query -> execute(array(':chr' => $chromosome, ':plotStart1' => $plotStart, ':plotEnd1' => $plotEnd, ':plotStart2' => $plotStart, ':plotEnd2' => $plotEnd));
+	$query -> execute(array(':chr' => $chromosome, ':plotStart1' => $plotStart,
+		':plotEnd1' => $plotEnd, ':plotStart2' => $plotStart, ':plotEnd2' => $plotEnd));
 	$cpgIslands = array();
 	while ($row = $query -> fetch(PDO::FETCH_ASSOC)){
 		$cpgiStart = $row['cpgi_start'];
@@ -125,7 +131,8 @@ try {
 	// Add the Infinium probe annotation and the DNA methylation data.
 	// TO DO: incorporate 27k data
 	$query = $db -> prepare("SELECT * FROM infinium450k_annotation WHERE chr = :chr AND cpg_location BETWEEN :plotStart AND :plotEnd");
-	$query -> execute(array(':chr' => $chromosome, ':plotStart' => $plotStart, ':plotEnd' => $plotEnd));
+	$query -> execute(array(':chr' => $chromosome, ':plotStart' => $plotStart,
+		':plotEnd' => $plotEnd));
 	$probes450 = array();
 	while ($row = $query -> fetch(PDO::FETCH_ASSOC)) {
 		$probeId = $row['probe_id'];
@@ -176,7 +183,8 @@ try {
 		$result['region_expression'] = $data;
 	}
 	if (count($result['region_expression']) === 0) {
-		$result['msg'] = 'There is no expression data available for '.$cancer.'. Please try another cancer type.';
+		$result['msg'] = 'There is no expression data available for '.$cancer.
+			'. Please try another cancer type.';
 		echo(json_encode($result));
 		die;
 	}
@@ -250,10 +258,13 @@ try {
 	$otherRegions = array();
 	if ($result['region_annotation']['region_type'] == 'gene') {
 		$query = $db -> prepare("SELECT DISTINCT(gene_stable_id) FROM gene_transcript_annotation WHERE chr = :chr AND gene_stable_id != :id AND ((gene_start BETWEEN :plotStart1 AND :plotEnd1) OR (gene_end BETWEEN :plotStart2 AND :plotEnd2))");
-		$query -> execute(array(':chr' => $chromosome, ':id' => $result['region_annotation']['ensembl_id'], ':plotStart1' => $plotStart, ':plotEnd1' => $plotEnd, ':plotStart2' => $plotStart, ':plotEnd2' => $plotEnd));
+		$query -> execute(array(':chr' => $chromosome,
+			':id' => $result['region_annotation']['ensembl_id'], ':plotStart1' => $plotStart,
+			':plotEnd1' => $plotEnd, ':plotStart2' => $plotStart, ':plotEnd2' => $plotEnd));
 	} else {
 		$query = $db -> prepare("SELECT DISTINCT(gene_stable_id) FROM gene_transcript_annotation WHERE chr = :chr AND ((gene_start BETWEEN :plotStart1 AND :plotEnd1) OR (gene_end BETWEEN :plotStart2 AND :plotEnd2))");
-		$query -> execute(array(':chr' => $chromosome, ':plotStart1' => $plotStart, ':plotEnd1' => $plotEnd, ':plotStart2' => $plotStart, ':plotEnd2' => $plotEnd));
+		$query -> execute(array(':chr' => $chromosome, ':plotStart1' => $plotStart,
+			':plotEnd1' => $plotEnd, ':plotStart2' => $plotStart, ':plotEnd2' => $plotEnd));
 	}
 	$otherGenes = array();
 	while ($row = $query -> fetch(PDO::FETCH_ASSOC)) {
@@ -268,6 +279,7 @@ try {
 		while ($row = $query -> fetch(PDO::FETCH_ASSOC)) {
 			$ensemblId = $row['gene_stable_id'];
 			$hgncSymbol = $row['hgnc_symbol'];
+			$entrezId = $row['entrez_id'];
 			$regionStart = $row['gene_start'];
 			$regionEnd = $row['gene_end'];
 			$strand = $row['strand'];
@@ -279,6 +291,7 @@ try {
 		$otherRegions[] = array(
 			'region_type' => $regionType,
 			'ensembl_id' => $ensemblId,
+			'entrez_id' => $entrezId,
 			'name' => $hgncSymbol,
 			'start' => $regionStart,
 			'end' => $regionEnd,
@@ -288,10 +301,13 @@ try {
 	}
 	if ($result['region_annotation']['region_type'] == 'mirna') {
 		$query = $db -> prepare("SELECT * FROM mirna_annotation WHERE chr = :chr AND name != :name AND ((mirna_start BETWEEN :plotStart1 AND :plotEnd1) OR (mirna_end BETWEEN :plotStart2 AND :plotEnd2))");
-		$query -> execute(array(':chr' => $chromosome, ':name' => $result['region_annotation']['name'], ':plotStart1' => $plotStart, ':plotEnd1' => $plotEnd, ':plotStart2' => $plotStart, ':plotEnd2' => $plotEnd));
+		$query -> execute(array(':chr' => $chromosome,
+			':name' => $result['region_annotation']['name'], ':plotStart1' => $plotStart,
+			':plotEnd1' => $plotEnd, ':plotStart2' => $plotStart, ':plotEnd2' => $plotEnd));
 	} else {
 		$query = $db -> prepare("SELECT * FROM mirna_annotation WHERE chr = :chr AND ((mirna_start BETWEEN :plotStart1 AND :plotEnd1) OR (mirna_end BETWEEN :plotStart2 AND :plotEnd2))");
-		$query -> execute(array(':chr' => $chromosome, ':plotStart1' => $plotStart, ':plotEnd1' => $plotEnd, ':plotStart2' => $plotStart, ':plotEnd2' => $plotEnd));
+		$query -> execute(array(':chr' => $chromosome, ':plotStart1' => $plotStart,
+			':plotEnd1' => $plotEnd, ':plotStart2' => $plotStart, ':plotEnd2' => $plotEnd));
 	}
 	$otherMirnas = array();
 	while ($row = $query -> fetch(PDO::FETCH_ASSOC)) {
@@ -329,7 +345,8 @@ try {
 		// Always show the CpGs for the + strand, regardless of the strand on which the main region
 		// is located. This will significantly simplify the drawing code.
 		$ensemblStrand = '1';
-		$url = 'https://rest.ensembl.org/sequence/region/human/'.$chromosome.':'.$plotStart.'..'.$plotEnd.':'.$ensemblStrand.'?content-type=text/plain;coord_system_version=GRCh38';
+		$url = 'https://rest.ensembl.org/sequence/region/human/'.$chromosome.':'.$plotStart.'..'.
+			$plotEnd.':'.$ensemblStrand.'?content-type=text/plain;coord_system_version=GRCh38';
 		$curl = curl_init($url);
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
 		$sequence = curl_exec($curl);

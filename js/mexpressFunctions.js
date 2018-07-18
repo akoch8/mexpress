@@ -520,7 +520,6 @@ var plot = function(sorter, sampleFilter) {
 		cnvSamples);
 
 	// Filter the samples. By default, there is no filtering applied.
-	console.log(sampleFilter);
 	var samples = filterSamples(sampleFilter);
 
 	// Sort the samples by the selected variable.
