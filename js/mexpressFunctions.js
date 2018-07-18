@@ -663,7 +663,7 @@ var plot = function(sorter, sampleFilter) {
 			if (regionEnd > cancerTypeData.plot_data.end) {
 				regionEnd = cancerTypeData.plot_data.end;
 			}
-			regionName = value.name !== '' ? value.name : value.ensembl_id;
+			regionName = value.name ? value.name : value.ensembl_id;
 			svg.append('rect')
 				.attr('fill', otherRegionColor)
 				.attr('x', xPosition)
