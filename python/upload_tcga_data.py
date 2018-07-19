@@ -58,7 +58,7 @@ def create_table(login_info, table, file, file_path):
 					for column_name in column_names:
 						sql += '{0} DECIMAL(4,3) UNSIGNED,'.format(column_name)
 					sql = sql.rstrip(',')
-					sql += ')ENGINE=INNODB;'
+					sql += ')ENGINE=MyISAM;'
 					sql += 'CREATE INDEX probe_id_index ON {0} (probe_id);'.format(table)
 				elif file in ('htseq_fpkm-uq.tsv', 'mirna.tsv'):
 					# Gene and miRNA expression values are positive
@@ -68,7 +68,7 @@ def create_table(login_info, table, file, file_path):
 					for column_name in column_names:
 						sql += '{0} DECIMAL(7,3) UNSIGNED,'.format(column_name)
 					sql = sql.rstrip(',')
-					sql += ')ENGINE=INNODB;'
+					sql += ')ENGINE=MyISAM;'
 					sql += 'CREATE INDEX {0}_index ON {1} ({0});'.format(
 						column_names[0], table)
 				elif file == 'Gistic2_CopyNumber_Gistic2_all_thresholded.by_genes.tsv':
@@ -79,7 +79,7 @@ def create_table(login_info, table, file, file_path):
 					for column_name in column_names:
 						sql += '{0} TINYINT,'.format(column_name)
 					sql = sql.rstrip(',')
-					sql += ')ENGINE=INNODB;'
+					sql += ')ENGINE=MyISAM;'
 					sql += 'CREATE INDEX hgnc_symbol_index ON {0} (hgnc_symbol);'.format(
 						table)
 				elif file == 'mutect2_snv.tsv':
@@ -92,7 +92,7 @@ def create_table(login_info, table, file, file_path):
 						'start INT(10) UNSIGNED, end INT(10) UNSIGNED, ref VARCHAR(255)'
 						', alt VARCHAR(255), amino_acid_change VARCHAR(255), effect '
 						'VARCHAR(255), filter VARCHAR(255), dna_vaf DECIMAL(4,3))ENGINE='
-						'INNODB;')
+						'MyISAM;')
 					sql += 'CREATE INDEX sample_index ON {0} (sample);'.format(table)
 					sql += 'CREATE INDEX gene_index ON {0} (gene);'.format(table)
 					sql += 'CREATE INDEX chr_index ON {0} (chr);'.format(table)
@@ -107,7 +107,7 @@ def create_table(login_info, table, file, file_path):
 					for column_name in column_names:
 						sql += '{0} VARCHAR(255),'.format(column_name)
 					sql = sql.rstrip(',')
-					sql += ')ENGINE=INNODB;'
+					sql += ')ENGINE=MyISAM;'
 					sql += 'CREATE INDEX sample_index ON {0} (sample);'.format(table)
 				# Since the latest PyMySQL version can't execute more than one SQL query
 				# in a single execute (this worked for PyMySQl 0.7.11, but broke after
