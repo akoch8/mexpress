@@ -32,6 +32,7 @@ import os
 import pymysql
 import sys
 import upload_annotation_data as uad
+import warnings
 
 from contextlib import closing
 
@@ -115,7 +116,13 @@ def create_table(login_info, table, file, file_path):
 				# statements and execute them separately.
 				sql = sql.rstrip(';')
 				for s in sql.split(';'):
-					cur.execute(s)
+					with warnings.catch_warnings():
+						# Ignore MySQL warning that table does not exist when checking
+						# if it exists. Couldn't get the filterwarnings function to
+						# select this specific warning, so now we're just ignoring them
+						# all.
+						warnings.simplefilter('ignore')
+						cur.execute(s)
 			conn.commit()
 		except Exception as e:
 			print 'ERROR: SQL query failed'
