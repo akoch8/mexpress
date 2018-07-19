@@ -64,7 +64,7 @@ $(function() {
 	$('.button--plot').on('click', function(e) {
 		if (!$(this).hasClass('button--inactive')) {
 			$('.button__text').css('visibility', 'hidden');
-			$('.loader').show();
+			$(this).find('.loader').show();
 			$('.button--plot').addClass('button--inactive');
 			$('.message').hide().find('p').remove();
 			clearFilterSelection();
@@ -77,20 +77,26 @@ $(function() {
 		}
 	});
 	$('.toolbar--select-sorter').change(function() {
+		$('.plot-loader').show();
 		var sampleSorter = $(this).val();
 
 		// Store the name of the parameter on which the samples are sorted in the DOM.
 		$('#sample-sorter').text(sampleSorter);
 		var sampleFilter = $('#sample-filter').text();
 		sampleFilter = sampleFilter === '' ? null : sampleFilter;
-		plot(sampleSorter, sampleFilter);
+		setTimeout(function() {
+			plot(sampleSorter, sampleFilter);
+		}, 100);
 	});
 	$('.toolbar--select-filter').change(function() {
 		var sampleFilter = $(this).val();
 		var sampleSorter = $('#sample-sorter').text();
 		if (sampleFilter === 'no filter') {
 			$('#sample-filter').text('');
-			plot(sampleSorter, null);
+			$('.plot-loader').show();
+			setTimeout(function() {
+				plot(sampleSorter, null);
+			}, 100);
 		} else {
 			showFilterOptions(sampleFilter);
 		}
@@ -130,8 +136,11 @@ $(function() {
 			var sampleSorter = $('#sample-sorter').text();
 			sampleSorter = sampleSorter === '' ? 'region_expression' : sampleSorter;
 			$(this).closest('.overlay').fadeOut(200, function() {
-				clearFilterSelection();
-				plot(sampleSorter, sampleFilter);
+				$('.plot-loader').show();
+				setTimeout(function() {
+					clearFilterSelection();
+					plot(sampleSorter, sampleFilter);
+				}, 100);
 			});
 		}
 	});

@@ -379,7 +379,7 @@ var loadData = function(name, cancer) {
 		url: 'php/loadData.php',
 		data: {name: name, cancer: cancer}
 	}).done(function(reply) {
-		$('.loader').hide();
+		$('.button--plot .loader').hide();
 		$('.button--plot').removeClass('button--inactive');
 		$('.button__text').css('visibility', 'visible');
 		cancerTypeData = $.parseJSON(reply);
@@ -861,6 +861,7 @@ var plot = function(sorter, sampleFilter) {
 				}
 			});
 	});
+	$('.plot-loader').hide();
 };
 
 var showDataTypeInformation = function(dataType) {

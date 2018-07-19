@@ -189,6 +189,16 @@ input[type="text"]:focus {
 	width: 30px;
 }
 
+.loader--dark {
+	border: 2px solid #34495e;
+	border-radius: 50%;
+	border-top: 2px solid #e4f1fe;
+}
+
+.plot-loader .loader {
+	display: block;
+}
+
 @keyframes spin {
 	0% { transform: rotate(0deg); }
 	10% { transform: rotate(20deg); }
@@ -230,11 +240,13 @@ main {
 	background: #fff;
 	margin: 2em;
 	min-height: 50vh;
+	overflow-x: scroll;
 	position: relative;
 }
 
 .overlay {
-	background: #34495e;
+	background: #fff;
+	background: rgba(255,255,255,0.8);
 	bottom: 0;
 	color: #fcfcfc;
 	left: 0;
@@ -247,6 +259,10 @@ main {
 
 .overlay a {
 	color: #e4f1fe;
+}
+
+.overlay--dark-bg {
+	background: #34495e;
 }
 
 .select-filter select {
