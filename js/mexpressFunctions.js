@@ -38,7 +38,7 @@ var addToolbar = function() {
 	} else {
 		$('.toolbar--select-data-type option[value=cnv]').attr('disabled', true);
 	}
-	$.each(cancerTypeAnnotation.default, function(index, value) {
+	$.each(cancerTypeAnnotation.default.sort(sortAlphabetically), function(index, value) {
 		var parameterText = value.replace(/_/g, ' ');
 		if (parameterText.length > 40) {
 			parameterText = parameterText.substr(0, 37) + '...';
