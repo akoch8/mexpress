@@ -62,6 +62,7 @@ for (i in 1:length(cancerTypes)) {
 						x[,samplesToAggregate[k]] = rowMeans(x[,columnsToAggregate])
 						x = x[,-columnsToAggregate]
 					}
+					colnames(x) = gsub('[A-Z]$', '', colnames(x), perl=T)
 				}
 				
 				# Round all the numeric values.
