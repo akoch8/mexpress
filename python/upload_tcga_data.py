@@ -109,7 +109,13 @@ def create_table(login_info, table, file, file_path):
 					sql = sql.rstrip(',')
 					sql += ')ENGINE=INNODB;'
 					sql += 'CREATE INDEX sample_index ON {0} (sample);'.format(table)
-				cur.execute(sql)
+				# Since the latest PyMySQL version can't execute more than one SQL query
+				# in a single execute (this worked for PyMySQl 0.7.11, but broke after
+				# updating to version 0.9.2), so we have to loop over the individual
+				# statements and execute them separately.
+				sql = sql.rstrip(';')
+				for s in sql.split(';'):
+					cur.execute(s)
 			conn.commit()
 		except Exception as e:
 			print 'ERROR: SQL query failed'
