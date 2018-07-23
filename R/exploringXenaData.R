@@ -8,7 +8,7 @@
 
 library(data.table)
 
-cancerType = 'cesc'
+cancerType = 'acc'
 plotCol = '#ffa96a'
 
 # Gene expression RNA-seq data

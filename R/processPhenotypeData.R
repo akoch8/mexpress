@@ -54,7 +54,7 @@ for (i in 1:length(cancerTypes)) {
 			variables = allVariables[[cancerTypes[i]]]$phenotype
 			pheno = pheno[,colnames(pheno) %in% c('sample', variables)]
 			
-			# The followin phenotype variable names are longer than 65 characters, which
+			# The following phenotype variable names are longer than 65 characters, which
 			# means that they can't be used as column names in MySQL and that we have to
 			# shorten them.
 			#
@@ -122,6 +122,26 @@ for (i in 1:length(cancerTypes)) {
 				clinical_stage_simplified = gsub('stage ii.*', 'stage 2', clinical_stage_simplified, perl=T)
 				clinical_stage_simplified = gsub('stage i.*', 'stage 1', clinical_stage_simplified, perl=T)
 				pheno$clinical_stage_simplified = clinical_stage_simplified
+			}
+			
+			# Simplify the values of the clinical parameters without losing any information. This can
+			# be achieved by removing the name of the parameter or the name of the cancer type from the
+			# value.
+			for (j in 1:ncol(pheno)) {
+				clinicalVar = gsub('_', ' ', colnames(pheno)[j])
+				pheno[,j] = gsub(clinicalVar, '', pheno[,j])
+				pheno[,j] = gsub(allVariables[[cancerTypes[i]]]$full_name, '', pheno[,j])
+				
+				# Remove any leading or trailing hyphens and whitespace.
+				pheno[,j] = trimws(gsub('^-|-$', '', pheno[,j], perl=T))
+			}
+			
+			# After the previous processing step, there are still some parameters for ACC that can
+			# be simplified.
+			if (cancerTypes[i] == 'acc') {
+				pheno$cytoplasm_presence_less_than_equal_25_percent = gsub('cytoplasm presence <= 25% ', '', pheno$cytoplasm_presence_less_than_equal_25_percent)
+				pheno$nuclear_grade_iii_iv = gsub('nuclear grade iii or iv ', '', pheno$nuclear_grade_iii_iv)
+				pheno$weiss_venous_invasion = gsub('venous invasion', '', pheno$weiss_venous_invasion)
 			}
 			
 			# Simplify the distant metastasis anatomic site for SKCM.
