@@ -18,6 +18,8 @@ var dataTrackHeight = 15;
 var dataTrackSeparator = 1;
 var marginBetweenMainParts = 15;
 var sampleWidth = 2;
+var legendRectHeight = 10;
+var legendRectWidth = 10;
 
 // Define the colors.
 var textColor = '#2c2c2c';

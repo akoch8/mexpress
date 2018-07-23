@@ -53,6 +53,16 @@ var addToolbar = function() {
 	}, 500);
 };
 
+var calculateTextWidth = function(text, font) {
+	// This function was adapted from https://stackoverflow.com/a/21015393
+	var canvas = calculateTextWidth.canvas ? calculateTextWidth.canvas :
+		document.createElement('canvas');
+	var context = canvas.getContext('2d');
+	context.font = font;
+	var textWidth = Math.ceil(context.measureText(text).width);
+	return textWidth;
+};
+
 var cleanString = function(s) {
 	s = s.replace(/[^\w-]/g, '');
 	return s;
@@ -141,7 +151,6 @@ var drawDataTrack = function(data, sortedSamples, color, xPosition, yPosition, v
 		});
 	} else {
 		var allCategories = Object.values(data).filter(uniqueValues);
-		//var categories = dataValues.filter(uniqueValues);
 		allCategories.sort(sortAlphabetically);
 		var re = new RegExp('^(clinical|pathologic)_|tumor_stage_*|clinical_stage_');
 		var categoryColors;
@@ -478,6 +487,28 @@ var plot = function(sorter, sampleFilter) {
 	nrClinicalParameters += cancerTypeAnnotation.default.length;
 	var clinicalParametersHeight = nrClinicalParameters * (dataTrackHeight + dataTrackSeparator);
 
+	// Calculate the height of the legend. This legend needs to contain all the categorical
+	// clinical parameters.
+	var categoricalClinicalParameters = cancerTypeAnnotation.default.filter(function(a) {
+		return !parameterIsNumerical(Object.values(cancerTypeData.phenotype[a]));
+	});
+	var legendHeight = 0;
+	legendHeight = categoricalClinicalParameters.length * (dataTrackHeight + dataTrackSeparator);
+	var legendWidth = 0;
+	$.each(categoricalClinicalParameters, function(index, value) {
+		var categoryData = Object.values(cancerTypeData.phenotype[value]);
+		var categories = categoryData.filter(uniqueValues);
+		var categoryWidth = 0;
+		$.each(categories, function(i, v) {
+			v = v ? v : 'null';
+			var textWidth = calculateTextWidth(v.replace(/_/g, ' '), '9px arial');
+			categoryWidth += textWidth + 2 * legendRectWidth + 5;
+		});
+		if (categoryWidth > legendWidth) {
+			legendWidth = categoryWidth;
+		}
+	});
+
 	// Count the number of location-linked data tracks that need to be plotted. These include the
 	// tracks for the DNA methylation data (one track per probe), as well as the variant data.
 	var nrLocationLinkedTracks = 0;
@@ -488,7 +519,9 @@ var plot = function(sorter, sampleFilter) {
 	// phenotype and expression data will be plotted in the top margin. This way we can have the y
 	// axis represent genomic coordinates and we don't have to worry about mapping the phenotype
 	// and expression tracks to a genomic location.
-	var topMargin = clinicalParametersHeight +
+	var topMargin = legendHeight +
+					marginBetweenMainParts + // Margin between the legend and the data tracks.
+					clinicalParametersHeight +
 					marginBetweenMainParts + // Margin between the phenotype and expression data.
 					dataTrackHeight + // Extra space for the gene/miRNA expression data.
 					dataTrackHeight; // Extra space for the copy number variation data.
@@ -536,11 +569,15 @@ var plot = function(sorter, sampleFilter) {
 	}
 
 	// Calculate the amount of horizontal space that is needed to plot the genomic annotation and
-	// all the samples.
+	// all the samples (or the legend, depending on the widest one).
+	var samplesWidth = samples.length * sampleWidth;
+	if (samplesWidth < legendWidth) {
+		samplesWidth = legendWidth;
+	}
 	var width = genomicFeaturesWidth +
 				marginBetweenMainParts * 5 + // Leave enough space to draw the lines that connect
 											 // the probe locations with the DNA methylation data.
-				samples.length * sampleWidth;
+				samplesWidth;
 
 	// Build the SVG.
 	var margin = {top: 20 + topMargin, left: 20, bottom: 100, right: 200};
@@ -790,11 +827,64 @@ var plot = function(sorter, sampleFilter) {
 	}
 	xPosition += genomicFeatureLargeMargin;
 
-	// Draw the phenotype data.
+	// Draw the legend.
 	xPosition += marginBetweenMainParts * 5;
-	var yPosition;
+	var yPosition = -topMargin;
+	$.each(categoricalClinicalParameters, function(index, value) {
+		svg.append('text')
+			.attr('x', xPosition - marginBetweenMainParts / 2)
+			.attr('y', yPosition + dataTrackHeight / 2)
+			.attr('fill', textColor)
+			.attr('text-anchor', 'end')
+			.attr('alignment-baseline', 'middle')
+			.text(value.replace(/_/g, ' '));
+		var categories = Object.values(cancerTypeData.phenotype[value]).filter(uniqueValues);
+		categories.sort(sortAlphabetically);
+		var re = new RegExp('^(clinical|pathologic)_|tumor_stage_*|clinical_stage_');
+		var categoryColors;
+		if (re.test(value)) {
+			categoryColors = categories.map(function(x) {
+				if (x) {
+					return stageColorsSimplified[categories.indexOf(x)];
+				} else {
+					return missingValueColor;
+				}
+			});
+		} else {
+			categoryColors = categories.map(function(x) {
+				if (x) {
+					return categoricalColors[categories.indexOf(x)];
+				} else {
+					return missingValueColor;
+				}
+			});
+		}
+		var xPositionLegend = 0;
+		$.each(categories, function(i, v) {
+			v = v ? v : 'null';
+			var textWidth = calculateTextWidth(v.replace(/_/g, ' '), '9px arial');
+			svg.append('rect')
+				.attr('fill', categoryColors[i])
+				.attr('x', xPosition + xPositionLegend)
+				.attr('y', yPosition + Math.floor(dataTrackHeight / 2) - legendRectHeight / 2)
+				.attr('width', legendRectWidth)
+				.attr('height', legendRectHeight);
+			svg.append('text')
+				.attr('x', xPosition + legendRectWidth + 5 + xPositionLegend)
+				.attr('y', yPosition + dataTrackHeight / 2)
+				.attr('fill', textColor)
+				.attr('text-anchor', 'start')
+				.attr('alignment-baseline', 'middle')
+				.text(v.replace(/_/g, ' '));
+			xPositionLegend += textWidth + 2 * legendRectWidth + 5;
+		});
+		yPosition += dataTrackHeight + dataTrackSeparator;
+	});
+
+	// Draw the phenotype data.
 	$.each(cancerTypeAnnotation.default, function(index, phenotypeParameter) {
-		yPosition = -topMargin + index * (dataTrackHeight + dataTrackSeparator);
+		yPosition = -topMargin + legendHeight + marginBetweenMainParts +
+					 index * (dataTrackHeight + dataTrackSeparator);
 		var phenotypeData = cancerTypeData.phenotype[phenotypeParameter];
 		drawDataTrack(phenotypeData, samples, regionColor, xPosition, yPosition, phenotypeParameter);
 	});
