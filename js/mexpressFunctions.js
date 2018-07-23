@@ -135,7 +135,7 @@ var drawDataTrack = function(data, sortedSamples, color, xPosition, yPosition, v
 		var factor = Math.max.apply(Math, dataValues) / dataTrackHeight;
 		$.each(dataValues, function(index, value) {
 			var rectHeight, rectCol;
-			if (value) {
+			if (value !== null) {
 				rectHeight = value / factor;
 				rectCol = color;
 			} else {
