@@ -580,7 +580,7 @@ var plot = function(sorter, sampleFilter) {
 				samplesWidth;
 
 	// Build the SVG.
-	var margin = {top: 20 + topMargin, left: 20, bottom: 100, right: 200};
+	var margin = {top: 20 + topMargin, left: 40, bottom: 100, right: 200};
 	var x = d3.scaleLinear().domain([0, width]).range([0, width]);
 	var y = d3.scaleLinear().domain([cancerTypeData.plot_data.start, cancerTypeData.plot_data.end])
 		.range([0, locationLinkedTracksHeight]);
