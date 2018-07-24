@@ -96,6 +96,53 @@ var drawArrow = function(y, xPosition, annotation, color) {
 		.attr('fill', color);
 };
 
+var drawBarPlot = function(data, element) {
+	// Calculate the data necessary to create a bar plot.
+	var uniqueDataValues = data.filter(uniqueValues);
+	uniqueDataValues.sort(sortAlphabetically);
+	var dataTable = {};
+	var maxTextWidth = 0;
+	$.each(uniqueDataValues, function(index, value) {
+		var count = data.filter(function(x) {
+			return x === value;
+		}).length;
+		dataTable[value] = count;
+		var plotText = value + ' (' + dataTable[value] + '/' + data.length + ')';
+		var valueTextWidth = calculateTextWidth(plotText, '11px arial');
+		if (valueTextWidth > maxTextWidth) {
+			maxTextWidth = valueTextWidth;
+		}
+	});
+	var barPlotWidth = 100;
+	var barPlotHeight = dataTrackHeight * uniqueDataValues.length;
+	var margin = {top: 5, left: 10 + maxTextWidth, bottom: 5, right: 5};
+	var x = d3.scaleLinear().domain([0, data.length]).range([0, barPlotWidth]);
+	var y = d3.scaleLinear().domain([0, uniqueDataValues.length])
+		.range([0, barPlotHeight]);
+	var barPlotSvg = d3.select(element)
+		.append('svg')
+			.attr('width', barPlotWidth + margin.left + margin.right)
+			.attr('height', barPlotHeight + margin.top + margin.bottom)
+		.append('g')
+			.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+	$.each(uniqueDataValues, function(index, value) {
+		barPlotSvg.append('rect')
+			.attr('fill', histogramColor)
+			.attr('x', 0)
+			.attr('y', y(index))
+			.attr('width', x(dataTable[value]))
+			.attr('height', dataTrackHeight);
+		barPlotSvg.append('text')
+			.attr('x', -5)
+			.attr('y', y(index) + dataTrackHeight / 2)
+			.attr('font-size', '11px')
+			.attr('fill', histogramColor)
+			.attr('text-anchor', 'end')
+			.attr('alignment-baseline', 'middle')
+			.text(value + ' (' + dataTable[value] + '/' + data.length + ')');
+	});
+};
+
 var drawCoordinates = function(y) {
 	var coordinates = [];
 	coordinates.push(Math.floor(cancerTypeData.region_annotation.start / 1000) * 1000);
@@ -106,7 +153,6 @@ var drawCoordinates = function(y) {
 		svg.append('text')
 			.attr('x', 0)
 			.attr('y', y(value))
-			.attr('font-size', '9px')
 			.attr('fill', textColor)
 			.attr('text-anchor', 'middle')
 			.attr('alignment-baseline', 'baseline')
@@ -297,7 +343,6 @@ var drawHistogram = function(data, element) {
 			((dataSummary.maximum - dataSummary.minimum) / 10);
 		var lineClass = key.replace(/%/, '');
 		lineClass = lineClass.replace(/ /g, '-');
-		console.log('"' + lineClass + '"');
 		histogramSvg.append('line')
 			.attr('x1', x(xPositionLine))
 			.attr('x2', x(xPositionLine))
@@ -992,6 +1037,7 @@ var showFilterOptions = function(sampleFilter) {
 	$('.sample-filter').text(sampleFilter.replace(/_/g, ' '));
 	var filterOptions;
 	var dataValues = Object.values(dataToFilter);
+	$('.data-summary').append('<h2>' + sampleFilter.replace(/_/g, ' ') + '</h2>');
 	if (parameterIsNumerical(dataValues)) {
 		// Add a summary of the data and plot the data distribution so the user can more easily
 		// select an appropriate filter value.
@@ -1002,8 +1048,7 @@ var showFilterOptions = function(sampleFilter) {
 		} else {
 			dataSummary = summary(dataValues, true);
 		}
-		var dataSummaryText = '<h2>' + sampleFilter.replace(/_/g, ' ') + '</h2>';
-		dataSummaryText += 'Data summary: <ul class="summary-values filter-list">';
+		var dataSummaryText = 'Data summary: <ul class="summary-values filter-list">';
 		$.each(dataSummary, function(key, value) {
 			var summaryVariable = key.replace(/ /g, '-');
 			summaryVariable = summaryVariable.replace(/%/, '');
@@ -1012,10 +1057,7 @@ var showFilterOptions = function(sampleFilter) {
 		});
 		dataSummaryText += '</ul> Data histogram:';
 		$('.data-summary').append(dataSummaryText);
-		
-		// Calculate the data necessary to plot a histogram.
 		drawHistogram(dataValues, '.data-summary');
-
 		$('<input type="text">').insertAfter('.filter-options');
 		filterOptions = '<li data-value="le">&lt;&emsp;less than</li>' +
 						'<li data-value="le">&le;&emsp;less than or equal to</li>' +
@@ -1024,6 +1066,8 @@ var showFilterOptions = function(sampleFilter) {
 						'<li data-value="ge">&ge;&emsp;greater than or equal to</li>' +
 						'<li data-value="gt">&gt;&emsp;greater than</li>';
 	} else {
+		$('.data-summary').append('Data bar plot:');
+		drawBarPlot(dataValues, '.data-summary');
 		$('.filter-categories').remove();
 		$('<ul class="filter-categories filter-list"></ul>').insertAfter('.filter-options');
 		var categories = dataValues.filter(uniqueValues).sort(sortAlphabetically);
