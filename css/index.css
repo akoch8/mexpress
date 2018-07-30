@@ -367,6 +367,16 @@ main {
 	font-style: italic;
 }
 
+.data-summary p:first-of-type {
+	font-size: 1.2rem;
+	margin-bottom: 0;
+}
+
+.data-summary p:last-of-type {
+	border-bottom: 1px solid #4e6487;
+	padding-bottom: 1em;
+}
+
 .data-summary svg {
 	border: 1px solid #4e6487;
 	margin: 0 0.5em;

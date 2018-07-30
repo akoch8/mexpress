@@ -24,7 +24,11 @@ var addProbeAnnotation = function(annotation, xPosition, yPosition) {
 };
 
 var addToolbar = function() {
-	// Clear the select dropdowns.
+	// Reset the toolbar.
+	$('.toolbar .data-summary').empty()
+		.append('<p><strong>' + cancerTypeData.region_annotation.name + '</strong> &mdash; ' +
+			cancerTypeAnnotation.full_name + '</p>')
+		.append('<p>Showing data for <span class="nr_samples"></span> samples.</p>');
 	$('.toolbar--select-sorter option:not(:first)').remove();
 	$('.toolbar--select-filter option:not(:first)').remove();
 	$('.toolbar--select-data-type option[value=cnv]').attr('disabled', false);
@@ -624,6 +628,9 @@ var plot = function(sorter, sampleFilter) {
 											 // the probe locations with the DNA methylation data.
 				samplesWidth;
 
+	// Add the number of samples to the toolbar.
+	$('.nr_samples').text(samples.length);
+
 	// Build the SVG.
 	var margin = {top: 20 + topMargin, left: 40, bottom: 100, right: 200};
 	var x = d3.scaleLinear().domain([0, width]).range([0, width]);
@@ -1037,7 +1044,7 @@ var showFilterOptions = function(sampleFilter) {
 	$('.sample-filter').text(sampleFilter.replace(/_/g, ' '));
 	var filterOptions;
 	var dataValues = Object.values(dataToFilter);
-	$('.data-summary').append('<h2>' + sampleFilter.replace(/_/g, ' ') + '</h2>');
+	filterWindow.find('.data-summary').append('<h2>' + sampleFilter.replace(/_/g, ' ') + '</h2>');
 	if (parameterIsNumerical(dataValues)) {
 		// Add a summary of the data and plot the data distribution so the user can more easily
 		// select an appropriate filter value.
@@ -1056,8 +1063,8 @@ var showFilterOptions = function(sampleFilter) {
 				value + '">' + key + '&emsp;' + (Math.round(value * 1000) / 1000) + '</li>';
 		});
 		dataSummaryText += '</ul> Data histogram:';
-		$('.data-summary').append(dataSummaryText);
-		drawHistogram(dataValues, '.data-summary');
+		filterWindow.find('.data-summary').append(dataSummaryText);
+		drawHistogram(dataValues, '.select-filter .data-summary');
 		$('<input type="text">').insertAfter('.filter-options');
 		filterOptions = '<li data-value="le">&lt;&emsp;less than</li>' +
 						'<li data-value="le">&le;&emsp;less than or equal to</li>' +
@@ -1066,8 +1073,8 @@ var showFilterOptions = function(sampleFilter) {
 						'<li data-value="ge">&ge;&emsp;greater than or equal to</li>' +
 						'<li data-value="gt">&gt;&emsp;greater than</li>';
 	} else {
-		$('.data-summary').append('Data bar plot:');
-		drawBarPlot(dataValues, '.data-summary');
+		filterWindow.find('.data-summary').append('Data bar plot:');
+		drawBarPlot(dataValues, '.select-filter .data-summary');
 		$('.filter-categories').remove();
 		$('<ul class="filter-categories filter-list"></ul>').insertAfter('.filter-options');
 		var categories = dataValues.filter(uniqueValues).sort(sortAlphabetically);
