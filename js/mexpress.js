@@ -113,9 +113,12 @@ $(function() {
 		if ($(this).closest('.overlay').hasClass('select-filter')) {
 			$('.toolbar--select-filter')[0].selectedIndex = 0;
 			$(this).closest('.overlay').fadeOut(200, clearFilterSelection);
-		} else {
+		} else if ($(this).closest('.overlay').hasClass('data-type-information')) {
 			$(this).closest('.overlay').fadeOut(200);
 			$('.toolbar--select-data-type')[0].selectedIndex = 0;
+		} else if ($(this).closest('.overlay').hasClass('select-parameters')) {
+			resetClinicalParameters();
+			$(this).closest('.overlay').fadeOut(200);
 		}
 	});
 	$('.button--filter').on('click', function() {
@@ -144,6 +147,40 @@ $(function() {
 			});
 		}
 	});
+	$('.button--reset').on('click', resetClinicalParameters);
+	$('.button--select').on('click', function() {
+		var selectedParameters = [];
+		$('.parameters-options .selected').each(function(index) {
+			selectedParameters.push($(this).attr('data-value'));
+		});
+		selectedParametersText = selectedParameters.join('+');
+
+		// Update the sorting and filtering dropdowns.
+		$('.toolbar--select-filter').find('option[data-type="clinical"]').remove();
+		$('.toolbar--select-sorter').find('option[data-type="clinical"]').remove();
+		$.each(selectedParameters.sort(sortAlphabetically), function(index, value) {
+			var parameterText = value.replace(/_/g, ' ');
+			if (parameterText.length > 40) {
+				parameterText = parameterText.substr(0, 37) + '...';
+			}
+			$('.toolbar--select-filter').append('<option value="' + value +
+				'" data-type="clinical">' + parameterText + '</option>');
+			$('.toolbar--select-sorter').append('<option value="' + value +
+				'" data-type="clinical">' + parameterText + '</option>');
+		});
+
+		// Recreate the plot based on the selected clinical parameters.
+		var sampleSorter = $('#sample-sorter').text();
+		sampleSorter = sampleSorter === '' ? 'region_expression' : sampleSorter;
+		var sampleFilter = $('#sample-filter').text();
+		sampleFilter = sampleFilter === '' ? null : sampleFilter;
+		$(this).closest('.overlay').fadeOut(200, function() {
+			$('.plot-loader').show();
+			setTimeout(function() {
+				plot(sampleSorter, sampleFilter, selectedParametersText);
+			}, 100);
+		});
+	});
 	$(document).on('click', '.filter-options li', function() {
 		// Indicate which filter command has been selected.
 		$('.filter-options').find('li').removeClass('selected');
@@ -160,10 +197,12 @@ $(function() {
 		$(this).toggleClass('selected');
 
 		// Check if the user already selected a filter command.
-		if ($('.filter-categories .selected').length > 0 && $('.filter-options .selected').length > 0) {
-			$('.button--filter').removeClass('button--inactive');
-		} else {
-			$('.button--filter').addClass('button--inactive');
+		if ($(this).closest('.overlay').hasClass('select-filter')) {
+			if ($('.filter-categories .selected').length > 0 && $('.filter-options .selected').length > 0) {
+				$('.button--filter').removeClass('button--inactive');
+			} else {
+				$('.button--filter').addClass('button--inactive');
+			}
 		}
 	});
 	$(document).on('input', '.select-filter__content input[type=text]', function() {
@@ -192,7 +231,14 @@ $(function() {
 			d3.select('.' + lineClass).style('stroke-opacity', 0);
 		}
 	}, '.summary-values li');
+	$(document).on('click', '.parameters-options li', function() {
+		// Indicate which clinical parameters have been selected.
+		$(this).toggleClass('selected');
+	});
 	$('.message__close-x').on('click', function() {
 		$(this).closest('.message').hide().find('p').remove();
+	});
+	$('.button--select-parameters').on('click', function() {
+		showParameterSelection();
 	});
 });

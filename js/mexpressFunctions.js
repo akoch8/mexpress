@@ -1,5 +1,17 @@
 // Function definitions.
 //
+var addClinicalParameters = function() {
+	var parametersList = $('.parameters-options');
+	parametersList.empty();
+	$.each(cancerTypeAnnotation.phenotype, function(index, value) {
+		parametersList.append('<li data-value="' + value + '">' + value.replace(/_/g, ' ') +
+			'</li>');
+		if (cancerTypeAnnotation.default.indexOf(value) !== -1) {
+			parametersList.find('li').last().addClass('selected');
+		}
+	});
+};
+
 var addProbeAnnotation = function(annotation, xPosition, yPosition) {
 	svg.append('rect')
 		.attr('fill', missingValueColor)
@@ -47,10 +59,10 @@ var addToolbar = function() {
 		if (parameterText.length > 40) {
 			parameterText = parameterText.substr(0, 37) + '...';
 		}
-		$('.toolbar--select-filter').append('<option value="' + value + '">' + parameterText +
-			'</option>');
-		$('.toolbar--select-sorter').append('<option value="' + value + '">' + parameterText +
-			'</option>');
+		$('.toolbar--select-filter').append('<option value="' + value + '" data-type="clinical">' +
+			parameterText + '</option>');
+		$('.toolbar--select-sorter').append('<option value="' + value + '" data-type="clinical">' +
+			parameterText + '</option>');
 	});
 	$('.toolbar').animate({
 		opacity: 1
@@ -444,6 +456,7 @@ var loadData = function(name, cancer) {
 		if (cancerTypeData.success) {
 			console.log(cancerTypeData);
 			addToolbar();
+			addClinicalParameters();
 
 			// By default, the samples are not filtered and are sorted by the expression of the
 			// selected main region.
@@ -476,7 +489,7 @@ var parameterIsNumerical = function(x) {
 	return x.every(isNumber);
 };
 
-var plot = function(sorter, sampleFilter) {
+var plot = function(sorter, sampleFilter, clinicalParameters) {
 	$('.plot-window > svg').remove();
 
 	// The plot consists of three main parts:
@@ -533,12 +546,19 @@ var plot = function(sorter, sampleFilter) {
 	// default parameters in the cancerTypeAnnotation object, not all the parameters in the data
 	// object.
 	var nrClinicalParameters = 0;
-	nrClinicalParameters += cancerTypeAnnotation.default.length;
+	if (clinicalParameters === undefined || clinicalParameters === 'default') {
+		clinicalParameters = cancerTypeAnnotation.default;
+	} else if (clinicalParameters === '') {
+		clinicalParameters = [];
+	} else {
+		clinicalParameters = clinicalParameters.split('+');
+	}
+	nrClinicalParameters += clinicalParameters.length;
 	var clinicalParametersHeight = nrClinicalParameters * (dataTrackHeight + dataTrackSeparator);
 
 	// Calculate the height of the legend. This legend needs to contain all the categorical
 	// clinical parameters.
-	var categoricalClinicalParameters = cancerTypeAnnotation.default.filter(function(a) {
+	var categoricalClinicalParameters = clinicalParameters.filter(function(a) {
 		return !parameterIsNumerical(Object.values(cancerTypeData.phenotype[a]));
 	});
 	var legendHeight = 0;
@@ -934,11 +954,11 @@ var plot = function(sorter, sampleFilter) {
 	});
 
 	// Draw the phenotype data.
-	$.each(cancerTypeAnnotation.default, function(index, phenotypeParameter) {
+	$.each(clinicalParameters, function(index, parameter) {
 		yPosition = -topMargin + legendHeight + marginBetweenMainParts +
 					 index * (dataTrackHeight + dataTrackSeparator);
-		var phenotypeData = cancerTypeData.phenotype[phenotypeParameter];
-		drawDataTrack(phenotypeData, samples, regionColor, xPosition, yPosition, phenotypeParameter);
+		var phenotypeData = cancerTypeData.phenotype[parameter];
+		drawDataTrack(phenotypeData, samples, regionColor, xPosition, yPosition, parameter);
 	});
 
 	// Draw the expression data. This includes the gene/miRNA expression and copy number variation
@@ -1004,6 +1024,17 @@ var plot = function(sorter, sampleFilter) {
 			});
 	});
 	$('.plot-loader').hide();
+};
+
+var resetClinicalParameters = function() {
+	$('.parameters-options li').each(function() {
+		var parameter = $(this).attr('data-value');
+		if (cancerTypeAnnotation.default.indexOf(parameter) !== -1) {
+			$(this).addClass('selected');
+		} else {
+			$(this).removeClass('selected');
+		}
+	});
 };
 
 var showDataTypeInformation = function(dataType) {
@@ -1086,6 +1117,11 @@ var showFilterOptions = function(sampleFilter) {
 	}
 	$('.filter-options').append(filterOptions);
 	filterWindow.fadeIn(200);
+};
+
+var showParameterSelection = function() {
+	var selectionWindow = $('.select-parameters');
+	selectionWindow.fadeIn(200);
 };
 
 var sortAlphabetically = function(a,b) {
