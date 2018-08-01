@@ -155,6 +155,9 @@ $(function() {
 		});
 		selectedParametersText = selectedParameters.join('+');
 
+		// Store the selected clinical parameters in the DOM.
+		$('#clinical-parameters').text(selectedParametersText);
+
 		// Update the sorting and filtering dropdowns.
 		$('.toolbar--select-filter').find('option[data-type="clinical"]').remove();
 		$('.toolbar--select-sorter').find('option[data-type="clinical"]').remove();
@@ -177,7 +180,7 @@ $(function() {
 		$(this).closest('.overlay').fadeOut(200, function() {
 			$('.plot-loader').show();
 			setTimeout(function() {
-				plot(sampleSorter, sampleFilter, selectedParametersText);
+				plot(sampleSorter, sampleFilter);
 			}, 100);
 		});
 	});

@@ -489,7 +489,7 @@ var parameterIsNumerical = function(x) {
 	return x.every(isNumber);
 };
 
-var plot = function(sorter, sampleFilter, clinicalParameters) {
+var plot = function(sorter, sampleFilter) {
 	$('.plot-window > svg').remove();
 
 	// The plot consists of three main parts:
@@ -545,6 +545,8 @@ var plot = function(sorter, sampleFilter, clinicalParameters) {
 	// Count the number of phenotype parameters that need to be plotted. We need to count the
 	// default parameters in the cancerTypeAnnotation object, not all the parameters in the data
 	// object.
+	clinicalParameters = $('#clinical-parameters').text();
+	console.log('Loaded the following clinical parameters from the DOM: ' + clinicalParameters);
 	var nrClinicalParameters = 0;
 	if (clinicalParameters === undefined || clinicalParameters === 'default') {
 		clinicalParameters = cancerTypeAnnotation.default;
@@ -559,6 +561,7 @@ var plot = function(sorter, sampleFilter, clinicalParameters) {
 	// Calculate the height of the legend. This legend needs to contain all the categorical
 	// clinical parameters.
 	var categoricalClinicalParameters = clinicalParameters.filter(function(a) {
+		console.log(a);
 		return !parameterIsNumerical(Object.values(cancerTypeData.phenotype[a]));
 	});
 	var legendHeight = 0;
