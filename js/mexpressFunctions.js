@@ -1195,3 +1195,18 @@ var uniqueValues = function(value, index, self) {
 	// https://stackoverflow.com/a/14438954
 	return self.indexOf(value) === index;
 };
+
+var updateDropdowns = function(parameters) {
+	$('.toolbar--select-filter').find('option[data-type="clinical"]').remove();
+	$('.toolbar--select-sorter').find('option[data-type="clinical"]').remove();
+	$.each(parameters.sort(sortAlphabetically), function(index, value) {
+		var parameterText = value.replace(/_/g, ' ');
+		if (parameterText.length > 40) {
+			parameterText = parameterText.substr(0, 37) + '...';
+		}
+		$('.toolbar--select-filter').append('<option value="' + value +
+			'" data-type="clinical">' + parameterText + '</option>');
+		$('.toolbar--select-sorter').append('<option value="' + value +
+			'" data-type="clinical">' + parameterText + '</option>');
+	});
+};

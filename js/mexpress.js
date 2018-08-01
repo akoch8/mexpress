@@ -159,18 +159,7 @@ $(function() {
 		$('#clinical-parameters').text(selectedParametersText);
 
 		// Update the sorting and filtering dropdowns.
-		$('.toolbar--select-filter').find('option[data-type="clinical"]').remove();
-		$('.toolbar--select-sorter').find('option[data-type="clinical"]').remove();
-		$.each(selectedParameters.sort(sortAlphabetically), function(index, value) {
-			var parameterText = value.replace(/_/g, ' ');
-			if (parameterText.length > 40) {
-				parameterText = parameterText.substr(0, 37) + '...';
-			}
-			$('.toolbar--select-filter').append('<option value="' + value +
-				'" data-type="clinical">' + parameterText + '</option>');
-			$('.toolbar--select-sorter').append('<option value="' + value +
-				'" data-type="clinical">' + parameterText + '</option>');
-		});
+		updateDropdowns(selectedParameters);
 
 		// Recreate the plot based on the selected clinical parameters.
 		var sampleSorter = $('#sample-sorter').text();
@@ -183,6 +172,16 @@ $(function() {
 				plot(sampleSorter, sampleFilter);
 			}, 100);
 		});
+	});
+	$('.button--reset-plot').on('click', function() {
+		$('.plot-loader').show();
+		setTimeout(function() {
+			updateDropdowns(cancerTypeAnnotation.default);
+			$('#sample-sorter').text('');
+			$('#sample-filter').text('');
+			$('#clinical-parameters').text('default');
+			plot('region_expression', null);
+		}, 100);
 	});
 	$(document).on('click', '.filter-options li', function() {
 		// Indicate which filter command has been selected.
