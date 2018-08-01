@@ -219,7 +219,11 @@ var drawDataTrack = function(data, sortedSamples, color, xPosition, yPosition, v
 		if (re.test(variable)) {
 			categoryColors = dataValues.map(function(x) {
 				if (x) {
-					return stageColorsSimplified[allCategories.indexOf(x)];
+					if (variable.endsWith('simplified')) {
+						return stageColorsSimplified[allCategories.indexOf(x)];
+					} else {
+						return stageColors[allCategories.indexOf(x)];
+					}
 				} else {
 					return missingValueColor;
 				}
@@ -546,7 +550,6 @@ var plot = function(sorter, sampleFilter) {
 	// default parameters in the cancerTypeAnnotation object, not all the parameters in the data
 	// object.
 	clinicalParameters = $('#clinical-parameters').text();
-	console.log('Loaded the following clinical parameters from the DOM: ' + clinicalParameters);
 	var nrClinicalParameters = 0;
 	if (clinicalParameters === undefined || clinicalParameters === 'default') {
 		clinicalParameters = cancerTypeAnnotation.default;
@@ -561,7 +564,6 @@ var plot = function(sorter, sampleFilter) {
 	// Calculate the height of the legend. This legend needs to contain all the categorical
 	// clinical parameters.
 	var categoricalClinicalParameters = clinicalParameters.filter(function(a) {
-		console.log(a);
 		return !parameterIsNumerical(Object.values(cancerTypeData.phenotype[a]));
 	});
 	var legendHeight = 0;
@@ -920,7 +922,11 @@ var plot = function(sorter, sampleFilter) {
 		if (re.test(value)) {
 			categoryColors = categories.map(function(x) {
 				if (x) {
-					return stageColorsSimplified[categories.indexOf(x)];
+					if (value.endsWith('simplified')) {
+						return stageColorsSimplified[categories.indexOf(x)];
+					} else {
+						return stageColors[categories.indexOf(x)];
+					}
 				} else {
 					return missingValueColor;
 				}
