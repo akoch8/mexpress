@@ -215,7 +215,10 @@ try {
 			$sample = strtolower($row['sample']);
 			$data = $row;
 			$idToRemove = array_shift($data);
-			$variationData[$sample] = $data;
+			if (!array_key_exists($sample, $variationData)) {
+				$variationData[$sample] = array();
+			}
+			array_push($variationData[$sample], $data);
 		}
 	}
 	$result['snv'] = $variationData;
