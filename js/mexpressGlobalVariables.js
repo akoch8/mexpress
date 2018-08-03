@@ -17,7 +17,7 @@ var genomicFeatureSmallMargin = 2;
 var dataTrackHeight = 15;
 var dataTrackSeparator = 1;
 var marginBetweenMainParts = 15;
-var sampleWidth = 2;
+var sampleWidth = 1;
 var legendRectHeight = 10;
 var legendRectWidth = 10;
 
