@@ -1,3 +1,27 @@
+var anova = function(x) {
+	// Perform an ANOVA.
+	// The input object 'x' should be an array (samples) of arrays (data points).
+	if (!Array.isArray(x)) {
+		return false;
+	}
+	var subArrayTest = x.map(function(x) {
+		return Array.isArray(x);
+	});
+	if (!subArrayTest.every(function(x) { return x; })) {
+		return false;
+	}
+	
+	var m = x.length;
+	var n = x.reduce(function(accumulator, currentValue) {
+		return accumulator + currentValue.length;
+	}, 0);
+	var df1 = m - 1;
+	var df2 = n - 1;
+	var f = fStatistic(x, m, n);
+	var p = fDistribution(f, df1, df2);
+	return p;
+};
+
 var countNull = function(x) {
 	var nullCount = 0;
 	for (var i = 0; i < x.length; i++) {
@@ -18,6 +42,44 @@ var degreesOfFreedom = function(x, y) {
 	var denominator = (Math.pow(xVar / nx, 2) / (nx - 1)) + (Math.pow(yVar / ny, 2) / (ny - 1));
 	var df = numerator / denominator;
 	return df;	
+};
+
+var fDistribution = function(f, df1, df2) {
+	// Calculate a p value based on:
+	// - a number of degrees of freedom
+	// - an F statistic
+	// - the F distribution.
+	// The p value is calculated using a numerical approximation:
+	// Abramowitz, M and Stegun, I. A. (1970), Handbook of Mathematical
+	// Functions With Formulas, Graphs, and Mathematical Tables, NBS Applied
+	// Mathematics Series 55, National Bureau of Standards, Washington, DC.
+	// p 932: function 26.2.19
+	// p 949: function 26.6.13
+	var a1 = 0.049867347;
+	var a2 = 0.0211410061;
+	var a3 = 0.0032776263;
+	var a4 = 0.0000380036;
+	var a5 = 0.0000488906;
+	var a6 = 0.000005383;
+	var x = (f - (df2 / (df2 - 2))) /
+			((df2 / (df2 - 2)) * Math.sqrt((2 * (df1 + df2 - 2)) / (df1 * (df2 - 4))));
+	var p = 2 * (1 / (2 * Math.pow(1 + a1 * x + a2 * Math.pow(x, 2) + a3 * Math.pow(x, 3) +
+		a4 * Math.pow(x, 4) + a5 * Math.pow(x, 5) + a6 * Math.pow(x, 6), 16)));
+	return p;
+};
+
+var fStatistic = function(x, m, n) {
+	// Calculate the F statistic for m samples and n data points.
+	var means = x.map(function(x) {
+		return mean(x);
+	});
+	var overallMean = mean(means);
+	var sse = sumSquaredErrors(x);
+	var sst = sumSquaredTreatment(overallMean, means);
+	var mse = sse / (n - m);
+	var mst = sst / (m - 1);
+	var f = mst / mse;
+	return f;
 };
 
 var isNumber = function(x) {
@@ -144,8 +206,36 @@ var summary = function(x, addQuantile) {
 	return result;
 };
 
+var sumSquaredErrors = function(data) {
+	var means = data.map(function(x) {
+		return mean(x);
+	});
+	var se = [];
+	for (var i=0; i < data.length; i++) {
+		var seSample = data[i].map(function(x) {
+			return Math.pow(x - means[i], 2);
+		});
+		seSample = seSample.reduce(function(accumulator, currentValue) {
+			return accumulator + currentValue;
+		}, 0);
+		se.push(seSample);
+	}
+	var sse = se.reduce(function(accumulator, currentValue) {
+		return accumulator + currentValue;
+	}, 0);
+	return sse;
+};
+
+var sumSquaredTreatment = function(overallMean, means) {
+	var sst = means.reduce(function(accumulator, currentValue) {
+		return accumulator + Math.pow(currentValue - overallMean, 2);
+	}, 0);
+	sst = sst * (means.length - 1);
+	return sst;
+};
+
 var tDistribution = function(df, t) {
-	// Calculate a p value range based on:
+	// Calculate a p value based on:
 	// - a number of degrees of freedom
 	// - a t value
 	// - the t distribution.
