@@ -366,8 +366,14 @@ var drawDataTrackVariants = function(data, sortedSamples, variantPosition, xPosi
 	});
 	$.each(dataValues, function(index, value) {
 		if (value !== null) {
+			/*svg.append('rect')
+				.attr('fill', variantColors[index])
+				.attr('x', xPosition + sampleWidth * index - dataTrackHeightVariants / 2)
+				.attr('y', yPosition)
+				.attr('width', 1)
+				.attr('height', 4);*/
 			svg.append('circle')
-				.attr('cx', xPosition + sampleWidth * index - 1)
+				.attr('cx', xPosition + sampleWidth * index)
 				.attr('cy', yPosition + 2)
 				.attr('r', 2)
 				.attr('fill', variantColors[index]);
