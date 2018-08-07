@@ -316,6 +316,36 @@ var drawDataTrackCopyNumber = function(data, sortedSamples, xPosition, yPosition
 		.text('copy number');
 };
 
+var drawDataTrackVariants = function(data, sortedSamples, variantPosition, xPosition, yPosition) {
+	var dataValues = [];
+	$.each(sortedSamples, function(index, sample) {
+		if (sample in data) {
+			// There can be more than one variant per sample, so we need to make sure we have the
+			// correct one (by filtering on genomic location).
+			var sampleVariant = data[sample].filter(function(x) {
+				return x.start == variantPosition;
+			});
+			if (sampleVariant.length) {
+				dataValues.push(sampleVariant[0].effect);
+			} else {
+				dataValues.push(null);
+			}
+		} else {
+			dataValues.push(null);
+		}
+	});
+	$.each(dataValues, function(index, value) {
+		if (value !== null) {
+			svg.append('rect')
+				.attr('fill', '#ff0000')
+				.attr('x', xPosition + sampleWidth * index - dataTrackHeightVariants / 2)
+				.attr('y', yPosition)
+				.attr('width', 4)
+				.attr('height', 4);
+		}
+	});
+};
+
 var drawHistogram = function(data, element) {
 	// Calculate the data necessary to plot a histogram.
 	var dataSummary = summary(data, true);
@@ -464,7 +494,7 @@ var loadData = function(name, cancer) {
 
 			// By default, the samples are not filtered and are sorted by the expression of the
 			// selected main region.
-			plot('region_expression', null);
+			plot('region_expression', null, true);
 		} else {
 			$('.plot-window > svg').remove();
 			var errorElement = '<p>' + cancerTypeData.msg + '</p>';
@@ -493,7 +523,7 @@ var parameterIsNumerical = function(x) {
 	return x.every(isNumber);
 };
 
-var plot = function(sorter, sampleFilter) {
+var plot = function(sorter, sampleFilter, showVariants) {
 	$('.plot-window > svg').remove();
 
 	// The plot consists of three main parts:
@@ -584,10 +614,12 @@ var plot = function(sorter, sampleFilter) {
 	});
 
 	// Count the number of location-linked data tracks that need to be plotted. These include the
-	// tracks for the DNA methylation data (one track per probe), as well as the variant data.
-	var nrLocationLinkedTracks = 0;
-	nrLocationLinkedTracks += Object.keys(cancerTypeData.dna_methylation_data).length;
-	nrLocationLinkedTracks += Object.keys(cancerTypeData.snv).length;
+	// tracks for the DNA methylation data (one track per probe), as well as the variant data (one
+	// track per variant).
+	var nrDnaMethylationTracks = 0;
+	nrDnaMethylationTracks += Object.keys(cancerTypeData.dna_methylation_data).length;
+	var variants = showVariants ? variantsByStartValue(cancerTypeData.snv) : {};
+	var nrVariantTracks = Object.keys(variants).length;
 
 	// Calculate the amount of vertical space that is needed to plot all the data tracks. All the
 	// phenotype and expression data will be plotted in the top margin. This way we can have the y
@@ -598,9 +630,15 @@ var plot = function(sorter, sampleFilter) {
 					clinicalParametersHeight +
 					marginBetweenMainParts + // Margin between the phenotype and expression data.
 					dataTrackHeight + // Extra space for the gene/miRNA expression data.
+					dataTrackSeparator +
 					dataTrackHeight; // Extra space for the copy number variation data.
-	var locationLinkedTracksHeight = nrLocationLinkedTracks * dataTrackHeight +
-									 nrLocationLinkedTracks * dataTrackSeparator +
+	if (showVariants) {
+		topMargin += dataTrackHeight + dataTrackSeparator;
+	}
+	var locationLinkedTracksHeight = nrDnaMethylationTracks * dataTrackHeight +
+									 nrDnaMethylationTracks * dataTrackSeparator +
+									 nrVariantTracks * dataTrackHeightVariants +
+									 nrVariantTracks * dataTrackSeparator +
 									 marginBetweenMainParts;
 	if (locationLinkedTracksHeight < 400) {
 		locationLinkedTracksHeight = 400;
@@ -686,10 +724,20 @@ var plot = function(sorter, sampleFilter) {
 					genomicCoordinatesWidth +
 					genomicFeatureSmallMargin;
 	var probeCounter = 0;
+	var probeLocations = [];
 	$.each(cancerTypeData.probe_annotation_450, function(key, value) {
 		var yPosition = value.cpg_location;
+		probeLocations.push(yPosition);
+		var nrVariants = 0;
+		if (showVariants) {
+			// We need to leave enough room to plot the genomic variants.
+			nrVariants = Object.keys(variants).filter(function(x) {
+				return x < yPosition;
+			}).length;
+		}
 		var yPositionDataTrack = marginBetweenMainParts +
 								 probeCounter * (dataTrackHeight + dataTrackSeparator) +
+								 nrVariants * (dataTrackHeightVariants + dataTrackSeparator) +
 								 dataTrackHeight / 2;
 		if (yPosition < cancerTypeData.plot_data.end && yPosition > cancerTypeData.plot_data.start) {
 			// Draw the horizontal part of the line.
@@ -715,6 +763,46 @@ var plot = function(sorter, sampleFilter) {
 			probeCounter += 1;
 		}
 	});
+
+	// Draw the lines that connect the genomic locations of the genomic variants with their
+	// corresponding data tracks.
+	var variantCounter = 0;
+	if (showVariants) {
+		$.each(variants, function(position, snv) {
+			var nrProbes = probeLocations.filter(function(x) {
+				return x < position;
+			}).length;
+			var yPositionDataTrack = marginBetweenMainParts +
+									 variantCounter * (dataTrackHeightVariants + dataTrackSeparator) +
+									 nrProbes * (dataTrackHeight + dataTrackSeparator) +
+									 dataTrackHeightVariants / 2;
+			if (position < cancerTypeData.plot_data.end && position > cancerTypeData.plot_data.start) {
+				// Draw the horizontal part of the line.
+				svg.append('line')
+					.attr('x1', xPosition)
+					.attr('x2', genomicFeaturesWidth)
+					.attr('y1', y(position))
+					.attr('y2', y(position))
+					.attr('class', 'variant-line')
+					.style('stroke', probeLineColor)
+					.attr('stroke-width', 0.5)
+					.attr('stroke-dasharray', '3 2');
+
+				// Draw the sloped line that connects the genomic variant data track with the
+				// location of the variant.
+				svg.append('line')
+					.attr('x1', genomicFeaturesWidth)
+					.attr('x2', genomicFeaturesWidth + marginBetweenMainParts * 5)
+					.attr('y1', y(position))
+					.attr('y2', yPositionDataTrack)
+					.attr('class', 'variant-line')
+					.attr('stroke', probeLineColor)
+					.attr('stroke-width', 0.5)
+					.attr('stroke-dasharray', '3 2');
+				variantCounter += 1;
+			}
+		});
+	}
 
 	// Add the genomic coordinates (= y axis).
 	drawCoordinates(y);
@@ -989,7 +1077,17 @@ var plot = function(sorter, sampleFilter) {
 			cancerTypeData.probe_annotation_450[b].cpg_location;
 	});
 	$.each(orderedProbes, function(index, value) {
-		var yPosition = marginBetweenMainParts + index * (dataTrackHeight + dataTrackSeparator);
+		var probeLocation = cancerTypeData.probe_annotation_450[value].cpg_location;
+		var nrVariants = 0;
+		if (showVariants) {
+			// We need to leave enough room to plot the genomic variants.
+			nrVariants = Object.keys(variants).filter(function(x) {
+				return x < probeLocation;
+			}).length;
+		}
+		var yPosition = marginBetweenMainParts +
+						index * (dataTrackHeight + dataTrackSeparator) +
+						nrVariants * (dataTrackHeightVariants + dataTrackSeparator);
 		var methylationValues = cancerTypeData.dna_methylation_data[value];
 		drawDataTrack(methylationValues, samples, otherRegionColor, xPosition, yPosition);
 
@@ -1032,6 +1130,21 @@ var plot = function(sorter, sampleFilter) {
 				}
 			});
 	});
+
+	// Draw the variant data.
+	variantCounter = 0;
+	if (showVariants) {
+		$.each(variants, function(position, snv) {
+			var nrProbes = probeLocations.filter(function(x) {
+				return x < position;
+			}).length;
+			var yPositionDataTrack = marginBetweenMainParts +
+									 variantCounter * (dataTrackHeightVariants + dataTrackSeparator) +
+									 nrProbes * (dataTrackHeight + dataTrackSeparator);
+			drawDataTrackVariants(cancerTypeData.snv, samples, position, xPosition, yPositionDataTrack);
+			variantCounter += 1;
+		});
+	}
 	$('.plot-loader').hide();
 };
 
@@ -1216,3 +1329,19 @@ var updateDropdowns = function(parameters) {
 			'" data-type="clinical">' + parameterText + '</option>');
 	});
 };
+
+var variantsByStartValue = function(data) {
+	var variants = {};
+	$.each(data, function(sample, value) {
+		$.each(value, function(index, snv) {
+			snv.sample = sample;
+			if (snv.start in variants) {
+				variants[snv.start].push(snv);
+			} else {
+				variants[snv.start] = [snv];
+			}
+		});
+	});
+	return variants;
+};
+
