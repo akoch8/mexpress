@@ -12,7 +12,7 @@ var addClinicalParameters = function() {
 	});
 };
 
-var addProbeAnnotation = function(annotation, xPosition, yPosition) {
+var addProbeAnnotation = function(probeId, annotation, xPosition, yPosition) {
 	svg.append('rect')
 		.attr('fill', missingValueColor)
 		.attr('x', xPosition - 5)
@@ -20,7 +20,16 @@ var addProbeAnnotation = function(annotation, xPosition, yPosition) {
 		.attr('width', 180 - marginBetweenMainParts)
 		.attr('height', 11 * Object.keys(annotation).length)
 		.attr('class', 'probe-annotation');
-	var counter = 0;
+	var counter = 1;
+	svg.append('text')
+			.attr('x', xPosition)
+			.attr('y', yPosition + counter * 10) // the font size is 9px
+			.attr('font-size', '9px')
+			.attr('fill', textColor)
+			.attr('text-anchor', 'start')
+			.attr('alignment-baseline', 'baseline')
+			.attr('class', 'probe-annotation')
+			.text('probe ID: ' + probeId);
 	$.each(annotation, function(key, value) {
 		counter += 1;
 		svg.append('text')
@@ -1205,7 +1214,7 @@ var plot = function(sorter, sampleFilter, showVariants) {
 					$('.highlighted').removeClass('highlighted');
 					$('.' + probeId).addClass('highlighted');
 					$('.' + probeId).css({'stroke': textColor});
-					addProbeAnnotation(probeAnnotation, xPositionAnnotation, yPosition);
+					addProbeAnnotation(probeId, probeAnnotation, xPositionAnnotation, yPosition);
 				}
 			});
 	});
