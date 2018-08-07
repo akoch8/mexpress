@@ -348,7 +348,7 @@ var drawDataTrackVariants = function(data, sortedSamples, variantPosition, xPosi
 				.attr('fill', variantColors[index])
 				.attr('x', xPosition + sampleWidth * index - dataTrackHeightVariants / 2)
 				.attr('y', yPosition)
-				.attr('width', 2)
+				.attr('width', 1)
 				.attr('height', 4);
 		}
 	});
@@ -1266,7 +1266,8 @@ var showDataTypeInformation = function(dataType) {
 			'/Gistic2_CopyNumber_Gistic2_all_thresholded.by_genes.json',
 		'phenotype': 'data/' + cancerTypeAnnotation.short_name + '/GDC_phenotype.tsv.json',
 		'survival': 'data/' + cancerTypeAnnotation.short_name + '/survival.tsv.json',
-		'methylation 450': 'data/' + cancerTypeAnnotation.short_name + '/HumanMethylation450.json'
+		'methylation 450': 'data/' + cancerTypeAnnotation.short_name + '/HumanMethylation450.json',
+		'variants': 'data/' + cancerTypeAnnotation.short_name + '/mutect2_snv.tsv.json'
 	};
 	var infoWindow = $('.data-type-information').find('.data-type-information__content');
 	infoWindow.empty();
