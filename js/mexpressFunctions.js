@@ -78,6 +78,19 @@ var addToolbar = function() {
 	}, 500);
 };
 
+var calculateStatistics = function(samples, sorter) {
+	var stats = {};
+	console.log('sorter = ' + sorter);
+	if (sorter in cancerTypeData) {
+		console.log('MAIN DATA TYPE');
+	} else if (sorter in cancerTypeData.phenotype) {
+		console.log('PHENOTYPE');
+	} else {
+		console.log('NOT FOUND');
+	}
+	return stats;
+};
+
 var calculateTextWidth = function(text, font) {
 	// This function was adapted from https://stackoverflow.com/a/21015393
 	var canvas = calculateTextWidth.canvas ? calculateTextWidth.canvas :
@@ -353,12 +366,11 @@ var drawDataTrackVariants = function(data, sortedSamples, variantPosition, xPosi
 	});
 	$.each(dataValues, function(index, value) {
 		if (value !== null) {
-			svg.append('rect')
-				.attr('fill', variantColors[index])
-				.attr('x', xPosition + sampleWidth * index - dataTrackHeightVariants / 2)
-				.attr('y', yPosition)
-				.attr('width', 1)
-				.attr('height', 4);
+			svg.append('circle')
+				.attr('cx', xPosition + sampleWidth * index - 1)
+				.attr('cy', yPosition + 2)
+				.attr('r', 2)
+				.attr('fill', variantColors[index]);
 		}
 	});
 };
@@ -724,6 +736,13 @@ var plot = function(sorter, sampleFilter, showVariants) {
 		dataToSort = cancerTypeData.phenotype[sorter];
 		samples = sortSamples(samples, dataToSort);
 	}
+
+	// Calculate the necessary statistics (correlation, t-test, ANOVA) for the sorter. If for
+	// example the samples are sorted by their region expression, then all statistics will be
+	// calculated based on the expression data, i.e. correlation between expression and DNA
+	// methylation, correlation between expression and numerical clinical parameters, t-test or
+	// ANOVA comparing expression in different groups for categorical clinical parameters.
+	var stats = calculateStatistics(samples, sorter);
 
 	// Calculate the amount of horizontal space that is needed to plot the genomic annotation and
 	// all the samples (or the legend, depending on the widest one).
