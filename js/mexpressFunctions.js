@@ -334,14 +334,22 @@ var drawDataTrackVariants = function(data, sortedSamples, variantPosition, xPosi
 			dataValues.push(null);
 		}
 	});
+	var variantCategories = getVariantCategories(cancerTypeData.snv);
+	var variantColors = dataValues.map(function(x) {
+		if (x) {
+			return categoricalColors[variantCategories.indexOf(x)];
+		} else {
+			return missingValueColor;
+		}
+	});
 	$.each(dataValues, function(index, value) {
 		if (value !== null) {
 			svg.append('rect')
-				.attr('fill', '#ff0000')
+				.attr('fill', variantColors[index])
 				.attr('x', xPosition + sampleWidth * index - dataTrackHeightVariants / 2)
 				.attr('y', yPosition)
-				.attr('width', 4)
-				.attr('height', 4);
+				.attr('width', 2)
+				.attr('height', 2);
 		}
 	});
 };
@@ -471,6 +479,19 @@ var filterSamples = function(sampleFilter) {
 	}
 };
 
+var getVariantCategories = function(data) {
+	var categories = [];
+	$.each(data, function(sample, snv) {
+		$.each(snv, function(index, value) {
+			if (categories.indexOf(value.effect) === -1) {
+				categories.push(value.effect);
+			}
+		});
+	});
+	categories.sort(sortAlphabetically);
+	return categories;
+};
+
 var isRegion = function(type) {
 	return function(x) {
 		return x.region_type === type;
@@ -591,8 +612,9 @@ var plot = function(sorter, sampleFilter, showVariants) {
 	nrClinicalParameters += clinicalParameters.length;
 	var clinicalParametersHeight = nrClinicalParameters * (dataTrackHeight + dataTrackSeparator);
 
-	// Calculate the height of the legend. This legend needs to contain all the categorical
-	// clinical parameters.
+	// Calculate the width and height of the legend. This legend needs to contain all the
+	// categorical clinical parameters as well as the genomic variant categories (if they
+	// need to be shown).
 	var categoricalClinicalParameters = clinicalParameters.filter(function(a) {
 		return !parameterIsNumerical(Object.values(cancerTypeData.phenotype[a]));
 	});
@@ -612,6 +634,20 @@ var plot = function(sorter, sampleFilter, showVariants) {
 			legendWidth = categoryWidth;
 		}
 	});
+	var variantCategories;
+	if (showVariants) {
+		legendHeight += dataTrackHeight + dataTrackSeparator;
+		variantCategories = getVariantCategories(cancerTypeData.snv);
+		var variantCategoriesWidth = 0;
+		$.each(variantCategories, function(i, v) {
+			v = v ? v : 'null';
+			var textWidth = calculateTextWidth(v.replace(/_/g, ' '), '9px arial');
+			variantCategoriesWidth += textWidth + 2 * legendRectWidth + 5;
+		});
+		if (variantCategoriesWidth > legendWidth) {
+			legendWidth = variantCategoriesWidth;
+		}
+	}
 
 	// Count the number of location-linked data tracks that need to be plotted. These include the
 	// tracks for the DNA methylation data (one track per probe), as well as the variant data (one
@@ -783,10 +819,9 @@ var plot = function(sorter, sampleFilter, showVariants) {
 					.attr('x2', genomicFeaturesWidth)
 					.attr('y1', y(position))
 					.attr('y2', y(position))
-					.attr('class', 'variant-line')
+					.attr('class', 'variant-line-' + position)
 					.style('stroke', probeLineColor)
-					.attr('stroke-width', 0.5)
-					.attr('stroke-dasharray', '3 2');
+					.attr('stroke-width', 0.5);
 
 				// Draw the sloped line that connects the genomic variant data track with the
 				// location of the variant.
@@ -795,10 +830,19 @@ var plot = function(sorter, sampleFilter, showVariants) {
 					.attr('x2', genomicFeaturesWidth + marginBetweenMainParts * 5)
 					.attr('y1', y(position))
 					.attr('y2', yPositionDataTrack)
-					.attr('class', 'variant-line')
+					.attr('class', 'variant-line-' + position)
 					.attr('stroke', probeLineColor)
-					.attr('stroke-width', 0.5)
-					.attr('stroke-dasharray', '3 2');
+					.attr('stroke-width', 0.5);
+
+				// Add an extra horizontal line to visually separate the different variants.
+				svg.append('line')
+					.attr('x1', genomicFeaturesWidth + marginBetweenMainParts * 5)
+					.attr('x2', genomicFeaturesWidth + marginBetweenMainParts * 5 + genomicFeatureLargeMargin + sampleWidth * samples.length)
+					.attr('y1', yPositionDataTrack)
+					.attr('y2', yPositionDataTrack)
+					.attr('class', 'variant-line-' + position)
+					.style('stroke', probeLineColor)
+					.attr('stroke-width', 0.5);
 				variantCounter += 1;
 			}
 		});
@@ -1049,6 +1093,41 @@ var plot = function(sorter, sampleFilter, showVariants) {
 		});
 		yPosition += dataTrackHeight + dataTrackSeparator;
 	});
+	if (showVariants) {
+		xPositionLegend = 0;
+		svg.append('text')
+			.attr('x', xPosition - marginBetweenMainParts / 2)
+			.attr('y', yPosition + dataTrackHeight / 2)
+			.attr('fill', textColor)
+			.attr('text-anchor', 'end')
+			.attr('alignment-baseline', 'middle')
+			.text('genomic variants');
+		var variantColors = variantCategories.map(function(x) {
+			if (x) {
+				return categoricalColors[variantCategories.indexOf(x)];
+			} else {
+				return missingValueColor;
+			}
+		});
+		$.each(variantCategories, function(index, value) {
+			value = value ? value : 'null';
+			var textWidth = calculateTextWidth(value.replace(/_/g, ' '), '9px arial');
+			svg.append('rect')
+				.attr('fill', variantColors[index])
+				.attr('x', xPosition + xPositionLegend)
+				.attr('y', yPosition + Math.floor(dataTrackHeight / 2) - legendRectHeight / 2)
+				.attr('width', legendRectWidth)
+				.attr('height', legendRectHeight);
+			svg.append('text')
+				.attr('x', xPosition + legendRectWidth + 5 + xPositionLegend)
+				.attr('y', yPosition + dataTrackHeight / 2)
+				.attr('fill', textColor)
+				.attr('text-anchor', 'start')
+				.attr('alignment-baseline', 'middle')
+				.text(value.replace(/_/g, ' '));
+			xPositionLegend += textWidth + 2 * legendRectWidth + 5;
+		});
+	}
 
 	// Draw the phenotype data.
 	$.each(clinicalParameters, function(index, parameter) {
@@ -1143,6 +1222,26 @@ var plot = function(sorter, sampleFilter, showVariants) {
 									 nrProbes * (dataTrackHeight + dataTrackSeparator);
 			drawDataTrackVariants(cancerTypeData.snv, samples, position, xPosition, yPositionDataTrack);
 			variantCounter += 1;
+
+			// Draw a transparent rectangle on top of the variant track that highlights its genomic
+			// location when hovered.
+			svg.append('rect')
+				.attr('fill', '#fff')
+				.attr('fill-opacity', 0)
+				.attr('x', xPosition)
+				.attr('y', yPositionDataTrack)
+				.attr('width', samples.length * sampleWidth)
+				.attr('height', dataTrackHeightVariants)
+				.attr('id', 'variant-line-' + position)
+				.attr('class', 'clickable')
+				.on('mouseover', function() {
+					var variantClass = $(this).attr('id');
+					$('.' + variantClass).css({'stroke': textColor});
+				})
+				.on('mouseout', function() {
+					var variantClass = $(this).attr('id');
+					$('.' + variantClass).css({'stroke': probeLineColor});
+				});
 		});
 	}
 	$('.plot-loader').hide();
