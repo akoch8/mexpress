@@ -349,7 +349,7 @@ var drawDataTrackVariants = function(data, sortedSamples, variantPosition, xPosi
 				.attr('x', xPosition + sampleWidth * index - dataTrackHeightVariants / 2)
 				.attr('y', yPosition)
 				.attr('width', 2)
-				.attr('height', 2);
+				.attr('height', 4);
 		}
 	});
 };
@@ -515,7 +515,7 @@ var loadData = function(name, cancer) {
 
 			// By default, the samples are not filtered and are sorted by the expression of the
 			// selected main region.
-			plot('region_expression', null, true);
+			plot('region_expression', null, false);
 		} else {
 			$('.plot-window > svg').remove();
 			var errorElement = '<p>' + cancerTypeData.msg + '</p>';

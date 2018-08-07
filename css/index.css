@@ -250,7 +250,7 @@ main {
 	margin-right: 2em;
 }
 
-.toolbar select {
+.toolbar select, .toolbar input[type="checkbox"] {
 	margin-left: 0.5em;
 }
 

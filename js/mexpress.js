@@ -68,6 +68,7 @@ $(function() {
 			$('.button--plot').addClass('button--inactive');
 			$('.message').hide().find('p').remove();
 			clearFilterSelection();
+			$('.toolbar--check-variants').prop('checked', false);
 			$('#sample-sorter').text('');
 			$('#sample-filter').text('');
 			var nameInput = cleanString($('#name-input').val());
@@ -84,18 +85,21 @@ $(function() {
 		$('#sample-sorter').text(sampleSorter);
 		var sampleFilter = $('#sample-filter').text();
 		sampleFilter = sampleFilter === '' ? null : sampleFilter;
+		var showVariants = $('.toolbar--check-variants').prop('checked');
 		setTimeout(function() {
-			plot(sampleSorter, sampleFilter);
+			plot(sampleSorter, sampleFilter, showVariants);
 		}, 100);
 	});
 	$('.toolbar--select-filter').change(function() {
 		var sampleFilter = $(this).val();
 		var sampleSorter = $('#sample-sorter').text();
+		sampleSorter = sampleSorter === '' ? 'region_expression' : sampleSorter;
+		var showVariants = $('.toolbar--check-variants').prop('checked');
 		if (sampleFilter === 'no filter') {
 			$('#sample-filter').text('');
 			$('.plot-loader').show();
 			setTimeout(function() {
-				plot(sampleSorter, null);
+				plot(sampleSorter, null, showVariants);
 			}, 100);
 		} else {
 			showFilterOptions(sampleFilter);
@@ -138,11 +142,12 @@ $(function() {
 			$('#sample-filter').text(sampleFilter);
 			var sampleSorter = $('#sample-sorter').text();
 			sampleSorter = sampleSorter === '' ? 'region_expression' : sampleSorter;
+			var showVariants = $('.toolbar--check-variants').prop('checked');
 			$(this).closest('.overlay').fadeOut(200, function() {
 				$('.plot-loader').show();
 				setTimeout(function() {
 					clearFilterSelection();
-					plot(sampleSorter, sampleFilter);
+					plot(sampleSorter, sampleFilter, showVariants);
 				}, 100);
 			});
 		}
@@ -166,12 +171,24 @@ $(function() {
 		sampleSorter = sampleSorter === '' ? 'region_expression' : sampleSorter;
 		var sampleFilter = $('#sample-filter').text();
 		sampleFilter = sampleFilter === '' ? null : sampleFilter;
+		var showVariants = $('.toolbar--check-variants').prop('checked');
 		$(this).closest('.overlay').fadeOut(200, function() {
 			$('.plot-loader').show();
 			setTimeout(function() {
-				plot(sampleSorter, sampleFilter);
+				plot(sampleSorter, sampleFilter, showVariants);
 			}, 100);
 		});
+	});
+	$('.toolbar--check-variants').change(function() {
+		$('.plot-loader').show();
+		var showVariants = this.checked;
+		var sampleSorter = $('#sample-sorter').text();
+		sampleSorter = sampleSorter === '' ? 'region_expression' : sampleSorter;
+		var sampleFilter = $('#sample-filter').text();
+		sampleFilter = sampleFilter === '' ? null : sampleFilter;
+		setTimeout(function() {
+			plot(sampleSorter, sampleFilter, showVariants);
+		}, 100);
 	});
 	$('.button--reset-plot').on('click', function() {
 		$('.plot-loader').show();
@@ -180,7 +197,7 @@ $(function() {
 			$('#sample-sorter').text('');
 			$('#sample-filter').text('');
 			$('#clinical-parameters').text('default');
-			plot('region_expression', null);
+			plot('region_expression', null, false);
 		}, 100);
 	});
 	$(document).on('click', '.filter-options li', function() {
