@@ -1,5 +1,11 @@
-var isNumber = function(x) {
-	return !isNaN(x);
+var countNull = function(x) {
+	var nullCount = 0;
+	for (var i = 0; i < x.length; i++) {
+		if (x[i] === null | x[i] === 'null') {
+			nullCount += 1;
+		}
+	}
+	return nullCount;
 };
 
 var degreesOfFreedom = function(x, y) {
@@ -12,6 +18,10 @@ var degreesOfFreedom = function(x, y) {
 	var denominator = (Math.pow(xVar / nx, 2) / (nx - 1)) + (Math.pow(yVar / ny, 2) / (ny - 1));
 	var df = numerator / denominator;
 	return df;	
+};
+
+var isNumber = function(x) {
+	return !isNaN(x);
 };
 
 var makeNumeric = function(x) {
@@ -119,11 +129,13 @@ var summary = function(x, addQuantile) {
 	// - minimum & maximum
 	// - mean
 	// - 25%, 50% (median) and 75% quantiles
+	// - the number of null values
 	var result = {
 		'minimum': Math.min.apply(Math, x),
 		'maximum': Math.max.apply(Math, x),
 		'mean': mean(x),
-		'median': median(x)
+		'median': median(x),
+		'null': countNull(x)
 	};
 	if (addQuantile) {
 		result['quantile 25%'] = quantile(x, 0.25);

@@ -1312,8 +1312,16 @@ var showFilterOptions = function(sampleFilter) {
 		$.each(dataSummary, function(key, value) {
 			var summaryVariable = key.replace(/ /g, '-');
 			summaryVariable = summaryVariable.replace(/%/, '');
-			dataSummaryText += '<li data-summary-variable="' + summaryVariable + '" data-value="' +
-				value + '">' + key + '&emsp;' + (Math.round(value * 1000) / 1000) + '</li>';
+			if (key === 'null') {
+				var nrSamples = $('.nr_samples').text();
+				var nullCount = nrSamples - dataValues.length + value;
+				dataSummaryText += '<li data-summary-variable="null" data-value="null">null&emsp;' +
+					nullCount + '/' + nrSamples + '</li>';
+			} else {
+				dataSummaryText += '<li data-summary-variable="' + summaryVariable +
+					'" data-value="' + value + '">' + key + '&emsp;' +
+					(Math.round(value * 1000) / 1000) + '</li>';
+			}
 		});
 		dataSummaryText += '</ul> Data histogram:';
 		filterWindow.find('.data-summary').append(dataSummaryText);
