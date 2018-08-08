@@ -61,6 +61,13 @@ var addVariantAnnotation = function(annotation, x, y) {
 	var counter = 0;
 	$.each(annotation, function(index, value) {
 		counter += 1;
+		var annotationText;
+		if (value.startsWith('sample:')) {
+			// We don't want to replace the underscores in the sample names.
+			annotationText = value;
+		} else {
+			annotationText = value.replace(/_/g, ' ');
+		}
 		svg.append('text')
 			.attr('x', x + 10)
 			.attr('y', y + counter * 10) // the font size is 9px
@@ -69,7 +76,7 @@ var addVariantAnnotation = function(annotation, x, y) {
 			.attr('text-anchor', 'start')
 			.attr('alignment-baseline', 'baseline')
 			.attr('class', 'variant-annotation')
-			.text(value.replace(/_/g, ' '));
+			.text(annotationText);
 	});
 };
 
@@ -918,7 +925,15 @@ var plot = function(sorter, sampleFilter, showVariants) {
 					.attr('y2', yPositionDataTrack)
 					.attr('class', 'variant-line-' + position)
 					.style('stroke', probeLineColor)
-					.attr('stroke-width', 0.5);
+					.attr('stroke-width', 0.5)
+					.on('mouseover', function() {
+						var variantClass = $(this).attr('class');
+						$('.' + variantClass).css({'stroke': textColor});
+					})
+					.on('mouseout', function() {
+						var variantClass = $(this).attr('class');
+						$('.' + variantClass).css({'stroke': probeLineColor});
+					});
 				variantCounter += 1;
 			}
 		});
@@ -1298,26 +1313,6 @@ var plot = function(sorter, sampleFilter, showVariants) {
 									 nrProbes * (dataTrackHeight + dataTrackSeparator);
 			drawDataTrackVariants(cancerTypeData.snv, samples, position, xPosition, yPositionDataTrack);
 			variantCounter += 1;
-
-			// Draw a transparent rectangle on top of the variant track that highlights its genomic
-			// location when hovered.
-			/*svg.append('rect')
-				.attr('fill', '#fff')
-				.attr('fill-opacity', 0)
-				.attr('x', xPosition)
-				.attr('y', yPositionDataTrack)
-				.attr('width', samples.length * sampleWidth)
-				.attr('height', dataTrackHeightVariants)
-				.attr('id', 'variant-line-' + position)
-				.attr('class', 'clickable')
-				.on('mouseover', function() {
-					var variantClass = $(this).attr('id');
-					$('.' + variantClass).css({'stroke': textColor});
-				})
-				.on('mouseout', function() {
-					var variantClass = $(this).attr('id');
-					$('.' + variantClass).css({'stroke': probeLineColor});
-				});*/
 		});
 	}
 	$('.plot-loader').hide();
