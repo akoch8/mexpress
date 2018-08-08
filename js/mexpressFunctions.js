@@ -44,6 +44,35 @@ var addProbeAnnotation = function(probeId, annotation, xPosition, yPosition) {
 	});
 };
 
+var addVariantAnnotation = function(annotation, x, y) {
+	annotation = annotation.split('__');
+	var maxTextWidth = 0;
+	$.each(annotation, function(index, value) {
+		var textWidth = calculateTextWidth(value, '9px arial');
+		maxTextWidth = textWidth > maxTextWidth ? textWidth : maxTextWidth;
+	});
+	svg.append('rect')
+		.attr('fill', missingValueColor)
+		.attr('x', x + 5)
+		.attr('y', y)
+		.attr('width', maxTextWidth + 2 * 5) // 2 * 5 = margin around text
+		.attr('height', 11 * annotation.length)
+		.attr('class', 'variant-annotation');
+	var counter = 0;
+	$.each(annotation, function(index, value) {
+		counter += 1;
+		svg.append('text')
+			.attr('x', x + 10)
+			.attr('y', y + counter * 10) // the font size is 9px
+			.attr('font-size', '9px')
+			.attr('fill', textColor)
+			.attr('text-anchor', 'start')
+			.attr('alignment-baseline', 'baseline')
+			.attr('class', 'variant-annotation')
+			.text(value.replace(/_/g, ' '));
+	});
+};
+
 var addToolbar = function() {
 	// Reset the toolbar.
 	$('.toolbar .data-summary').empty()
@@ -80,13 +109,12 @@ var addToolbar = function() {
 
 var calculateStatistics = function(samples, sorter) {
 	var stats = {};
-	console.log('sorter = ' + sorter);
 	if (sorter in cancerTypeData) {
-		console.log('MAIN DATA TYPE');
+		//
 	} else if (sorter in cancerTypeData.phenotype) {
-		console.log('PHENOTYPE');
+		//
 	} else {
-		console.log('NOT FOUND');
+		//
 	}
 	return stats;
 };
@@ -348,7 +376,7 @@ var drawDataTrackVariants = function(data, sortedSamples, variantPosition, xPosi
 				return x.start == variantPosition;
 			});
 			if (sampleVariant.length) {
-				dataValues.push(sampleVariant[0].effect);
+				dataValues.push(sampleVariant[0]);
 			} else {
 				dataValues.push(null);
 			}
@@ -359,24 +387,38 @@ var drawDataTrackVariants = function(data, sortedSamples, variantPosition, xPosi
 	var variantCategories = getVariantCategories(cancerTypeData.snv);
 	var variantColors = dataValues.map(function(x) {
 		if (x) {
-			return categoricalColors[variantCategories.indexOf(x)];
+			return categoricalColors[variantCategories.indexOf(x.effect)];
 		} else {
 			return missingValueColor;
 		}
 	});
 	$.each(dataValues, function(index, value) {
 		if (value !== null) {
-			/*svg.append('rect')
-				.attr('fill', variantColors[index])
-				.attr('x', xPosition + sampleWidth * index - dataTrackHeightVariants / 2)
-				.attr('y', yPosition)
-				.attr('width', 1)
-				.attr('height', 4);*/
+			var variantAnnotation = '';
+			$.each(value, function(k, v) {
+				variantAnnotation += k + ': ' + v + '__';
+			});
+			variantAnnotation = variantAnnotation.slice(0, -2); // Remove trailing '__'.
 			svg.append('circle')
 				.attr('cx', xPosition + sampleWidth * index)
 				.attr('cy', yPosition + 2)
 				.attr('r', 2)
-				.attr('fill', variantColors[index]);
+				.attr('fill', variantColors[index])
+				.attr('id', variantAnnotation)
+				.attr('class', 'clickable')
+				.on('mouseup', function() {
+					$('.variant-annotation').remove();
+					if ($(this).hasClass('highlighted')) {
+						$(this).removeClass('highlighted');
+					} else {
+						$('.highlighted').removeClass('highlighted');
+						var annotation = $(this).attr('id');
+						var xPosition = Number($(this).attr('cx'));
+						var yPosition = Number($(this).attr('cy'));
+						$(this).addClass('highlighted');
+						addVariantAnnotation(variantAnnotation, xPosition, yPosition);
+					}
+				});
 		}
 	});
 };
@@ -1259,7 +1301,7 @@ var plot = function(sorter, sampleFilter, showVariants) {
 
 			// Draw a transparent rectangle on top of the variant track that highlights its genomic
 			// location when hovered.
-			svg.append('rect')
+			/*svg.append('rect')
 				.attr('fill', '#fff')
 				.attr('fill-opacity', 0)
 				.attr('x', xPosition)
@@ -1275,7 +1317,7 @@ var plot = function(sorter, sampleFilter, showVariants) {
 				.on('mouseout', function() {
 					var variantClass = $(this).attr('id');
 					$('.' + variantClass).css({'stroke': probeLineColor});
-				});
+				});*/
 		});
 	}
 	$('.plot-loader').hide();

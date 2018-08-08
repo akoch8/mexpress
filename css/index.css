@@ -376,10 +376,6 @@ main {
 	cursor: pointer;
 }
 
-.highlighted {
-	stroke: #f00;
-}
-
 .tip {
 	color: #e4f1fe;
 	font-style: italic;
