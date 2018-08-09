@@ -867,7 +867,7 @@ var plot = function(sorter, sampleFilter, showVariants) {
 				.attr('y2', y(yPosition))
 				.attr('class', key)
 				.style('stroke', probeLineColor)
-				.attr('stroke-width', 0.5);
+				.attr('stroke-width', 1);
 
 			// Draw the sloped line that connects the DNA methylation data track with the probe
 			// location.
@@ -878,7 +878,7 @@ var plot = function(sorter, sampleFilter, showVariants) {
 				.attr('y2', yPositionDataTrack)
 				.attr('class', key)
 				.attr('stroke', probeLineColor)
-				.attr('stroke-width', 0.5);
+				.attr('stroke-width', 1);
 			probeCounter += 1;
 		}
 	});
@@ -904,7 +904,7 @@ var plot = function(sorter, sampleFilter, showVariants) {
 					.attr('y2', y(position))
 					.attr('class', 'variant-line-' + position)
 					.style('stroke', probeLineColor)
-					.attr('stroke-width', 0.5);
+					.attr('stroke-width', 1);
 
 				// Draw the sloped line that connects the genomic variant data track with the
 				// location of the variant.
@@ -915,17 +915,18 @@ var plot = function(sorter, sampleFilter, showVariants) {
 					.attr('y2', yPositionDataTrack)
 					.attr('class', 'variant-line-' + position)
 					.attr('stroke', probeLineColor)
-					.attr('stroke-width', 0.5);
+					.attr('stroke-width', 1);
 
 				// Add an extra horizontal line to visually separate the different variants.
 				svg.append('line')
 					.attr('x1', genomicFeaturesWidth + marginBetweenMainParts * 5)
-					.attr('x2', genomicFeaturesWidth + marginBetweenMainParts * 5 + genomicFeatureLargeMargin + sampleWidth * samples.length)
+					.attr('x2', genomicFeaturesWidth + marginBetweenMainParts * 5 +
+						genomicFeatureLargeMargin + sampleWidth * samples.length)
 					.attr('y1', yPositionDataTrack)
 					.attr('y2', yPositionDataTrack)
 					.attr('class', 'variant-line-' + position)
 					.style('stroke', probeLineColor)
-					.attr('stroke-width', 0.5)
+					.attr('stroke-width', 1)
 					.on('mouseover', function() {
 						var variantClass = $(this).attr('class');
 						$('.' + variantClass).css({'stroke': textColor});
