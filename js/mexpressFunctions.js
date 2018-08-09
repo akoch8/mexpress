@@ -18,7 +18,7 @@ var addProbeAnnotation = function(probeId, annotation, xPosition, yPosition) {
 		.attr('x', xPosition - 5)
 		.attr('y', yPosition)
 		.attr('width', 180 - marginBetweenMainParts)
-		.attr('height', 11 * Object.keys(annotation).length)
+		.attr('height', 11 * Object.keys(annotation).length + 10)
 		.attr('class', 'probe-annotation');
 	var counter = 1;
 	svg.append('text')
