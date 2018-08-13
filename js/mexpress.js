@@ -194,6 +194,7 @@ $(function() {
 		$('.plot-loader').show();
 		setTimeout(function() {
 			updateDropdowns(cancerTypeAnnotation.default);
+			$('.toolbar--check-variants').prop('checked', false);
 			$('#sample-sorter').text('');
 			$('#sample-filter').text('');
 			$('#clinical-parameters').text('default');
