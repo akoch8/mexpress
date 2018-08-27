@@ -24,8 +24,6 @@ var addProbeAnnotation = function(probeId, annotation, xPosition, yPosition) {
 	svg.append('text')
 			.attr('x', xPosition)
 			.attr('y', yPosition + counter * 10) // the font size is 9px
-			.attr('font-size', '9px')
-			.attr('fill', textColor)
 			.attr('text-anchor', 'start')
 			.attr('alignment-baseline', 'baseline')
 			.attr('class', 'probe-annotation')
@@ -35,8 +33,6 @@ var addProbeAnnotation = function(probeId, annotation, xPosition, yPosition) {
 		svg.append('text')
 			.attr('x', xPosition)
 			.attr('y', yPosition + counter * 10) // the font size is 9px
-			.attr('font-size', '9px')
-			.attr('fill', textColor)
 			.attr('text-anchor', 'start')
 			.attr('alignment-baseline', 'baseline')
 			.attr('class', 'probe-annotation')
@@ -71,8 +67,6 @@ var addVariantAnnotation = function(annotation, x, y) {
 		svg.append('text')
 			.attr('x', x + 10)
 			.attr('y', y + counter * 10) // the font size is 9px
-			.attr('font-size', '9px')
-			.attr('fill', textColor)
 			.attr('text-anchor', 'start')
 			.attr('alignment-baseline', 'baseline')
 			.attr('class', 'variant-annotation')
@@ -252,7 +246,6 @@ var drawCoordinates = function(y) {
 		svg.append('text')
 			.attr('x', 0)
 			.attr('y', y(value))
-			.attr('fill', textColor)
 			.attr('text-anchor', 'middle')
 			.attr('alignment-baseline', 'baseline')
 			.attr('transform', 'rotate(-90, ' + 0 + ',' + y(value) + ')')
@@ -337,8 +330,6 @@ var drawDataTrack = function(data, sortedSamples, color, xPosition, yPosition, v
 		svg.append('text')
 			.attr('x', xPosition - marginBetweenMainParts / 2)
 			.attr('y', yPosition + dataTrackHeight / 2)
-			.attr('font-size', '9px')
-			.attr('fill', textColor)
 			.attr('text-anchor', 'end')
 			.attr('alignment-baseline', 'middle')
 			.text(parameterText);
@@ -392,8 +383,6 @@ var drawDataTrackCopyNumber = function(data, sortedSamples, xPosition, yPosition
 	svg.append('text')
 		.attr('x', xPosition - marginBetweenMainParts / 2)
 		.attr('y', yPosition + dataTrackHeight / 2)
-		.attr('font-size', '9px')
-		.attr('fill', textColor)
 		.attr('text-anchor', 'end')
 		.attr('alignment-baseline', 'middle')
 		.text('copy number');
@@ -1163,7 +1152,6 @@ var plot = function(sorter, sampleFilter, showVariants) {
 		svg.append('text')
 			.attr('x', xPosition - marginBetweenMainParts / 2)
 			.attr('y', yPosition + dataTrackHeight / 2)
-			.attr('fill', textColor)
 			.attr('text-anchor', 'end')
 			.attr('alignment-baseline', 'middle')
 			.text(value.replace(/_/g, ' '));
@@ -1205,7 +1193,6 @@ var plot = function(sorter, sampleFilter, showVariants) {
 			svg.append('text')
 				.attr('x', xPosition + legendRectWidth + 5 + xPositionLegend)
 				.attr('y', yPosition + dataTrackHeight / 2)
-				.attr('fill', textColor)
 				.attr('text-anchor', 'start')
 				.attr('alignment-baseline', 'middle')
 				.text(v.replace(/_/g, ' '));
@@ -1218,7 +1205,6 @@ var plot = function(sorter, sampleFilter, showVariants) {
 		svg.append('text')
 			.attr('x', xPosition - marginBetweenMainParts / 2)
 			.attr('y', yPosition + dataTrackHeight / 2)
-			.attr('fill', textColor)
 			.attr('text-anchor', 'end')
 			.attr('alignment-baseline', 'middle')
 			.text('genomic variants');
@@ -1241,7 +1227,6 @@ var plot = function(sorter, sampleFilter, showVariants) {
 			svg.append('text')
 				.attr('x', xPosition + legendRectWidth + 5 + xPositionLegend)
 				.attr('y', yPosition + dataTrackHeight / 2)
-				.attr('fill', textColor)
 				.attr('text-anchor', 'start')
 				.attr('alignment-baseline', 'middle')
 				.text(value.replace(/_/g, ' '));
