@@ -116,7 +116,33 @@ var addToolbar = function() {
 
 var calculateStatistics = function(samples, sorter) {
 	var stats = {};
-	if (sorter in cancerTypeData) {
+	var sorterValues = [];
+	if (sorter === 'region_expression') {
+		$.each(samples, function(index, sample) {
+			var dataValue = cancerTypeData.region_expression[sample];
+			if (dataValue !== null) {
+				sorterValues.push(+dataValue);
+			} else {
+				sorterValues.push(null);
+			}
+		});
+
+		// We need to calculate the correlation with DNA methylation and numerical clinical
+		// variables, and perform a t-test or ANOVA for categorical clinical variables.
+		stats.dna_methylation_data = {};
+		$.each(cancerTypeData.dna_methylation_data, function(key, value) {
+			methylationValues = [];
+			$.each(samples, function(index, sample) {
+				var dataValue = value[sample];
+				if (dataValue !== null) {
+					methylationValues.push(+dataValue);
+				} else {
+					methylationValues.push(null);
+				}
+			});
+			stats.dna_methylation_data[key] = pearsonCorrelation(sorterValues, methylationValues);
+		});
+	} else if (sorter === 'cnv') {
 		//
 	} else if (sorter in cancerTypeData.phenotype) {
 		//
@@ -798,6 +824,8 @@ var plot = function(sorter, sampleFilter, showVariants) {
 	// methylation, correlation between expression and numerical clinical parameters, t-test or
 	// ANOVA comparing expression in different groups for categorical clinical parameters.
 	var stats = calculateStatistics(samples, sorter);
+	console.log('STATS OBJECT:');
+	console.log(stats);
 
 	// Calculate the amount of horizontal space that is needed to plot the genomic annotation and
 	// all the samples (or the legend, depending on the widest one).
@@ -1316,6 +1344,34 @@ var plot = function(sorter, sampleFilter, showVariants) {
 			variantCounter += 1;
 		});
 	}
+
+	// Add the statistics.
+	var addStats = true;
+	if (addStats) {
+		$.each(stats.dna_methylation_data, function(probe, corr) {
+			var probeIndex = orderedProbes.indexOf(probe);
+			var probeLocation = cancerTypeData.probe_annotation_450[probe].cpg_location;
+			var nrVariants = 0;
+			if (showVariants) {
+				// We need to skip any variant tracks.
+				nrVariants = Object.keys(variants).filter(function(x) {
+					return x < probeLocation;
+				}).length;
+			}
+			var yPosition = marginBetweenMainParts +
+							probeIndex * (dataTrackHeight + dataTrackSeparator) +
+							nrVariants * (dataTrackHeightVariants + dataTrackSeparator);
+			var rColor = corr.p < 0.05 ? textColor : textColorLight;
+			svg.append('text')
+				.attr('x', xPosition + samples.length * sampleWidth + genomicFeatureLargeMargin)
+				.attr('y', yPosition + dataTrackHeight / 2)
+				.attr('fill', rColor)
+				.attr('text-anchor', 'start')
+				.attr('alignment-baseline', 'middle')
+				.text('\u03C1 = ' + corr.r.toFixed(3));
+		});
+	}
+
 	$('.plot-loader').hide();
 };
 
@@ -1524,4 +1580,3 @@ var variantsByStartValue = function(data) {
 	});
 	return variants;
 };
-

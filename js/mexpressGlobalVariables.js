@@ -24,6 +24,7 @@ var legendRectWidth = 10;
 
 // Define the colors.
 var textColor = '#2c2c2c';
+var textColorLight = '#a9a9a9';
 var missingValueColor = '#ececec';
 var regionColor = '#34495e';
 var transcriptColor = '#7f94b5';
