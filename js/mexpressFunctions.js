@@ -12,12 +12,52 @@ var addClinicalParameters = function() {
 	});
 };
 
+var addCloseButton = function(x, y, svgClass) {
+	// Draw a close button with the provided x, y coordinates as the center of the button.
+	// Clicking the button will remove all SVG elements with the provided class, as well as the
+	// button itself.
+	var buttonSize = 6;
+	svg.append('line')
+		.attr('x1', x - buttonSize / 2)
+		.attr('x2', x + buttonSize / 2)
+		.attr('y1', y - buttonSize / 2)
+		.attr('y2', y + buttonSize / 2)
+		.attr('stroke-width', 1)
+		.attr('stroke-linecap', 'round')
+		.attr('stroke-linejoin', 'round')
+		.attr('stroke', textColor)
+		.attr('class', svgClass);
+	svg.append('line')
+		.attr('x1', x - buttonSize / 2)
+		.attr('x2', x + buttonSize / 2)
+		.attr('y1', y + buttonSize / 2)
+		.attr('y2', y - buttonSize / 2)
+		.attr('stroke-width', 1)
+		.attr('stroke-linecap', 'round')
+		.attr('stroke-linejoin', 'round')
+		.attr('stroke', textColor)
+		.attr('class', svgClass);
+	svg.append('circle')
+		.attr('cx', x)
+		.attr('cy', y)
+		.attr('fill-opacity', 0)
+		.attr('r', buttonSize)
+		.attr('class', svgClass + ' clickable')
+		.on('mouseup', function() {
+			$('.' + svgClass).remove();
+			if (svgClass === 'probe-annotation') {
+				$('.highlighted').css({'stroke': probeLineColor});
+				$('.highlighted').removeClass('highlighted');
+			}
+		});
+};
+
 var addProbeAnnotation = function(probeId, annotation, xPosition, yPosition) {
 	svg.append('rect')
 		.attr('fill', missingValueColor)
 		.attr('x', xPosition - 5)
 		.attr('y', yPosition)
-		.attr('width', 180 - marginBetweenMainParts)
+		.attr('width', 160 - marginBetweenMainParts)
 		.attr('height', 11 * Object.keys(annotation).length + 10)
 		.attr('class', 'probe-annotation');
 	var counter = 1;
@@ -28,6 +68,7 @@ var addProbeAnnotation = function(probeId, annotation, xPosition, yPosition) {
 			.attr('alignment-baseline', 'baseline')
 			.attr('class', 'probe-annotation')
 			.text('probe ID: ' + probeId);
+	addCloseButton(xPosition + 130, yPosition + counter * 8, 'probe-annotation');
 	$.each(annotation, function(key, value) {
 		counter += 1;
 		svg.append('text')
@@ -40,7 +81,7 @@ var addProbeAnnotation = function(probeId, annotation, xPosition, yPosition) {
 	});
 };
 
-var addVariantAnnotation = function(annotation, x, y) {
+var addVariantAnnotation = function(annotation, xPosition, yPosition) {
 	annotation = annotation.split('__');
 	var maxTextWidth = 0;
 	$.each(annotation, function(index, value) {
@@ -49,12 +90,13 @@ var addVariantAnnotation = function(annotation, x, y) {
 	});
 	svg.append('rect')
 		.attr('fill', missingValueColor)
-		.attr('x', x + 5)
-		.attr('y', y)
+		.attr('x', xPosition + 5)
+		.attr('y', yPosition)
 		.attr('width', maxTextWidth + 2 * 5) // 2 * 5 = margin around text
 		.attr('height', 11 * annotation.length)
 		.attr('class', 'variant-annotation');
 	var counter = 0;
+	addCloseButton(xPosition + maxTextWidth + 5, yPosition + 8, 'variant-annotation');
 	$.each(annotation, function(index, value) {
 		counter += 1;
 		var annotationText;
@@ -65,8 +107,8 @@ var addVariantAnnotation = function(annotation, x, y) {
 			annotationText = value.replace(/_/g, ' ');
 		}
 		svg.append('text')
-			.attr('x', x + 10)
-			.attr('y', y + counter * 10) // the font size is 9px
+			.attr('x', xPosition + 10)
+			.attr('y', yPosition + counter * 10) // the font size is 9px
 			.attr('text-anchor', 'start')
 			.attr('alignment-baseline', 'baseline')
 			.attr('class', 'variant-annotation')
@@ -1033,7 +1075,6 @@ var plot = function(sorter, sampleFilter, showVariants) {
 					svg.append('text')
 						.attr('x', xPositionRegion)
 						.attr('y', yPositionRegion - 5)
-						.attr('font-size', '9px')
 						.attr('stroke-width', 4)
 						.attr('stroke', '#fff')
 						.attr('text-anchor', 'start')
@@ -1043,7 +1084,6 @@ var plot = function(sorter, sampleFilter, showVariants) {
 					svg.append('text')
 						.attr('x', xPositionRegion)
 						.attr('y', yPositionRegion - 5)
-						.attr('font-size', '9px')
 						.attr('font-weight', 700)
 						.attr('fill', otherRegionColor)
 						.attr('text-anchor', 'start')
