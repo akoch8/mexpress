@@ -1,6 +1,6 @@
 var anova = function(x) {
 	// Perform an ANOVA.
-	// The input object 'x' should be an array (samples) of arrays (data points).
+	// The input object 'x' should be an array (groups/samples) of arrays (data points).
 	if (!Array.isArray(x)) {
 		return false;
 	}
@@ -261,38 +261,28 @@ var tTest = function(x, y) {
 	// Perform a Welch's t-test.
 	var c;
 
-	// Check whether the arrays contain more than just NaN values.
-	for (c in x) {
-		if (isNaN(x[c])) {
-			x[c] = null;
-		}
-	}
-	for (c in y) {
-		if (isNaN(y[c])) {
-			y[c] = null;
-		}
-	}
-	if (!x.some(function(a){ return a !== null; })) {
-		return 'failed';
-	} else if (!y.some(function(a){ return a !== null; })) {
-		return 'failed';
+	// Remove missing values.
+	x = x.filter(function(a) {
+		return a !== null && a !== undefined;
+	});
+	y = y.filter(function(a) {
+		return a !== null && a !== undefined;
+	});
+	var nx = x.length;
+	var ny = y.length;
+	if (nx >= 3 && ny >= 3) {
+		var xMean = mean(x);
+		var yMean = mean(y);
+		var xVar = variance(x);
+		var yVar = variance(y);
+		var t = (xMean - yMean) / (Math.sqrt(xVar / nx + yVar / ny));
+		t = Math.abs(t);
+		var df = degreesOfFreedom(x, y);
+		var answer = tDistribution(df, t);
+		return answer;
 	} else {
-		var nx = x.length;
-		var ny = y.length;
-		if (nx >= 3 && ny >= 3) {
-			var xMean = mean(x);
-			var yMean = mean(y);
-			var xVar = variance(x);
-			var yVar = variance(y);
-			var t = (xMean - yMean) / (Math.sqrt(xVar / nx + yVar / ny));
-			t = Math.abs(t);
-			var df = degreesOfFreedom(x, y);
-			var answer = tDistribution(df, t);
-			return answer;
-		} else {
-			return 'failed';
-		}
-	}	
+		return NaN;
+	}
 };
 
 var variance = function(x) {
