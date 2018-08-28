@@ -1,4 +1,6 @@
 var anova = function(x) {
+	// This function was adapted from this example on how to calculate the ANOVA table by hand:
+	// https://stat.ethz.ch/education/semesters/as2013/anova/ANOVA_how_to_do.pdf
 	var i, j;
 
 	// The input object 'x' should be an array (groups/samples) of arrays (data points).
