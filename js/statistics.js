@@ -1,5 +1,6 @@
 var anova = function(x) {
-	// Perform an ANOVA.
+	var i, j;
+
 	// The input object 'x' should be an array (groups/samples) of arrays (data points).
 	if (!Array.isArray(x)) {
 		return false;
@@ -10,16 +11,76 @@ var anova = function(x) {
 	if (!subArrayTest.every(function(x) { return x; })) {
 		return false;
 	}
-	
+
+	// Filter out missing values.
+	for (i=0; i<x.length; i++) {
+		x[i] = x[i].filter(function(a) {
+			return a !== null && a !== undefined && !isNaN(a);
+		});
+	}
+
+	// m = the number of samples
 	var m = x.length;
-	var n = x.reduce(function(accumulator, currentValue) {
-		return accumulator + currentValue.length;
-	}, 0);
-	var df1 = m - 1;
-	var df2 = n - 1;
-	var f = fStatistic(x, m, n);
-	var p = fDistribution(f, df1, df2);
+	
+	// n = size of each sample
+	var n = x.map(function(a) {
+		return a.length;
+	});
+
+	// Calculate the degrees of freedom between and within the samples.
+	var dfBetween = m - 1;
+	var dfWithin = n.reduce(function(a, b) {
+		return a + b;
+	});
+	dfWithin -= m;
+
+	// Calculate the sample means.
+	var means = x.map(function(a) {
+		return mean(a);
+	});
+
+	// Calculate the overall mean, i.e. the mean of all the data points over all samples.
+	var allValues = x.reduce(function(a, b) {
+		return a.concat(b);
+	});
+	var overallMean = mean(allValues);
+
+	// Calculate the estimated effects, i.e. the difference between the estimated sample means
+	// and the estimated overall mean.
+	var estimatedEffects = means.map(function(a) {
+		return a - overallMean;
+	});
+
+	// Calculate the sum of squares, both within and between the samples.
+	var sst = 0;
+	for (i=0; i<m; i++) {
+		sst += Math.pow(estimatedEffects[i], 2) * n[i];
+	}
+	var ssr = 0;
+	for (i=0; i<m; i++) {
+		var groupValues = x[i];
+		var groupMean = means[i];
+		var ssGroup = 0;
+		for (j=0; j<n[i]; j++) {
+			ssGroup += Math.pow(groupValues[j] - groupMean, 2);
+		}
+		ssr += ssGroup;
+	}
+	var mst = sst / dfBetween;
+	var msr = ssr / dfWithin;
+
+	// Using the mean sum of squares, calculate the F statistic and the associated p value.
+	var f = mst / msr;
+	var p = fDistribution(f, dfBetween, dfWithin);
 	return p;
+};
+
+var beta = function(x, y) {
+	// Calculate the beta function using Sterling's approximation. See
+	// https://en.wikipedia.org/wiki/Beta_function#Approximation for more information.
+	var nominator = Math.pow(x, (x - 0.5)) * Math.pow(y, (y - 0.5));
+	var denominator = Math.pow(x + y, x + y - 0.5);
+	return Math.sqrt(2 * Math.PI) * nominator / denominator;
 };
 
 var countNull = function(x) {
@@ -45,41 +106,12 @@ var degreesOfFreedom = function(x, y) {
 };
 
 var fDistribution = function(f, df1, df2) {
-	// Calculate a p value based on:
-	// - a number of degrees of freedom
-	// - an F statistic
-	// - the F distribution.
-	// The p value is calculated using a numerical approximation:
-	// Abramowitz, M and Stegun, I. A. (1970), Handbook of Mathematical
-	// Functions With Formulas, Graphs, and Mathematical Tables, NBS Applied
-	// Mathematics Series 55, National Bureau of Standards, Washington, DC.
-	// p 932: function 26.2.19
-	// p 949: function 26.6.13
-	var a1 = 0.049867347;
-	var a2 = 0.0211410061;
-	var a3 = 0.0032776263;
-	var a4 = 0.0000380036;
-	var a5 = 0.0000488906;
-	var a6 = 0.000005383;
-	var x = (f - (df2 / (df2 - 2))) /
-			((df2 / (df2 - 2)) * Math.sqrt((2 * (df1 + df2 - 2)) / (df1 * (df2 - 4))));
-	var p = 2 * (1 / (2 * Math.pow(1 + a1 * x + a2 * Math.pow(x, 2) + a3 * Math.pow(x, 3) +
-		a4 * Math.pow(x, 4) + a5 * Math.pow(x, 5) + a6 * Math.pow(x, 6), 16)));
-	return p;
-};
-
-var fStatistic = function(x, m, n) {
-	// Calculate the F statistic for m samples and n data points.
-	var means = x.map(function(x) {
-		return mean(x);
-	});
-	var overallMean = mean(means);
-	var sse = sumSquaredErrors(x);
-	var sst = sumSquaredTreatment(overallMean, means);
-	var mse = sse / (n - m);
-	var mst = sst / (m - 1);
-	var f = mst / mse;
-	return f;
+	// Calculate the probability density function for a given F statistic and degrees of freedom.
+	// See https://en.wikipedia.org/wiki/F-distribution#Definition for more information.
+	var result = Math.sqrt((Math.pow(df1 * f, df1) * Math.pow(df2, df2)) /
+			(Math.pow(df1 * f + df2, df1 + df2))) /
+		(f * beta(df1 / 2, df2 / 2));
+	return result;
 };
 
 var isNumber = function(x) {
@@ -158,12 +190,9 @@ var pearsonCorrelation = function(x, y) {
 
 		// 2. Look up the p value in the t distribution.
 		var p = tDistribution(df, t);
-		return {
-			r: r,
-			p: p
-		};
+		return { r: r, p: p };
 	} else {
-		return 'failed';
+		return null;
 	}	
 };
 
@@ -204,34 +233,6 @@ var summary = function(x, addQuantile) {
 		result['quantile 75%'] = quantile(x, 0.75);
 	}
 	return result;
-};
-
-var sumSquaredErrors = function(data) {
-	var means = data.map(function(x) {
-		return mean(x);
-	});
-	var se = [];
-	for (var i=0; i < data.length; i++) {
-		var seSample = data[i].map(function(x) {
-			return Math.pow(x - means[i], 2);
-		});
-		seSample = seSample.reduce(function(accumulator, currentValue) {
-			return accumulator + currentValue;
-		}, 0);
-		se.push(seSample);
-	}
-	var sse = se.reduce(function(accumulator, currentValue) {
-		return accumulator + currentValue;
-	}, 0);
-	return sse;
-};
-
-var sumSquaredTreatment = function(overallMean, means) {
-	var sst = means.reduce(function(accumulator, currentValue) {
-		return accumulator + Math.pow(currentValue - overallMean, 2);
-	}, 0);
-	sst = sst * (means.length - 1);
-	return sst;
 };
 
 var tDistribution = function(df, t) {
@@ -278,8 +279,8 @@ var tTest = function(x, y) {
 		var t = (xMean - yMean) / (Math.sqrt(xVar / nx + yVar / ny));
 		t = Math.abs(t);
 		var df = degreesOfFreedom(x, y);
-		var answer = tDistribution(df, t);
-		return answer;
+		var p = tDistribution(df, t);
+		return p;
 	} else {
 		return NaN;
 	}
