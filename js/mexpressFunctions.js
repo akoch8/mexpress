@@ -81,6 +81,24 @@ var addProbeAnnotation = function(probeId, annotation, xPosition, yPosition) {
 	});
 };
 
+var addStatistic = function(statistic, x, y) {
+	if (statistic) {
+		statTextColor = statistic.p < 0.05 ? textColor : textColorLight;
+		if ('r' in statistic) {
+			statText = 'r = ' + statistic.r.toFixed(3);
+		} else {
+			statText = 'p = ' + statistic.p.toFixed(3);
+		}
+		svg.append('text')
+			.attr('x', x)
+			.attr('y', y + dataTrackHeight / 2)
+			.attr('fill', statTextColor)
+			.attr('text-anchor', 'start')
+			.attr('alignment-baseline', 'middle')
+			.text(statText);
+	}	
+};
+
 var addVariantAnnotation = function(annotation, xPosition, yPosition) {
 	annotation = annotation.split('__');
 	var maxTextWidth = 0;
@@ -153,37 +171,242 @@ var addToolbar = function() {
 var calculateStatistics = function(samples, sorter) {
 	var stats = {};
 	var sorterValues = [];
-	if (sorter === 'region_expression') {
+	var dataValues;
+	$.each(samples, function(index, sample) {
+		var sorterValue;
+		if (sorter in cancerTypeData.phenotype) {
+			sorterValue = cancerTypeData.phenotype[sorter][sample];
+		} else {
+			sorterValue = cancerTypeData[sorter][sample];
+		}
+		if (sorterValue !== null && sorterValue !== undefined) {
+			sorterValues.push(sorterValue);
+		} else {
+			sorterValues.push(null);
+		}
+	});
+	var sorterValuesNumeric = parameterIsNumerical(sorterValues);
+	var sorterCategories = [];
+	if (sorterValuesNumeric) {
+		sorterValues = sorterValues.map(makeNumeric);
+	} else {
+		sorterCategories = Object.values(sorterValues).filter(uniqueValues);
+		sorterCategories = sorterCategories.filter(function(x) {
+			return x !== null;
+		});
+	}
+
+	// DNA methylation data.
+	stats.dna_methylation_data = {};
+	$.each(cancerTypeData.dna_methylation_data, function(key, value) {
+		dataValues = [];
 		$.each(samples, function(index, sample) {
-			var dataValue = cancerTypeData.region_expression[sample];
+			var dataValue = value[sample];
 			if (dataValue !== null) {
-				sorterValues.push(+dataValue);
+				dataValues.push(+dataValue);
 			} else {
-				sorterValues.push(null);
+				dataValues.push(null);
 			}
 		});
+		if (sorterValuesNumeric) {
+			// Sorter = numeric & data = numeric
+			// ==> correlation
+			stats.dna_methylation_data[key] = pearsonCorrelation(sorterValues, dataValues);
+		} else {
+			if (sorterCategories.length === 2) {
+				// Sorter = two categories & data = numeric
+				// ==> t test
+				var valuesGroup1 = dataValues.filter(function(x, index) {
+					return sorterValues[index] === sorterCategories[0];
+				});
+				var valuesGroup2 = dataValues.filter(function(x, index) {
+					return sorterValues[index] === sorterCategories[1];
+				});
+				stats.dna_methylation_data[key] = {'p': tTest(valuesGroup1, valuesGroup2)};
+			} else if (sorterCategories.length > 2) {
+				// Sorter = more than two categories & data = numeric
+				// ==> ANOVA
+				console.log('DNAm => ANOVA');
+				var valuesGroups = [];
+				for (var i=0; i < sorterCategories.length; i++) {
+					var groupValues = dataValues.filter(function(x, index) {
+						return sorterValues[index] === sorterCategories[i];
+					});
+					valuesGroups.push(groupValues);
+				}
+				console.log(valuesGroups);
+				stats.dna_methylation_data[key] = {'p': anova(valuesGroups)};
+			} else {
+				stats.dna_methylation_data[key] = null;
+			}
+		}
+	});
 
-		// We need to calculate the correlation with DNA methylation and numerical clinical
-		// variables, and perform a t-test or ANOVA for categorical clinical variables.
-		stats.dna_methylation_data = {};
-		$.each(cancerTypeData.dna_methylation_data, function(key, value) {
-			methylationValues = [];
+	// Phenotype data.
+	stats.phenotype = {};
+	$.each(cancerTypeData.phenotype, function(key, value) {
+		var valuesGroups, valuesGroup1, valuesGroup2, i;
+		if (sorter !== key) {
+			dataValues = [];
 			$.each(samples, function(index, sample) {
 				var dataValue = value[sample];
 				if (dataValue !== null) {
-					methylationValues.push(+dataValue);
+					dataValues.push(dataValue);
 				} else {
-					methylationValues.push(null);
+					dataValues.push(null);
 				}
 			});
-			stats.dna_methylation_data[key] = pearsonCorrelation(sorterValues, methylationValues);
+			if (parameterIsNumerical(dataValues)) {
+				dataValues = dataValues.map(makeNumeric);
+				if (sorterValuesNumeric) {
+					// Sorter = numeric & data = numeric
+					// ==> correlation
+					stats.phenotype[key] = pearsonCorrelation(sorterValues, dataValues);
+				} else if (sorterCategories.length === 2) {
+					// Sorter = two categories & data = numeric
+					// ==> t test
+					valuesGroup1 = dataValues.filter(function(x, index) {
+						return sorterValues[index] === sorterCategories[0];
+					});
+					valuesGroup2 = dataValues.filter(function(x, index) {
+						return sorterValues[index] === sorterCategories[1];
+					});
+					stats.phenotype[key] = {'p': tTest(valuesGroup1, valuesGroup2)};
+				} else if (sorterCategories.length > 2) {
+					// Sorter = more than two categories & data = numeric
+					// ==> ANOVA
+					valuesGroups = [];
+					for (i=0; i < sorterCategories.length; i++) {
+						var groupValues = dataValues.filter(function(x, index) {
+							return sorterValues[index] === sorterCategories[i];
+						});
+						valuesGroups.push(groupValues);
+					}
+					stats.phenotype[key] = {'p': anova(valuesGroups)};
+				} else {
+					stats.phenotype[key] = null;
+				}
+			} else {
+				var dataCategories = Object.values(dataValues).filter(uniqueValues);
+				dataCategories = dataCategories.filter(function(x) {
+					return x !== null;
+				});
+				if (sorterValuesNumeric) {
+					if (dataCategories.length === 2) {
+						// Sorter = numeric & data = two categories
+						// ==> t test
+						valuesGroup1 = sorterValues.filter(function(x, index) {
+							return dataValues[index] === dataCategories[0];
+						});
+						valuesGroup2 = sorterValues.filter(function(x, index) {
+							return dataValues[index] === dataCategories[1];
+						});
+						stats.phenotype[key] = {'p': tTest(valuesGroup1, valuesGroup2)};
+					} else if (dataCategories.length > 2) {
+						// Sorter = numeric & data = more than two categories
+						// ==> ANOVA
+						valuesGroups = [];
+						for (i=0; i < dataCategories.length; i++) {
+							var groupValues = sorterValues.filter(function(x, index) {
+								return dataValues[index] === dataCategories[i];
+							});
+							valuesGroups.push(groupValues);
+						}
+						stats.phenotype[key] = {'p': anova(valuesGroups)};
+					} else {
+						stats.phenotype[key] = null;
+					}
+				} else {
+					stats.phenotype[key] = null;
+				}
+			}
+		}
+	});
+
+	// Region expression data.
+	if (sorter !== 'region_expression') {
+		dataValues = [];
+		$.each(samples, function(index, sample) {
+			var dataValue = cancerTypeData.region_expression[sample];
+			if (dataValue !== null) {
+				dataValues.push(+dataValue);
+			} else {
+				dataValues.push(null);
+			}
 		});
-	} else if (sorter === 'cnv') {
-		//
-	} else if (sorter in cancerTypeData.phenotype) {
-		//
+		if (sorterValuesNumeric) {
+			// Sorter = numeric & data = numeric
+			// ==> correlation
+			stats.region_expression = pearsonCorrelation(sorterValues, dataValues);
+		} else if (sorterCategories.length === 2) {
+			// Sorter = two categories & data = numeric
+			// ==> t test
+			valuesGroup1 = dataValues.filter(function(x, index) {
+				return sorterValues[index] === sorterCategories[0];
+			});
+			valuesGroup2 = dataValues.filter(function(x, index) {
+				return sorterValues[index] === sorterCategories[1];
+			});
+			stats.region_expression = {'p': tTest(valuesGroup1, valuesGroup2)};
+		} else if (sorterCategories.length > 2) {
+			// Sorter = more than two categories & data = numeric
+			// ==> ANOVA
+			valuesGroups = [];
+			for (i=0; i < sorterCategories.length; i++) {
+				var groupValues = dataValues.filter(function(x, index) {
+					return sorterValues[index] === sorterCategories[i];
+				});
+				valuesGroups.push(groupValues);
+			}
+			stats.region_expression = {'p': anova(valuesGroups)};
+		} else {
+			stats.region_expression = null;
+		}
 	} else {
-		//
+		stats.region_expression = null;
+	}
+
+	// Copy number data.
+	if (sorter !== 'cnv') {
+		dataValues = [];
+		$.each(samples, function(index, sample) {
+			var dataValue = cancerTypeData.cnv[sample];
+			if (dataValue !== null) {
+				dataValues.push(+dataValue);
+			} else {
+				dataValues.push(null);
+			}
+		});
+		if (sorterValuesNumeric) {
+			// Sorter = numeric & data = numeric
+			// ==> correlation
+			stats.cnv = pearsonCorrelation(sorterValues, dataValues);
+		} else if (sorterCategories.length === 2) {
+			// Sorter = two categories & data = numeric
+			// ==> t test
+			valuesGroup1 = dataValues.filter(function(x, index) {
+				return sorterValues[index] === sorterCategories[0];
+			});
+			valuesGroup2 = dataValues.filter(function(x, index) {
+				return sorterValues[index] === sorterCategories[1];
+			});
+			stats.cnv = {'p': tTest(valuesGroup1, valuesGroup2)};
+		} else if (sorterCategories.length > 2) {
+			// Sorter = more than two categories & data = numeric
+			// ==> ANOVA
+			valuesGroups = [];
+			for (i=0; i < sorterCategories.length; i++) {
+				var groupValues = dataValues.filter(function(x, index) {
+					return sorterValues[index] === sorterCategories[i];
+				});
+				valuesGroups.push(groupValues);
+			}
+			stats.cnv = {'p': anova(valuesGroups)};
+		} else {
+			stats.cnv = null;
+		}
+	} else {
+		stats.cnv = null;
 	}
 	return stats;
 };
@@ -1373,9 +1596,28 @@ var plot = function(sorter, sampleFilter, showVariants) {
 	// Add the statistics.
 	var addStats = true;
 	if (addStats) {
-		$.each(stats.dna_methylation_data, function(probe, corr) {
-			var probeIndex = orderedProbes.indexOf(probe);
-			var probeLocation = cancerTypeData.probe_annotation_450[probe].cpg_location;
+		var yPositionStat;
+		var xPositionStat = xPosition + samples.length * sampleWidth + genomicFeatureLargeMargin;
+		var dataTrackCount = 0;
+		var statText, statTextColor;
+		$.each(clinicalParameters, function(index, value) {
+			var statData = stats.phenotype[value];
+			yPositionStat = -topMargin + legendHeight + marginBetweenMainParts +
+							dataTrackCount * (dataTrackHeight + dataTrackSeparator);
+			addStatistic(statData, xPositionStat, yPositionStat);
+			dataTrackCount += 1;
+		});
+		yPositionStat += dataTrackHeight + marginBetweenMainParts;
+		if (stats.region_expression) {
+			addStatistic(stats.region_expression, xPositionStat, yPositionStat);
+		}
+		yPositionStat += dataTrackHeight + dataTrackSeparator;
+		if (stats.cnv) {
+			addStatistic(stats.cnv, xPositionStat, yPositionStat);
+		}
+		$.each(stats.dna_methylation_data, function(key, value) {
+			var probeIndex = orderedProbes.indexOf(key);
+			var probeLocation = cancerTypeData.probe_annotation_450[key].cpg_location;
 			var nrVariants = 0;
 			if (showVariants) {
 				// We need to skip any variant tracks.
@@ -1383,17 +1625,10 @@ var plot = function(sorter, sampleFilter, showVariants) {
 					return x < probeLocation;
 				}).length;
 			}
-			var yPosition = marginBetweenMainParts +
-							probeIndex * (dataTrackHeight + dataTrackSeparator) +
-							nrVariants * (dataTrackHeightVariants + dataTrackSeparator);
-			var rColor = corr.p < 0.05 ? textColor : textColorLight;
-			svg.append('text')
-				.attr('x', xPosition + samples.length * sampleWidth + genomicFeatureLargeMargin)
-				.attr('y', yPosition + dataTrackHeight / 2)
-				.attr('fill', rColor)
-				.attr('text-anchor', 'start')
-				.attr('alignment-baseline', 'middle')
-				.text('\u03C1 = ' + corr.r.toFixed(3));
+			var yPositionStat = marginBetweenMainParts +
+								probeIndex * (dataTrackHeight + dataTrackSeparator) +
+								nrVariants * (dataTrackHeightVariants + dataTrackSeparator);
+			addStatistic(value, xPositionStat, yPositionStat);
 		});
 	}
 
