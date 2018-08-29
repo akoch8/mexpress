@@ -1369,18 +1369,13 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 		var regionStart, regionEnd;
 		regionStart = value.start;
 		regionEnd = value.end;
-		console.log('CPG ISLAND');
-		console.log(regionStart + ' > ' + regionEnd);
 		if (regionStart < cancerTypeData.plot_data.end && regionEnd > cancerTypeData.plot_data.start) {
 			if (regionStart < cancerTypeData.plot_data.start) {
-				console.log('adjusting start');
 				regionStart = cancerTypeData.plot_data.start;
 			}
 			if (regionEnd > cancerTypeData.plot_data.end) {
-				console.log('adjusting end');
 				regionEnd = cancerTypeData.plot_data.end;
 			}
-			console.log(regionStart + ' > ' + regionEnd);
 			svg.append('rect')
 				.attr('fill', cpgColor)
 				.attr('x', xPosition)
