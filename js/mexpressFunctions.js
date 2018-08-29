@@ -226,7 +226,6 @@ var calculateStatistics = function(samples, sorter) {
 			} else if (sorterCategories.length > 2) {
 				// Sorter = more than two categories & data = numeric
 				// ==> ANOVA
-				console.log('DNAm => ANOVA');
 				var valuesGroups = [];
 				for (var i=0; i < sorterCategories.length; i++) {
 					var groupValues = dataValues.filter(function(x, index) {
@@ -1118,8 +1117,6 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 	// methylation, correlation between expression and numerical clinical parameters, t-test or
 	// ANOVA comparing expression in different groups for categorical clinical parameters.
 	var stats = calculateStatistics(samples, sorter);
-	console.log('STATS OBJECT:');
-	console.log(stats);
 
 	// Calculate the amount of horizontal space that is needed to plot the genomic annotation and
 	// all the samples (or the legend, depending on the widest one).
@@ -1344,7 +1341,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 	var re = /CG/g;
 	var cpgPosition, cpgOpacity = 1;
 	while ((match = re.exec(regionSequence)) !== null) {
-		cpgPosition = cancerTypeData.region_annotation.start + match.index;
+		cpgPosition = cancerTypeData.plot_data.start + match.index;
 
 		// Adapt the opacity of the CpG lines to the length of the gene. Otherwise the CpG plot is
 		// just one big block of green for extremely long genes. Since the longest genes in the
