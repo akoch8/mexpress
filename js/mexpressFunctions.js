@@ -1187,22 +1187,24 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 					// Use the coordinates of the zoom rectangle to zoom in on part of the plot.
 					var rectY = +rect.attr('y');
 					var rectHeight = +rect.attr('height');
-					var newStart = Math.round(y.invert(rectY));
-					var newEnd = Math.round(y.invert(rectY + rectHeight));
+					if (rectHeight > 0) {
+						var newStart = Math.round(y.invert(rectY));
+						var newEnd = Math.round(y.invert(rectY + rectHeight));
 
-					// Recreate the plot.
-					console.log(cancerTypeData);
-					var sampleSorter = $('#sample-sorter').text();
-					sampleSorter = sampleSorter === '' ? 'region_expression' : sampleSorter;
-					var sampleFilter = $('#sample-filter').text();
-					sampleFilter = sampleFilter === '' ? null : sampleFilter;
-					var showVariants = $('.toolbar--check-variants').prop('checked');
-					$('.plot-loader.overlay').fadeOut(200, function() {
-						$('.plot-loader').show();
-						setTimeout(function() {
-							plot(sampleSorter, sampleFilter, showVariants, newStart, newEnd);
-						}, 100);
-					});
+						// Recreate the plot.
+						console.log(cancerTypeData);
+						var sampleSorter = $('#sample-sorter').text();
+						sampleSorter = sampleSorter === '' ? 'region_expression' : sampleSorter;
+						var sampleFilter = $('#sample-filter').text();
+						sampleFilter = sampleFilter === '' ? null : sampleFilter;
+						var showVariants = $('.toolbar--check-variants').prop('checked');
+						$('.plot-loader.overlay').fadeOut(200, function() {
+							$('.plot-loader').show();
+							setTimeout(function() {
+								plot(sampleSorter, sampleFilter, showVariants, newStart, newEnd);
+							}, 100);
+						});
+					}
 				}
 				var coord = d3.mouse(this);
 				if (coord[0] > margin.left && coord[0] < margin.left + genomicFeaturesWidth +
@@ -1338,6 +1340,8 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 
 	// Draw the individual CpGs and the CpG islands.
 	var regionSequence = cancerTypeData.region_annotation.sequence;
+	// TO DO
+	// sequence changes when zooming in
 	var re = /CG/g;
 	var cpgPosition, cpgOpacity = 1;
 	while ((match = re.exec(regionSequence)) !== null) {
