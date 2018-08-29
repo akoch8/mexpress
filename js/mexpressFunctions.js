@@ -503,10 +503,19 @@ var drawBarPlot = function(data, element) {
 
 var drawCoordinates = function(y) {
 	var coordinates = [];
-	coordinates.push(Math.floor(cancerTypeData.region_annotation.start / 1000) * 1000);
-	coordinates.push(Math.ceil(cancerTypeData.region_annotation.end / 1000) * 1000);
-	coordinates.push(coordinates[0] +
-		Math.round(Math.abs(coordinates[0] - coordinates[1]) / 2000) * 1000);
+	var plotWindow = cancerTypeData.plot_data.end - cancerTypeData.plot_data.start;
+	var factor = 1000;
+	if (plotWindow <= 10000 && plotWindow > 1000) {
+		factor = 100;
+	} else if (plotWindow <= 1000 && plotWindow > 100) {
+		factor = 10;
+	} else if (plotWindow <= 100) {
+		factor = 1;
+	}
+	coordinates.push(Math.ceil(cancerTypeData.plot_data.start / factor) * factor);
+	coordinates.push(Math.floor(cancerTypeData.plot_data.end / factor) * factor);
+	coordinates.push(coordinates[0] + Math.round(Math.abs(coordinates[0] - coordinates[1]) /
+		(2 * factor)) * factor);
 	$.each(coordinates, function(index, value) {
 		svg.append('text')
 			.attr('x', 0)
@@ -900,7 +909,7 @@ var parameterIsNumerical = function(x) {
 	return x.every(isNumber);
 };
 
-var plot = function(sorter, sampleFilter, showVariants) {
+var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 	$('.plot-window > svg').remove();
 
 	// The plot consists of three main parts:
@@ -1009,9 +1018,40 @@ var plot = function(sorter, sampleFilter, showVariants) {
 	// tracks for the DNA methylation data (one track per probe), as well as the variant data (one
 	// track per variant).
 	var nrDnaMethylationTracks = 0;
-	nrDnaMethylationTracks += Object.keys(cancerTypeData.dna_methylation_data).length;
 	var variants = showVariants ? variantsByStartValue(cancerTypeData.snv) : {};
-	var nrVariantTracks = Object.keys(variants).length;
+	var nrVariantTracks = 0;
+	if (plotStart && plotEnd) {
+		// Filter the DNA methylation probes and genomic variants based on the provided genomic
+		// window.
+		cancerTypeData.plot_data.start = plotStart;
+		cancerTypeData.plot_data.end = plotEnd;
+		var filteredDnaMethylationData = {};
+		var filteredProbeAnnotation = {};
+		$.each(cancerTypeData.dna_methylation_data, function(probe, data) {
+			var probeLocation = cancerTypeData.probe_annotation_450[probe].cpg_location;
+			if (probeLocation >= plotStart && probeLocation <= plotEnd) {
+				filteredDnaMethylationData[probe] = data;
+				filteredProbeAnnotation[probe] = cancerTypeData.probe_annotation_450[probe];
+			}
+		});
+		cancerTypeData.dna_methylation_data = filteredDnaMethylationData;
+		cancerTypeData.probe_annotation_450 = filteredProbeAnnotation;
+		var filteredVariants = {};
+		$.each(variants, function(sample, data) {
+			var snv = [];
+			$.each(data, function(i, a) {
+				if (a.start >= plotStart && a.start <= plotEnd) {
+					snv.push(a);
+				}
+			});
+			if (snv.length > 0) {
+				filteredVariants[sample] = snv;
+			}
+		});
+		variants = filteredVariants;
+	}
+	nrDnaMethylationTracks += Object.keys(cancerTypeData.dna_methylation_data).length;
+	nrVariantTracks = Object.keys(variants).length;
 
 	// Calculate the amount of vertical space that is needed to plot all the data tracks. All the
 	// phenotype and expression data will be plotted in the top margin. This way we can have the y
@@ -1108,6 +1148,80 @@ var plot = function(sorter, sampleFilter, showVariants) {
 			.attr('font-family', 'arial')
 			.attr('font-size', '9px')
 			.attr('fill', textColor)
+			.on('mousedown', function() {
+				function mousemove(el, y) {
+					$('.zoom-rect').remove();
+					var newYPos = d3.mouse(el.node())[1] - margin.top;
+
+					// Limit the size of the zoom rectangle to the plot window.
+					if (newYPos < 0) {
+						newYPos = 0;
+					}
+					if (newYPos > locationLinkedTracksHeight) {
+						newYPos = locationLinkedTracksHeight;
+					}
+					if (newYPos < y) {
+						// We can't draw rectangles with a negative height, so when the new y
+						// position is lower than the start position (when the user draws a
+						// rectangle up from where they first clicked) we have to flip both
+						// variables.
+						var tmp = y;
+						y = newYPos;
+						newYPos = tmp;
+					}
+					var rectWidth = genomicFeaturesWidth + marginBetweenMainParts;
+					var rectHeight = newYPos - y;
+					svg.append('rect')
+						.attr('x', genomicCoordinatesWidth)
+						.attr('y', y)
+						.attr('width', rectWidth)
+						.attr('height', rectHeight)
+						.attr('class', 'zoom-rect')
+						.attr('fill', transcriptColor)
+						.attr('fill-opacity', 0.25)
+						.attr('stroke-width', '1px')
+						.attr('stroke', regionColor);
+				}
+				function mouseup() {
+					var rect = $('.zoom-rect').first();
+					rect.remove();
+					w.on('mousemove', null).on('mouseup', null);
+
+					// Use the coordinates of the zoom rectangle to zoom in on part of the plot.
+					var rectY = +rect.attr('y');
+					var rectHeight = +rect.attr('height');
+					var newStart = Math.round(y.invert(rectY));
+					var newEnd = Math.round(y.invert(rectY + rectHeight));
+
+					// Recreate the plot.
+					console.log(cancerTypeData);
+					var sampleSorter = $('#sample-sorter').text();
+					sampleSorter = sampleSorter === '' ? 'region_expression' : sampleSorter;
+					var sampleFilter = $('#sample-filter').text();
+					sampleFilter = sampleFilter === '' ? null : sampleFilter;
+					var showVariants = $('.toolbar--check-variants').prop('checked');
+					$('.plot-loader.overlay').fadeOut(200, function() {
+						$('.plot-loader').show();
+						setTimeout(function() {
+							plot(sampleSorter, sampleFilter, showVariants, newStart, newEnd);
+						}, 100);
+					});
+				}
+				var coord = d3.mouse(this);
+				if (coord[0] > margin.left && coord[0] < margin.left + genomicFeaturesWidth +
+					marginBetweenMainParts * 5 && coord[1] > margin.top && coord[1] < margin.top +
+					locationLinkedTracksHeight) {
+					// The user clicked inside the plot window (we're excluding the margins!).
+					d3.event.preventDefault();
+					var el = d3.select(this);
+					var startY = coord[1] - margin.top;
+					var w = d3.select(window)
+						.on('mousemove', function() {
+							mousemove(el, startY);
+						})
+						.on('mouseup', mouseup);
+				}
+			})
 		.append('g')
 			.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
@@ -1255,17 +1369,25 @@ var plot = function(sorter, sampleFilter, showVariants) {
 		var regionStart, regionEnd;
 		regionStart = value.start;
 		regionEnd = value.end;
-		if (regionStart < cancerTypeData.plot_data.start) {
-			regionStart = cancerTypeData.plot_data.start;
-		} else if (regionEnd > cancerTypeData.plot_data.end) {
-			regionEnd = cancerTypeData.plot_data.end;
+		console.log('CPG ISLAND');
+		console.log(regionStart + ' > ' + regionEnd);
+		if (regionStart < cancerTypeData.plot_data.end && regionEnd > cancerTypeData.plot_data.start) {
+			if (regionStart < cancerTypeData.plot_data.start) {
+				console.log('adjusting start');
+				regionStart = cancerTypeData.plot_data.start;
+			}
+			if (regionEnd > cancerTypeData.plot_data.end) {
+				console.log('adjusting end');
+				regionEnd = cancerTypeData.plot_data.end;
+			}
+			console.log(regionStart + ' > ' + regionEnd);
+			svg.append('rect')
+				.attr('fill', cpgColor)
+				.attr('x', xPosition)
+				.attr('y', y(regionStart))
+				.attr('width', cpgIslandWidth)
+				.attr('height', Math.abs(y(regionStart) - y(regionEnd)));
 		}
-		svg.append('rect')
-			.attr('fill', cpgColor)
-			.attr('x', xPosition)
-			.attr('y', y(regionStart))
-			.attr('width', cpgIslandWidth)
-			.attr('height', Math.abs(y(regionStart) - y(regionEnd)));
 	});
 	xPosition += cpgIslandWidth + genomicFeatureLargeMargin;
 
@@ -1330,7 +1452,8 @@ var plot = function(sorter, sampleFilter, showVariants) {
 				xPosition += genomicFeatureSmallMargin;
 				transcriptStart = value.start;
 				transcriptEnd = value.end;
-				if (transcriptStart < cancerTypeData.plot_data.end && transcriptEnd > cancerTypeData.plot_data.start) {
+				if (transcriptStart < cancerTypeData.plot_data.end &&
+					transcriptEnd > cancerTypeData.plot_data.start) {
 					if (transcriptStart < cancerTypeData.plot_data.start) {
 						transcriptStart = cancerTypeData.plot_data.start;
 					} else if (transcriptEnd > cancerTypeData.plot_data.end) {
@@ -1350,16 +1473,23 @@ var plot = function(sorter, sampleFilter, showVariants) {
 	xPosition += genomicFeatureLargeMargin;
 
 	// Draw the main region (miRNA or gene with its transcripts).
+	var mainRegionStart = cancerTypeData.region_annotation.start;
+	var mainRegionEnd = cancerTypeData.region_annotation.end;
+	if (mainRegionStart < cancerTypeData.plot_data.start) {
+		mainRegionStart = cancerTypeData.plot_data.start;
+	}
+	if (mainRegionEnd > cancerTypeData.plot_data.end) {
+		mainRegionEnd = cancerTypeData.plot_data.end;
+	}
 	svg.append('rect')
 		.attr('fill', regionColor)
 		.attr('x', xPosition)
-		.attr('y', y(cancerTypeData.region_annotation.start))
+		.attr('y', y(mainRegionStart))
 		.attr('width', regionWidth)
-		.attr('height', Math.abs(y(cancerTypeData.region_annotation.start) -
-			y(cancerTypeData.region_annotation.end)));
+		.attr('height', Math.abs(y(mainRegionStart) - y(mainRegionEnd)));
 	svg.append('text')
 		.attr('x', xPosition)
-		.attr('y', y(cancerTypeData.region_annotation.start) - 5)
+		.attr('y', y(mainRegionStart) - 5)
 		.attr('font-weight', 700)
 		.attr('fill', regionColor)
 		.attr('text-anchor', 'start')
@@ -1375,33 +1505,40 @@ var plot = function(sorter, sampleFilter, showVariants) {
 			xPosition += genomicFeatureSmallMargin;
 			transcriptStart = value.start;
 			transcriptEnd = value.end;
-			if (transcriptStart < cancerTypeData.plot_data.start) {
-				transcriptStart = cancerTypeData.plot_data.start;
-			} else if (transcriptEnd > cancerTypeData.plot_data.end) {
-				transcriptEnd = cancerTypeData.plot_data.end;
+			if (transcriptStart < cancerTypeData.plot_data.end && transcriptEnd > cancerTypeData.plot_data.start) {
+				if (transcriptStart < cancerTypeData.plot_data.start) {
+					transcriptStart = cancerTypeData.plot_data.start;
+				}
+				if (transcriptEnd > cancerTypeData.plot_data.end) {
+					transcriptEnd = cancerTypeData.plot_data.end;
+				}
+				svg.append('rect')
+					.attr('fill', transcriptColor)
+					.attr('x', xPosition)
+					.attr('y', y(transcriptStart))
+					.attr('width', transcriptWidth)
+					.attr('height', Math.abs(y(transcriptStart) - y(transcriptEnd)));
 			}
-			svg.append('rect')
-				.attr('fill', transcriptColor)
-				.attr('x', xPosition)
-				.attr('y', y(transcriptStart))
-				.attr('width', transcriptWidth)
-				.attr('height', Math.abs(y(transcriptStart) - y(transcriptEnd)));
 			exons = value.exons;
 			$.each(exons, function(key, value) {
 				var exonStart, exonEnd;
 				exonStart = value.start;
 				exonEnd = value.end;
-				if (exonStart < cancerTypeData.plot_data.start) {
-					exonStart = cancerTypeData.plot_data.start;
-				} else if (exonEnd > cancerTypeData.plot_data.end) {
-					exonEnd = cancerTypeData.plot_data.end;
-				}
-				svg.append('rect')
-					.attr('fill', exonColor)
-					.attr('x', xPosition)
-					.attr('y', y(exonStart))
-					.attr('width', transcriptWidth)
-					.attr('height', Math.abs(y(exonStart) - y(exonEnd)));
+				if (exonStart < cancerTypeData.plot_data.end &&
+					exonEnd > cancerTypeData.plot_data.start) {
+					if (exonStart < cancerTypeData.plot_data.start) {
+						exonStart = cancerTypeData.plot_data.start;
+					}
+					if (exonEnd > cancerTypeData.plot_data.end) {
+						exonEnd = cancerTypeData.plot_data.end;
+					}
+					svg.append('rect')
+						.attr('fill', exonColor)
+						.attr('x', xPosition)
+						.attr('y', y(exonStart))
+						.attr('width', transcriptWidth)
+						.attr('height', Math.abs(y(exonStart) - y(exonEnd)));
+					}
 			});
 			xPosition += transcriptWidth;
 		});
