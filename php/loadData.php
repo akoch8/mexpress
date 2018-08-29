@@ -112,7 +112,9 @@ try {
 	$plotEnd = $regionEnd + $extra;
 	$result['plot_data'] = array(
 		'start' => $plotStart,
-		'end' => $plotEnd
+		'end' => $plotEnd,
+		'new_start' => $plotStart,
+		'new_end' => $plotEnd
 	);
 
 	// Add the CpG island annotation. See comment higher up for the explanation on repeating
@@ -354,7 +356,6 @@ try {
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
 		$sequence = curl_exec($curl);
 		curl_close($curl);
-		$successfulRequest = true;
 		if ($sequence === false) {
 			$sequence = '';
 			$result['msg'] = 'Could not retrieve the genomic sequence from Ensembl.';
@@ -363,7 +364,17 @@ try {
 } catch (Exception $e) {
 	$result['msg'] = 'Could not retrieve the genomic sequence from Ensembl.';
 }
+$cpgLocations = array();
+if ($sequence !== '') {
+	$lastPos = 0;
+	while (($lastPos = strpos($sequence, 'CG', $lastPos)) !== false) {
+		$cpgLocation = $result['plot_data']['start'] + $lastPos;
+		array_push($cpgLocations, $cpgLocation);
+		$lastPos = $lastPos + strlen('CG');
+	}
+}
 $result['region_annotation']['sequence'] = $sequence;
+$result['region_annotation']['cpg_locations'] = $cpgLocations;
 
 if (function_exists('ob_gzhandler')) {
 	ob_start('ob_gzhandler');
