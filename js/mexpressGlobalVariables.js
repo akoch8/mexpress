@@ -2,6 +2,7 @@
 //
 var cancerTypeAnnotation;
 var cancerTypeData;
+var cancerTypeDataFiltered;
 var allSamples;
 var plotWidth;
 var svg;

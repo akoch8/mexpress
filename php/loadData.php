@@ -112,9 +112,7 @@ try {
 	$plotEnd = $regionEnd + $extra;
 	$result['plot_data'] = array(
 		'start' => $plotStart,
-		'end' => $plotEnd,
-		'new_start' => $plotStart,
-		'new_end' => $plotEnd
+		'end' => $plotEnd
 	);
 
 	// Add the CpG island annotation. See comment higher up for the explanation on repeating

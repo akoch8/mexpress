@@ -174,10 +174,10 @@ var calculateStatistics = function(samples, sorter) {
 	var dataValues;
 	$.each(samples, function(index, sample) {
 		var sorterValue;
-		if (sorter in cancerTypeData.phenotype) {
-			sorterValue = cancerTypeData.phenotype[sorter][sample];
+		if (sorter in cancerTypeDataFiltered.phenotype) {
+			sorterValue = cancerTypeDataFiltered.phenotype[sorter][sample];
 		} else {
-			sorterValue = cancerTypeData[sorter][sample];
+			sorterValue = cancerTypeDataFiltered[sorter][sample];
 		}
 		if (sorterValue !== null && sorterValue !== undefined) {
 			sorterValues.push(sorterValue);
@@ -198,7 +198,7 @@ var calculateStatistics = function(samples, sorter) {
 
 	// DNA methylation data.
 	stats.dna_methylation_data = {};
-	$.each(cancerTypeData.dna_methylation_data, function(key, value) {
+	$.each(cancerTypeDataFiltered.dna_methylation_data, function(key, value) {
 		dataValues = [];
 		$.each(samples, function(index, sample) {
 			var dataValue = value[sample];
@@ -243,7 +243,7 @@ var calculateStatistics = function(samples, sorter) {
 
 	// Phenotype data.
 	stats.phenotype = {};
-	$.each(cancerTypeData.phenotype, function(key, value) {
+	$.each(cancerTypeDataFiltered.phenotype, function(key, value) {
 		var valuesGroups, valuesGroup1, valuesGroup2, i;
 		if (sorter !== key) {
 			dataValues = [];
@@ -326,7 +326,7 @@ var calculateStatistics = function(samples, sorter) {
 	if (sorter !== 'region_expression') {
 		dataValues = [];
 		$.each(samples, function(index, sample) {
-			var dataValue = cancerTypeData.region_expression[sample];
+			var dataValue = cancerTypeDataFiltered.region_expression[sample];
 			if (dataValue !== null) {
 				dataValues.push(+dataValue);
 			} else {
@@ -369,7 +369,7 @@ var calculateStatistics = function(samples, sorter) {
 	if (sorter !== 'cnv') {
 		dataValues = [];
 		$.each(samples, function(index, sample) {
-			var dataValue = cancerTypeData.cnv[sample];
+			var dataValue = cancerTypeDataFiltered.cnv[sample];
 			if (dataValue !== null) {
 				dataValues.push(+dataValue);
 			} else {
@@ -502,7 +502,7 @@ var drawBarPlot = function(data, element) {
 
 var drawCoordinates = function(y) {
 	var coordinates = [];
-	var plotWindow = cancerTypeData.plot_data.end - cancerTypeData.plot_data.start;
+	var plotWindow = cancerTypeDataFiltered.plot_data.end - cancerTypeDataFiltered.plot_data.start;
 	var factor = 1000;
 	if (plotWindow <= 10000 && plotWindow > 1000) {
 		factor = 100;
@@ -511,8 +511,8 @@ var drawCoordinates = function(y) {
 	} else if (plotWindow <= 100) {
 		factor = 1;
 	}
-	coordinates.push(Math.ceil(cancerTypeData.plot_data.start / factor) * factor);
-	coordinates.push(Math.floor(cancerTypeData.plot_data.end / factor) * factor);
+	coordinates.push(Math.ceil(cancerTypeDataFiltered.plot_data.start / factor) * factor);
+	coordinates.push(Math.floor(cancerTypeDataFiltered.plot_data.end / factor) * factor);
 	coordinates.push(coordinates[0] + Math.round(Math.abs(coordinates[0] - coordinates[1]) /
 		(2 * factor)) * factor);
 	$.each(coordinates, function(index, value) {
@@ -1017,25 +1017,28 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 	// tracks for the DNA methylation data (one track per probe), as well as the variant data (one
 	// track per variant).
 	var nrDnaMethylationTracks = 0;
-	var variants = showVariants ? variantsByStartValue(cancerTypeData.snv) : {};
 	var nrVariantTracks = 0;
+	var variants = showVariants ? variantsByStartValue(cancerTypeData.snv) : {};
+	var filteredVariants = variants;
+	cancerTypeDataFiltered = $.extend(true, {}, cancerTypeData);
 	if (plotStart && plotEnd) {
 		// Filter the DNA methylation probes and genomic variants based on the provided genomic
 		// window.
-		cancerTypeData.plot_data.start = plotStart;
-		cancerTypeData.plot_data.end = plotEnd;
+		cancerTypeDataFiltered.plot_data.start = plotStart;
+		cancerTypeDataFiltered.plot_data.end = plotEnd;
 		var filteredDnaMethylationData = {};
 		var filteredProbeAnnotation = {};
-		$.each(cancerTypeData.dna_methylation_data, function(probe, data) {
-			var probeLocation = cancerTypeData.probe_annotation_450[probe].cpg_location;
+		$.each(cancerTypeDataFiltered.dna_methylation_data, function(probe, data) {
+			var probeLocation = cancerTypeDataFiltered.probe_annotation_450[probe].cpg_location;
 			if (probeLocation >= plotStart && probeLocation <= plotEnd) {
 				filteredDnaMethylationData[probe] = data;
-				filteredProbeAnnotation[probe] = cancerTypeData.probe_annotation_450[probe];
+				filteredProbeAnnotation[probe] = cancerTypeDataFiltered.probe_annotation_450[probe];
 			}
 		});
-		cancerTypeData.dna_methylation_data = filteredDnaMethylationData;
-		cancerTypeData.probe_annotation_450 = filteredProbeAnnotation;
-		var filteredVariants = {};
+		nrDnaMethylationTracks = Object.keys(filteredDnaMethylationData).length;
+		cancerTypeDataFiltered.probe_annotation_450 = filteredProbeAnnotation;
+		cancerTypeDataFiltered.dna_methylation_data = filteredDnaMethylationData;
+		filteredVariants = {};
 		$.each(variants, function(sample, data) {
 			var snv = [];
 			$.each(data, function(i, a) {
@@ -1047,10 +1050,12 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 				filteredVariants[sample] = snv;
 			}
 		});
-		variants = filteredVariants;
+		nrVariantTracks = Object.keys(filteredVariants).length;
+		cancerTypeDataFiltered.snv = filteredVariants;
+	} else {
+		nrDnaMethylationTracks = Object.keys(cancerTypeDataFiltered.dna_methylation_data).length;
+		nrVariantTracks = Object.keys(variants).length;
 	}
-	nrDnaMethylationTracks += Object.keys(cancerTypeData.dna_methylation_data).length;
-	nrVariantTracks = Object.keys(variants).length;
 
 	// Calculate the amount of vertical space that is needed to plot all the data tracks. All the
 	// phenotype and expression data will be plotted in the top margin. This way we can have the y
@@ -1077,16 +1082,16 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 	
 	// Count the number of samples.
 	var dnaMethylationSamples = 0;
-	if (cancerTypeData.dna_methylation_data.length) {
-		var dnaMethProbe = Object.keys(cancerTypeData.dna_methylation_data)[0];
-		dnaMethylationSamples = Object.keys(cancerTypeData.dna_methylation_data[dnaMethProbe]);
+	if (cancerTypeDataFiltered.dna_methylation_data.length) {
+		var dnaMethProbe = Object.keys(cancerTypeDataFiltered.dna_methylation_data)[0];
+		dnaMethylationSamples = Object.keys(cancerTypeDataFiltered.dna_methylation_data[dnaMethProbe]);
 	}
-	var regionExpressionSamples = Object.keys(cancerTypeData.region_expression);
-	var phenotypeVariable = Object.keys(cancerTypeData.phenotype)[0];
-	var phenotypeSamples = Object.keys(cancerTypeData.phenotype[phenotypeVariable]);
+	var regionExpressionSamples = Object.keys(cancerTypeDataFiltered.region_expression);
+	var phenotypeVariable = Object.keys(cancerTypeDataFiltered.phenotype)[0];
+	var phenotypeSamples = Object.keys(cancerTypeDataFiltered.phenotype[phenotypeVariable]);
 	var cnvSamples = 0;
-	if (cancerTypeData.cnv.length) {
-		cnvSamples = Object.keys(cancerTypeData.cnv);
+	if (cancerTypeDataFiltered.cnv.length) {
+		cnvSamples = Object.keys(cancerTypeDataFiltered.cnv);
 	}
 
 	// Create an array that holds all the samples for which there is any type of data. This array
@@ -1103,11 +1108,11 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 	if (!sorter) {
 		sorter = 'region_expression';
 	}
-	if (sorter in cancerTypeData) {
-		dataToSort = cancerTypeData[sorter];
+	if (sorter in cancerTypeDataFiltered) {
+		dataToSort = cancerTypeDataFiltered[sorter];
 		samples = sortSamples(samples, dataToSort);
-	} else if (sorter in cancerTypeData.phenotype) {
-		dataToSort = cancerTypeData.phenotype[sorter];
+	} else if (sorter in cancerTypeDataFiltered.phenotype) {
+		dataToSort = cancerTypeDataFiltered.phenotype[sorter];
 		samples = sortSamples(samples, dataToSort);
 	}
 
@@ -1135,7 +1140,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 	// Build the SVG.
 	var margin = {top: 20 + topMargin, left: 40, bottom: 100, right: 200};
 	var x = d3.scaleLinear().domain([0, width]).range([0, width]);
-	var y = d3.scaleLinear().domain([cancerTypeData.plot_data.start, cancerTypeData.plot_data.end])
+	var y = d3.scaleLinear().domain([cancerTypeDataFiltered.plot_data.start, cancerTypeDataFiltered.plot_data.end])
 		.range([0, locationLinkedTracksHeight]);
 	svg = d3.select('.plot-window')
 		.append('svg')
@@ -1192,7 +1197,6 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 						var newEnd = Math.round(y.invert(rectY + rectHeight));
 
 						// Recreate the plot.
-						console.log(cancerTypeData);
 						var sampleSorter = $('#sample-sorter').text();
 						sampleSorter = sampleSorter === '' ? 'region_expression' : sampleSorter;
 						var sampleFilter = $('#sample-filter').text();
@@ -1239,7 +1243,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 					genomicFeatureSmallMargin;
 	var probeCounter = 0;
 	var probeLocations = [];
-	$.each(cancerTypeData.probe_annotation_450, function(key, value) {
+	$.each(cancerTypeDataFiltered.probe_annotation_450, function(key, value) {
 		var yPosition = value.cpg_location;
 		probeLocations.push(yPosition);
 		var nrVariants = 0;
@@ -1253,7 +1257,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 								 probeCounter * (dataTrackHeight + dataTrackSeparator) +
 								 nrVariants * (dataTrackHeightVariants + dataTrackSeparator) +
 								 dataTrackHeight / 2;
-		if (yPosition < cancerTypeData.plot_data.end && yPosition > cancerTypeData.plot_data.start) {
+		if (yPosition < cancerTypeDataFiltered.plot_data.end && yPosition > cancerTypeDataFiltered.plot_data.start) {
 			// Draw the horizontal part of the line.
 			svg.append('line')
 				.attr('x1', xPosition)
@@ -1290,7 +1294,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 									 variantCounter * (dataTrackHeightVariants + dataTrackSeparator) +
 									 nrProbes * (dataTrackHeight + dataTrackSeparator) +
 									 dataTrackHeightVariants / 2;
-			if (position < cancerTypeData.plot_data.end && position > cancerTypeData.plot_data.start) {
+			if (position < cancerTypeDataFiltered.plot_data.end && position > cancerTypeDataFiltered.plot_data.start) {
 				// Draw the horizontal part of the line.
 				svg.append('line')
 					.attr('x1', xPosition)
@@ -1339,22 +1343,22 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 	drawCoordinates(y);
 
 	// Draw the individual CpGs and the CpG islands.
-	var regionSequence = cancerTypeData.region_annotation.sequence;
+	var regionSequence = cancerTypeDataFiltered.region_annotation.sequence;
 	// TO DO
 	// sequence changes when zooming in
 	var re = /CG/g;
 	var cpgPosition, cpgOpacity = 1;
 	while ((match = re.exec(regionSequence)) !== null) {
-		cpgPosition = cancerTypeData.plot_data.start + match.index;
+		cpgPosition = cancerTypeDataFiltered.plot_data.start + match.index;
 
 		// Adapt the opacity of the CpG lines to the length of the gene. Otherwise the CpG plot is
 		// just one big block of green for extremely long genes. Since the longest genes in the
 		// human genome appear to be around 2.3 megabases long, we chose 2,500,000 as the
 		// denominator in the calculation below (basically to normalise the gene length to a value
 		// between 0 and 1).
-		cpgOpacity = 1 - Math.abs(cancerTypeData.region_annotation.start -
-			cancerTypeData.region_annotation.end) / 2500000;
-		if (cpgPosition > cancerTypeData.plot_data.start && cpgPosition < cancerTypeData.plot_data.end) {
+		cpgOpacity = 1 - Math.abs(cancerTypeDataFiltered.region_annotation.start -
+			cancerTypeDataFiltered.region_annotation.end) / 2500000;
+		if (cpgPosition > cancerTypeDataFiltered.plot_data.start && cpgPosition < cancerTypeDataFiltered.plot_data.end) {
 			svg.append('line')
 				.attr('x1', xPosition)
 				.attr('x2', xPosition + cpgWidth)
@@ -1366,16 +1370,16 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 		}
 	}
 	xPosition += cpgWidth + genomicFeatureSmallMargin;
-	$.each(cancerTypeData.cpgi_annotation, function(key, value) {
+	$.each(cancerTypeDataFiltered.cpgi_annotation, function(key, value) {
 		var regionStart, regionEnd;
 		regionStart = value.start;
 		regionEnd = value.end;
-		if (regionStart < cancerTypeData.plot_data.end && regionEnd > cancerTypeData.plot_data.start) {
-			if (regionStart < cancerTypeData.plot_data.start) {
-				regionStart = cancerTypeData.plot_data.start;
+		if (regionStart < cancerTypeDataFiltered.plot_data.end && regionEnd > cancerTypeDataFiltered.plot_data.start) {
+			if (regionStart < cancerTypeDataFiltered.plot_data.start) {
+				regionStart = cancerTypeDataFiltered.plot_data.start;
 			}
-			if (regionEnd > cancerTypeData.plot_data.end) {
-				regionEnd = cancerTypeData.plot_data.end;
+			if (regionEnd > cancerTypeDataFiltered.plot_data.end) {
+				regionEnd = cancerTypeDataFiltered.plot_data.end;
 			}
 			svg.append('rect')
 				.attr('fill', cpgColor)
@@ -1389,17 +1393,17 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 
 	// Plot any other regions (miRNAs and/or genes with their transcripts).
 	var transcripts;
-	$.each(cancerTypeData.other_regions, function(key, value) {
+	$.each(cancerTypeDataFiltered.other_regions, function(key, value) {
 		var regionStart, regionEnd, regionName;
 		xPosition += genomicFeatureLargeMargin;
 		regionStart = value.start;
 		regionEnd = value.end;
-		if (regionStart < cancerTypeData.plot_data.end && regionEnd > cancerTypeData.plot_data.start) {
-			if (regionStart < cancerTypeData.plot_data.start) {
-				regionStart = cancerTypeData.plot_data.start;
+		if (regionStart < cancerTypeDataFiltered.plot_data.end && regionEnd > cancerTypeDataFiltered.plot_data.start) {
+			if (regionStart < cancerTypeDataFiltered.plot_data.start) {
+				regionStart = cancerTypeDataFiltered.plot_data.start;
 			}
-			if (regionEnd > cancerTypeData.plot_data.end) {
-				regionEnd = cancerTypeData.plot_data.end;
+			if (regionEnd > cancerTypeDataFiltered.plot_data.end) {
+				regionEnd = cancerTypeDataFiltered.plot_data.end;
 			}
 			regionName = value.name ? value.name : value.ensembl_id;
 			svg.append('rect')
@@ -1448,12 +1452,12 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 				xPosition += genomicFeatureSmallMargin;
 				transcriptStart = value.start;
 				transcriptEnd = value.end;
-				if (transcriptStart < cancerTypeData.plot_data.end &&
-					transcriptEnd > cancerTypeData.plot_data.start) {
-					if (transcriptStart < cancerTypeData.plot_data.start) {
-						transcriptStart = cancerTypeData.plot_data.start;
-					} else if (transcriptEnd > cancerTypeData.plot_data.end) {
-						transcriptEnd = cancerTypeData.plot_data.end;
+				if (transcriptStart < cancerTypeDataFiltered.plot_data.end &&
+					transcriptEnd > cancerTypeDataFiltered.plot_data.start) {
+					if (transcriptStart < cancerTypeDataFiltered.plot_data.start) {
+						transcriptStart = cancerTypeDataFiltered.plot_data.start;
+					} else if (transcriptEnd > cancerTypeDataFiltered.plot_data.end) {
+						transcriptEnd = cancerTypeDataFiltered.plot_data.end;
 					}
 					svg.append('rect')
 						.attr('fill', otherTranscriptColor)
@@ -1469,13 +1473,13 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 	xPosition += genomicFeatureLargeMargin;
 
 	// Draw the main region (miRNA or gene with its transcripts).
-	var mainRegionStart = cancerTypeData.region_annotation.start;
-	var mainRegionEnd = cancerTypeData.region_annotation.end;
-	if (mainRegionStart < cancerTypeData.plot_data.start) {
-		mainRegionStart = cancerTypeData.plot_data.start;
+	var mainRegionStart = cancerTypeDataFiltered.region_annotation.start;
+	var mainRegionEnd = cancerTypeDataFiltered.region_annotation.end;
+	if (mainRegionStart < cancerTypeDataFiltered.plot_data.start) {
+		mainRegionStart = cancerTypeDataFiltered.plot_data.start;
 	}
-	if (mainRegionEnd > cancerTypeData.plot_data.end) {
-		mainRegionEnd = cancerTypeData.plot_data.end;
+	if (mainRegionEnd > cancerTypeDataFiltered.plot_data.end) {
+		mainRegionEnd = cancerTypeDataFiltered.plot_data.end;
 	}
 	svg.append('rect')
 		.attr('fill', regionColor)
@@ -1490,23 +1494,23 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 		.attr('fill', regionColor)
 		.attr('text-anchor', 'start')
 		.attr('alignment-baseline', 'baseline')
-		.text(cancerTypeData.region_annotation.name);
+		.text(cancerTypeDataFiltered.region_annotation.name);
 	xPosition += regionWidth;
-	drawArrow(y, xPosition - regionWidth, cancerTypeData.region_annotation, regionColor);
-	if (cancerTypeData.region_annotation.region_type === 'gene') {
+	drawArrow(y, xPosition - regionWidth, cancerTypeDataFiltered.region_annotation, regionColor);
+	if (cancerTypeDataFiltered.region_annotation.region_type === 'gene') {
 		// Add the transcripts.
-		transcripts = cancerTypeData.region_annotation.transcripts;
+		transcripts = cancerTypeDataFiltered.region_annotation.transcripts;
 		$.each(transcripts, function(key, value) {
 			var transcriptStart, transcriptEnd, exons;
 			xPosition += genomicFeatureSmallMargin;
 			transcriptStart = value.start;
 			transcriptEnd = value.end;
-			if (transcriptStart < cancerTypeData.plot_data.end && transcriptEnd > cancerTypeData.plot_data.start) {
-				if (transcriptStart < cancerTypeData.plot_data.start) {
-					transcriptStart = cancerTypeData.plot_data.start;
+			if (transcriptStart < cancerTypeDataFiltered.plot_data.end && transcriptEnd > cancerTypeDataFiltered.plot_data.start) {
+				if (transcriptStart < cancerTypeDataFiltered.plot_data.start) {
+					transcriptStart = cancerTypeDataFiltered.plot_data.start;
 				}
-				if (transcriptEnd > cancerTypeData.plot_data.end) {
-					transcriptEnd = cancerTypeData.plot_data.end;
+				if (transcriptEnd > cancerTypeDataFiltered.plot_data.end) {
+					transcriptEnd = cancerTypeDataFiltered.plot_data.end;
 				}
 				svg.append('rect')
 					.attr('fill', transcriptColor)
@@ -1520,13 +1524,13 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 				var exonStart, exonEnd;
 				exonStart = value.start;
 				exonEnd = value.end;
-				if (exonStart < cancerTypeData.plot_data.end &&
-					exonEnd > cancerTypeData.plot_data.start) {
-					if (exonStart < cancerTypeData.plot_data.start) {
-						exonStart = cancerTypeData.plot_data.start;
+				if (exonStart < cancerTypeDataFiltered.plot_data.end &&
+					exonEnd > cancerTypeDataFiltered.plot_data.start) {
+					if (exonStart < cancerTypeDataFiltered.plot_data.start) {
+						exonStart = cancerTypeDataFiltered.plot_data.start;
 					}
-					if (exonEnd > cancerTypeData.plot_data.end) {
-						exonEnd = cancerTypeData.plot_data.end;
+					if (exonEnd > cancerTypeDataFiltered.plot_data.end) {
+						exonEnd = cancerTypeDataFiltered.plot_data.end;
 					}
 					svg.append('rect')
 						.attr('fill', exonColor)
@@ -1551,7 +1555,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 			.attr('text-anchor', 'end')
 			.attr('alignment-baseline', 'middle')
 			.text(value.replace(/_/g, ' '));
-		var categories = Object.values(cancerTypeData.phenotype[value]).filter(uniqueValues);
+		var categories = Object.values(cancerTypeDataFiltered.phenotype[value]).filter(uniqueValues);
 		categories.sort(sortAlphabetically);
 		var re = new RegExp('^(clinical|pathologic)_|tumor_stage_*|clinical_stage_');
 		var categoryColors;
@@ -1634,7 +1638,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 	$.each(clinicalParameters, function(index, parameter) {
 		yPosition = -topMargin + legendHeight + marginBetweenMainParts +
 					 index * (dataTrackHeight + dataTrackSeparator);
-		var phenotypeData = cancerTypeData.phenotype[parameter];
+		var phenotypeData = cancerTypeDataFiltered.phenotype[parameter];
 		drawDataTrack(phenotypeData, samples, regionColor, xPosition, yPosition, parameter);
 	});
 
@@ -1642,22 +1646,22 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 	// data (if available).
 	// 1. Gene/miRNA expression
 	yPosition += dataTrackHeight + marginBetweenMainParts;
-	var regionExpressionDataValues = cancerTypeData.region_expression;
+	var regionExpressionDataValues = cancerTypeDataFiltered.region_expression;
 	drawDataTrack(regionExpressionDataValues, samples, regionColor, xPosition, yPosition,
-		cancerTypeData.region_annotation.name + ' expression');
+		cancerTypeDataFiltered.region_annotation.name + ' expression');
 
 	// 2. Copy number variation
 	yPosition += dataTrackHeight + dataTrackSeparator;
-	var copyNumberDataValues = cancerTypeData.cnv;
+	var copyNumberDataValues = cancerTypeDataFiltered.cnv;
 	drawDataTrackCopyNumber(copyNumberDataValues, samples, xPosition, yPosition);
 
 	// Draw the DNA methylation data.
-	var orderedProbes = Object.keys(cancerTypeData.probe_annotation_450).sort(function(a,b) {
-		return cancerTypeData.probe_annotation_450[a].cpg_location -
-			cancerTypeData.probe_annotation_450[b].cpg_location;
+	var orderedProbes = Object.keys(cancerTypeDataFiltered.probe_annotation_450).sort(function(a,b) {
+		return cancerTypeDataFiltered.probe_annotation_450[a].cpg_location -
+			cancerTypeDataFiltered.probe_annotation_450[b].cpg_location;
 	});
 	$.each(orderedProbes, function(index, value) {
-		var probeLocation = cancerTypeData.probe_annotation_450[value].cpg_location;
+		var probeLocation = cancerTypeDataFiltered.probe_annotation_450[value].cpg_location;
 		var nrVariants = 0;
 		if (showVariants) {
 			// We need to leave enough room to plot the genomic variants.
@@ -1668,7 +1672,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 		var yPosition = marginBetweenMainParts +
 						index * (dataTrackHeight + dataTrackSeparator) +
 						nrVariants * (dataTrackHeightVariants + dataTrackSeparator);
-		var methylationValues = cancerTypeData.dna_methylation_data[value];
+		var methylationValues = cancerTypeDataFiltered.dna_methylation_data[value];
 		drawDataTrack(methylationValues, samples, otherRegionColor, xPosition, yPosition);
 
 		// Draw a transparent rectangle on top of the DNA methylation track that shows the probe
@@ -1694,7 +1698,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 			})
 			.on('mouseup', function() {
 				var probeId = $(this).attr('id');
-				var probeAnnotation = cancerTypeData.probe_annotation_450[probeId];
+				var probeAnnotation = cancerTypeDataFiltered.probe_annotation_450[probeId];
 				var xPositionAnnotation = xPosition + samples.length * sampleWidth +
 					marginBetweenMainParts;
 				$('.probe-annotation').remove();
@@ -1721,7 +1725,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 			var yPositionDataTrack = marginBetweenMainParts +
 									 variantCounter * (dataTrackHeightVariants + dataTrackSeparator) +
 									 nrProbes * (dataTrackHeight + dataTrackSeparator);
-			drawDataTrackVariants(cancerTypeData.snv, samples, position, xPosition, yPositionDataTrack);
+			drawDataTrackVariants(cancerTypeDataFiltered.snv, samples, position, xPosition, yPositionDataTrack);
 			variantCounter += 1;
 		});
 	}
@@ -1750,7 +1754,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 		}
 		$.each(stats.dna_methylation_data, function(key, value) {
 			var probeIndex = orderedProbes.indexOf(key);
-			var probeLocation = cancerTypeData.probe_annotation_450[key].cpg_location;
+			var probeLocation = cancerTypeDataFiltered.probe_annotation_450[key].cpg_location;
 			var nrVariants = 0;
 			if (showVariants) {
 				// We need to skip any variant tracks.
@@ -1806,10 +1810,10 @@ var showDataTypeInformation = function(dataType) {
 var showFilterOptions = function(sampleFilter) {
 	var filterWindow = $('.select-filter');
 	var dataToFilter;
-	if (sampleFilter in cancerTypeData) {
-		dataToFilter = cancerTypeData[sampleFilter];
-	} else if (sampleFilter in cancerTypeData.phenotype) {
-		dataToFilter = cancerTypeData.phenotype[sampleFilter];
+	if (sampleFilter in cancerTypeDataFiltered) {
+		dataToFilter = cancerTypeDataFiltered[sampleFilter];
+	} else if (sampleFilter in cancerTypeDataFiltered.phenotype) {
+		dataToFilter = cancerTypeDataFiltered.phenotype[sampleFilter];
 	} else {
 		console.log('ERROR: cannot find "' + sampleFilter + '" in the data object keys.');
 		return false;
