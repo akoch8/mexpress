@@ -233,7 +233,6 @@ var calculateStatistics = function(samples, sorter) {
 					});
 					valuesGroups.push(groupValues);
 				}
-				console.log(valuesGroups);
 				stats.dna_methylation_data[key] = {'p': anova(valuesGroups)};
 			} else {
 				stats.dna_methylation_data[key] = null;
@@ -544,6 +543,9 @@ var drawDataTrack = function(data, sortedSamples, color, xPosition, yPosition, v
 	if (parameterIsNumerical(dataValues)) {
 		dataValues = dataValues.map(makeNumeric);
 		var factor = Math.max.apply(Math, dataValues) / dataTrackHeight;
+		if (factor === 0) {
+			factor = 1;
+		}
 		$.each(dataValues, function(index, value) {
 			var rectHeight, rectCol;
 			if (value !== null) {
