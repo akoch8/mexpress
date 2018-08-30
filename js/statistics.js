@@ -88,7 +88,7 @@ var beta = function(x, y) {
 var countNull = function(x) {
 	var nullCount = 0;
 	for (var i = 0; i < x.length; i++) {
-		if (x[i] === null | x[i] === 'null') {
+		if (x[i] === null || x[i] === 'null') {
 			nullCount += 1;
 		}
 	}
