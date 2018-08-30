@@ -666,17 +666,14 @@ var drawDataTrackCopyNumber = function(data, sortedSamples, xPosition, yPosition
 var drawDataTrackVariants = function(data, sortedSamples, variantPosition, xPosition, yPosition) {
 	var dataValues = [];
 	$.each(sortedSamples, function(index, sample) {
-		if (sample in data) {
-			// There can be more than one variant per sample, so we need to make sure we have the
-			// correct one (by filtering on genomic location).
-			var sampleVariant = data[sample].filter(function(x) {
-				return x.start == variantPosition;
-			});
-			if (sampleVariant.length) {
-				dataValues.push(sampleVariant[0]);
-			} else {
-				dataValues.push(null);
+		var sampleVariant = [];
+		$.each(data, function(index, snv) {
+			if (snv.sample === sample) {
+				sampleVariant.push(snv);
 			}
+		});
+		if (sampleVariant.length) {
+			dataValues.push(sampleVariant[0]);
 		} else {
 			dataValues.push(null);
 		}
@@ -1041,18 +1038,19 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 		cancerTypeDataFiltered.probe_annotation_450 = filteredProbeAnnotation;
 		cancerTypeDataFiltered.dna_methylation_data = filteredDnaMethylationData;
 		filteredVariants = {};
-		$.each(variants, function(sample, data) {
+		$.each(variants, function(location, data) {
 			var snv = [];
 			$.each(data, function(i, a) {
-				if (a.start >= plotStart && a.start <= plotEnd) {
+				if (location >= plotStart && location <= plotEnd) {
 					snv.push(a);
 				}
 			});
 			if (snv.length > 0) {
-				filteredVariants[sample] = snv;
+				filteredVariants[location] = snv;
 			}
 		});
 		nrVariantTracks = Object.keys(filteredVariants).length;
+		// This needs to change
 		cancerTypeDataFiltered.snv = filteredVariants;
 	} else {
 		nrDnaMethylationTracks = Object.keys(cancerTypeDataFiltered.dna_methylation_data).length;
@@ -1251,7 +1249,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 		var nrVariants = 0;
 		if (showVariants) {
 			// We need to leave enough room to plot the genomic variants.
-			nrVariants = Object.keys(variants).filter(function(x) {
+			nrVariants = Object.keys(filteredVariants).filter(function(x) {
 				return x < yPosition;
 			}).length;
 		}
@@ -1288,7 +1286,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 	// corresponding data tracks.
 	var variantCounter = 0;
 	if (showVariants) {
-		$.each(variants, function(position, snv) {
+		$.each(filteredVariants, function(position, snv) {
 			var nrProbes = probeLocations.filter(function(x) {
 				return x < position;
 			}).length;
@@ -1661,7 +1659,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 		var nrVariants = 0;
 		if (showVariants) {
 			// We need to leave enough room to plot the genomic variants.
-			nrVariants = Object.keys(variants).filter(function(x) {
+			nrVariants = Object.keys(filteredVariants).filter(function(x) {
 				return x < probeLocation;
 			}).length;
 		}
@@ -1714,14 +1712,14 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 	// Draw the variant data.
 	variantCounter = 0;
 	if (showVariants) {
-		$.each(variants, function(position, snv) {
+		$.each(filteredVariants, function(position, snv) {
 			var nrProbes = probeLocations.filter(function(x) {
 				return x < position;
 			}).length;
 			var yPositionDataTrack = marginBetweenMainParts +
 									 variantCounter * (dataTrackHeightVariants + dataTrackSeparator) +
 									 nrProbes * (dataTrackHeight + dataTrackSeparator);
-			drawDataTrackVariants(cancerTypeDataFiltered.snv, samples, position, xPosition, yPositionDataTrack);
+			drawDataTrackVariants(snv, samples, position, xPosition, yPositionDataTrack);
 			variantCounter += 1;
 		});
 	}
@@ -1754,7 +1752,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 			var nrVariants = 0;
 			if (showVariants) {
 				// We need to skip any variant tracks.
-				nrVariants = Object.keys(variants).filter(function(x) {
+				nrVariants = Object.keys(filteredVariants).filter(function(x) {
 					return x < probeLocation;
 				}).length;
 			}
