@@ -271,4 +271,12 @@ $(function() {
 	$('.button--select-parameters').on('click', function() {
 		showParameterSelection();
 	});
+	$('.button--download-data').on('click', function() {
+		var data = 'text/json;charset=utf-8,' +
+			encodeURIComponent(JSON.stringify(cancerTypeDataFiltered));
+		var a = document.createElement('a');
+		a.href = 'data:' + data;
+		a.download = 'plottedData.json';
+		a.click();
+	});
 });
