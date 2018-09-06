@@ -61,6 +61,15 @@ $(function() {
 			$('.button--plot').addClass('button--inactive');
 		}
 	});
+	$(document).on('keydown', function(e) {
+		if (e.which === 13) {
+			var nameInput = cleanString($('#name-input').val());
+			if (nameInput && $('.select-cancer-type .selected').length) {
+				$('.button--plot').removeClass('button--inactive');
+				$('.button--plot').click();
+			}
+		}
+	});
 	$('.button--plot').on('click', function(e) {
 		if (!$(this).hasClass('button--inactive')) {
 			$('.button__text').css('visibility', 'hidden');
