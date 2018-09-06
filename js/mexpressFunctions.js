@@ -977,12 +977,13 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 
 	// Calculate the width and height of the legend. This legend needs to contain all the
 	// categorical clinical parameters as well as the genomic variant categories (if they
-	// need to be shown).
+	// need to be shown) and the copy number data annotation.
 	var categoricalClinicalParameters = clinicalParameters.filter(function(a) {
 		return !parameterIsNumerical(Object.values(cancerTypeData.phenotype[a]));
 	});
 	var legendHeight = 0;
-	legendHeight = categoricalClinicalParameters.length * (dataTrackHeight + dataTrackSeparator);
+	legendHeight = categoricalClinicalParameters.length * (dataTrackHeight + dataTrackSeparator) +
+		dataTrackHeight + dataTrackSeparator; // Add an extra track for the copy number data.
 	var legendWidth = 0;
 	$.each(categoricalClinicalParameters, function(index, value) {
 		var categoryData = Object.values(cancerTypeData.phenotype[value]);
@@ -1010,6 +1011,16 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 		if (variantCategoriesWidth > legendWidth) {
 			legendWidth = variantCategoriesWidth;
 		}
+	}
+	var snvCategories = ['-2: homozygous deletion', '-1: single copy deletion',
+		'0: diploid normal', '+1: low-level amplification', '+2: high-level amplification'];
+	var snvCategoriesWidth = 0;
+	$.each(snvCategories, function(i, v) {
+		var textWidth = calculateTextWidth(v.replace(/_/g, ' '), '9px arial');
+		snvCategoriesWidth += textWidth + 5 * sampleWidth + 5;
+	});
+	if (snvCategoriesWidth > legendWidth) {
+		legendWidth = snvCategoriesWidth;
 	}
 
 	// Count the number of location-linked data tracks that need to be plotted. These include the
@@ -1626,7 +1637,51 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 				.text(value.replace(/_/g, ' '));
 			xPositionLegend += textWidth + 2 * legendRectWidth + 5;
 		});
+		yPosition += dataTrackHeight + dataTrackSeparator;
 	}
+	svg.append('text')
+		.attr('x', xPosition - marginBetweenMainParts / 2)
+		.attr('y', yPosition + dataTrackHeight / 2)
+		.attr('text-anchor', 'end')
+		.attr('alignment-baseline', 'middle')
+		.text('copy number');
+	var snvCategoryValues = [-2, -1, 0, 1, 2];
+	var xPositionLegend = 0;
+	$.each(snvCategories, function(i, v) {
+		v = v ? v : 'null';
+		var textWidth = calculateTextWidth(v, '9px arial');
+		var cnvFactor = 4 / dataTrackHeight; // The copy number values range from -2 to 2.
+		var rectHeight, rectCol, yPositionRect;
+		yPositionRect = yPosition;
+		rectHeight = Math.abs(snvCategoryValues[i] / cnvFactor);
+		if (snvCategoryValues[i] < 0) {
+			yPositionRect += dataTrackHeight / 2;
+			rectCol = otherRegionColor;
+		} else {
+			yPositionRect += dataTrackHeight / 2 - rectHeight;
+			rectCol = regionColor;
+		}
+		svg.append('line')
+			.attr('x1', xPosition + xPositionLegend - 2)
+			.attr('x2', xPosition + xPositionLegend + 4)
+			.attr('y1', yPosition + dataTrackHeight / 2)
+			.attr('y2', yPosition + dataTrackHeight / 2)
+			.attr('stroke', otherRegionColor)
+			.attr('stroke-width', 1);
+		svg.append('rect')
+			.attr('fill', rectCol)
+			.attr('x', xPosition + xPositionLegend)
+			.attr('y', yPositionRect)
+			.attr('width', sampleWidth * 2)
+			.attr('height', rectHeight);
+		svg.append('text')
+			.attr('x', xPosition + sampleWidth + 5 + xPositionLegend)
+			.attr('y', yPosition + dataTrackHeight / 2)
+			.attr('text-anchor', 'start')
+			.attr('alignment-baseline', 'middle')
+			.text(v);
+		xPositionLegend += textWidth + 5 * sampleWidth + 5;
+	});
 
 	// Draw the phenotype data.
 	$.each(clinicalParameters, function(index, parameter) {
