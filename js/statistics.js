@@ -147,6 +147,116 @@ var median = function(x) {
 	return quantile(x, 0.5);
 };
 
+function pAdjust(stats) {
+	// Calculate Benjamini-Hochberg-adjusted p values.
+	// Formula: adjusted p value = (p value * total number of p values) / p value index
+	// The p value index is obtained by sorting all the p values in ascending order.
+	// Start by cloning the input object. We do not want to modify the original object.
+	var s = $.extend(true, {}, stats);
+	var allPValues = [];
+	$.each(s, function(key, value) {
+		if (value) {
+			if (value.p) {
+				allPValues.push(value.p);
+			} else {
+				$.each(value, function(key, value) {
+					allPValues.push(value.p);
+				});
+			}
+		}
+	});
+	var allPValuesSorted = allPValues.slice().sort(function(a,b) {
+		if (isFinite(a - b)) {
+			return a - b;
+		} else {
+			return isFinite(a) ? -1 : 1;
+		}
+	});
+	var adjustedPvalues = [];
+	$.each(s, function(key1, value1) {
+		if (value1) {
+			if ('p' in value1) {
+				if (value1.p) {
+					s[key1].pAdj = value1.p * allPValuesSorted.length / (allPValuesSorted.lastIndexOf(value1.p) + 1);
+					adjustedPvalues.push(s[key1].pAdj);
+				} else {
+					s[key1].pAdj = NaN;
+					adjustedPvalues.push(NaN);
+				}
+			} else {
+				$.each(value1, function(key2, value2) {
+					if (value2.p) {
+						s[key1][key2].pAdj = value2.p * allPValuesSorted.length / (allPValuesSorted.lastIndexOf(value2.p) + 1);
+						adjustedPvalues.push(s[key1][key2].pAdj);
+					} else {
+						s[key1][key2].pAdj = NaN;
+						adjustedPvalues.push(NaN);
+					}
+				});
+			}
+		}
+	});
+	return s;
+}
+
+function pAdjust2(p) {
+	var c;
+	var n = p.length;
+	var i = [];
+	for (c = n; c > 0; c--) {
+		i.push(c);
+	}
+	var pValues = [];
+	for (c = 0; c < n; c++) {
+		pValues[c] = [p[c], c];
+	}
+	// sort the p values
+	var pValuesSorted = nestedArraySort(pValues, true, 0);
+	var cumMin;
+	for (c = 0; c < n; c++) {
+		var x = pValuesSorted[c][0]*n/i[c];
+		if (c !== 0) {
+			if (x < cumMin) {
+				cumMin = x;
+			} else {
+				x = cumMin;
+			}
+		} else {
+			cumMin = x;
+		}
+		if (x > 1) {
+			x = 1;
+		}
+		console.log('c = ' + c + ', p = ' + pValuesSorted[c][0] + ', x = ' + x + ', cumMin = ' + cumMin);
+		pValuesSorted[c][0] = x;
+	}
+	// put the adjusted p values back in their original order
+	pValuesSorted = nestedArraySort(pValuesSorted, false, 1);
+	result = [];
+	for (c = 0; c < pValuesSorted.length; c++) {
+		result.push(pValuesSorted[c][0]);
+	}
+	return result;
+}
+
+function nestedArraySort(x, descending, sortIndex) {
+	// This function sorts an array of nested arrays on the first element of each nested array.
+	if (descending) {
+		x.sort(function(a,b) {
+			a = a[sortIndex];
+			b = b[sortIndex];
+			return a === b ? 0 : (a > b ? -1 : 1);
+		});
+	} else {
+		x.sort(function(a,b) {
+			a = a[sortIndex];
+			b = b[sortIndex];
+			return a === b ? 0 : (a < b ? -1 : 1);
+		});
+	}
+	return x;
+}
+
 var pearsonCorrelation = function(x, y) {
 	// Calculate the Pearson correlation coefficient between two arrays.
 	var c;
@@ -299,3 +409,19 @@ var variance = function(x) {
 	var v = diff / n;
 	return v;
 };
+
+/*
+var testP = [0.00001, 0.003, 0.003, 0.003, 0.9873, 0.00009872, 0.045, 0.056, 0.6, 0.00826];
+console.log(testP);
+var testPSorted = testP.sort(function(a,b) {
+	return a - b;
+});
+console.log(testPSorted);
+$.each(testP, function(i,v) {
+	console.log(v * testP.length / (testPSorted.lastIndexOf(v) + 1));
+});
+var testPAdj = pAdjust2(testP);
+console.log('testPAdj:');
+console.log(testPAdj);
+
+*/

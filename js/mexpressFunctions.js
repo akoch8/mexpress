@@ -1134,6 +1134,10 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 	// ANOVA comparing expression in different groups for categorical clinical parameters.
 	var stats = calculateStatistics(samples, sorter);
 
+	// Adjust the p values for multiple hypothesis testing.
+	stats = pAdjust(stats);
+	console.log(stats);
+
 	// Calculate the amount of horizontal space that is needed to plot the genomic annotation and
 	// all the samples (or the legend, depending on the widest one).
 	var samplesWidth = samples.length * sampleWidth;
