@@ -86,6 +86,15 @@ var addStatistic = function(statistic, x, y) {
 		statTextColor = statistic.p < 0.05 ? textColor : textColorLight;
 		if ('r' in statistic) {
 			statText = 'r = ' + statistic.r.toFixed(3);
+			if (!isNaN(statistic.p)) {
+				if (statistic.p < 0.001) {
+					statText += '***';
+				} else if (statistic.p < 0.01) {
+					statText += '**';
+				} else if (statistic.p < 0.05) {
+					statText += '*';
+				}
+			}
 		} else {
 			statText = 'p = ' + statistic.p.toFixed(3);
 		}
