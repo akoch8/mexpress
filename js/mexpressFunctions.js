@@ -1031,6 +1031,10 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 	if (snvCategoriesWidth > legendWidth) {
 		legendWidth = snvCategoriesWidth;
 	}
+	var addStats = true;
+	if (addStats) {
+		legendHeight += dataTrackHeight + dataTrackSeparator;
+	}
 
 	// Count the number of location-linked data tracks that need to be plotted. These include the
 	// tracks for the DNA methylation data (one track per probe), as well as the variant data (one
@@ -1695,6 +1699,29 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 			.text(v);
 		xPositionLegend += textWidth + 5 * sampleWidth + 5;
 	});
+	yPosition += dataTrackHeight + dataTrackSeparator;
+	if (addStats) {
+		svg.append('text')
+			.attr('x', xPosition - marginBetweenMainParts / 2)
+			.attr('y', yPosition + dataTrackHeight / 2)
+			.attr('text-anchor', 'end')
+			.attr('alignment-baseline', 'middle')
+			.text('statistics');
+		var statsLegend = ['p >= 0.05', '* p < 0.05', '** p < 0.01', '*** p < 0.001'];
+		xPositionLegend = 0;
+		$.each(statsLegend, function(i, v) {
+			var statsTextColor = v === 'p >= 0.05' ? textColorLight : textColor;
+			var textWidth = calculateTextWidth(v, '9px arial');
+			svg.append('text')
+				.attr('fill', statsTextColor)
+				.attr('x', xPosition + xPositionLegend)
+				.attr('y', yPosition + dataTrackHeight / 2)
+				.attr('text-anchor', 'start')
+				.attr('alignment-baseline', 'middle')
+				.text(v);
+			xPositionLegend += textWidth + 5 * sampleWidth + 5;
+		});
+	}
 
 	// Draw the phenotype data.
 	$.each(clinicalParameters, function(index, parameter) {
@@ -1793,7 +1820,6 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 	}
 
 	// Add the statistics.
-	var addStats = true;
 	if (addStats) {
 		var yPositionStat;
 		var xPositionStat = xPosition + samples.length * sampleWidth + genomicFeatureLargeMargin;
@@ -1854,7 +1880,8 @@ var showDataTypeInformation = function(dataType) {
 		'phenotype': 'data/' + cancerTypeAnnotation.short_name + '/GDC_phenotype.tsv.json',
 		'survival': 'data/' + cancerTypeAnnotation.short_name + '/survival.tsv.json',
 		'methylation 450': 'data/' + cancerTypeAnnotation.short_name + '/HumanMethylation450.json',
-		'variants': 'data/' + cancerTypeAnnotation.short_name + '/mutect2_snv.tsv.json'
+		'variants': 'data/' + cancerTypeAnnotation.short_name + '/mutect2_snv.tsv.json',
+		'statistics': 'data/statistics.json'
 	};
 	var infoWindow = $('.data-type-information').find('.data-type-information__content');
 	infoWindow.empty();
