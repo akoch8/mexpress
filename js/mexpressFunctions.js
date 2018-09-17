@@ -1873,14 +1873,14 @@ var resetClinicalParameters = function() {
 
 var showDataTypeInformation = function(dataType) {
 	var dataInformation = {
-		'gene expression': 'data/' + cancerTypeAnnotation.short_name + '/htseq_fpkm-uq.tsv.json',
-		'mirna expression': 'data/' + cancerTypeAnnotation.short_name + '/mirna.tsv.json',
-		'cnv': 'data/' + cancerTypeAnnotation.short_name +
+		'gene expression data': 'data/' + cancerTypeAnnotation.short_name + '/htseq_fpkm-uq.tsv.json',
+		'mirna expression data': 'data/' + cancerTypeAnnotation.short_name + '/mirna.tsv.json',
+		'cnv data': 'data/' + cancerTypeAnnotation.short_name +
 			'/Gistic2_CopyNumber_Gistic2_all_thresholded.by_genes.json',
-		'phenotype': 'data/' + cancerTypeAnnotation.short_name + '/GDC_phenotype.tsv.json',
-		'survival': 'data/' + cancerTypeAnnotation.short_name + '/survival.tsv.json',
-		'methylation 450': 'data/' + cancerTypeAnnotation.short_name + '/HumanMethylation450.json',
-		'variants': 'data/' + cancerTypeAnnotation.short_name + '/mutect2_snv.tsv.json',
+		'phenotype data': 'data/' + cancerTypeAnnotation.short_name + '/GDC_phenotype.tsv.json',
+		'survival data': 'data/' + cancerTypeAnnotation.short_name + '/survival.tsv.json',
+		'methylation 450 data': 'data/' + cancerTypeAnnotation.short_name + '/HumanMethylation450.json',
+		'genomic variants': 'data/' + cancerTypeAnnotation.short_name + '/mutect2_snv.tsv.json',
 		'statistics': 'data/statistics.json'
 	};
 	var infoWindow = $('.data-type-information').find('.data-type-information__content');
@@ -1888,7 +1888,7 @@ var showDataTypeInformation = function(dataType) {
 	$.getJSON(
 		dataInformation[dataType]
 	).done(function(data) {
-		infoWindow.append('<h2>' + dataType + ' data</h2>');
+		infoWindow.append('<h2>' + dataType + '</h2>');
 		$.each(data, function(key, value) {
 			infoWindow.append('<p><strong>' + key + ':</strong> ' + value + '</p>');
 		});
