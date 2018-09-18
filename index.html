@@ -136,14 +136,17 @@
 						<polyline points="7 10 12 15 17 10"></polyline>
 						<line x1="12" y1="15" x2="12" y2="3"></line>
 					</svg>
-					<div class="button button--download-data button--extra-small">
-						<div class="button__text">Download</div>
-					</div>
-					the plotted data
+					Download
+					<select class="toolbar--select-download">
+						<option selected value="empty"></option>
+						<option value="json">the plotted data in JSON format</option>
+						<option value="svg">the figure in SVG format</option>
+					</select>
 				</li>
 			</ul>
 		</div>
 		<div class="plot-window">
+			<div class="svg-container"></div>
 			<div class="plot-loader overlay hidden">
 				<div class="loader loader--dark"></div>
 			</div>

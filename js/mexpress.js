@@ -280,12 +280,23 @@ $(function() {
 	$('.button--select-parameters').on('click', function() {
 		showParameterSelection();
 	});
-	$('.button--download-data').on('click', function() {
-		var data = 'text/json;charset=utf-8,' +
-			encodeURIComponent(JSON.stringify(cancerTypeDataFiltered));
-		var a = document.createElement('a');
-		a.href = 'data:' + data;
-		a.download = 'plottedData.json';
-		a.click();
+	$('.toolbar--select-download').change(function() {
+		var format = $(this).val();
+		var data, link;
+		if (format === 'json') {
+			data = 'text/json;charset=utf-8,' +
+				encodeURIComponent(JSON.stringify(cancerTypeDataFiltered));
+			link = document.createElement('a');
+			link.href = 'data:' + data;
+			link.download = 'plottedData.json';
+			link.click();
+		} else if (format === 'svg') {
+			data = d3.select('.svg-container').html();
+			link = document.createElement('a');
+			link.href = 'data:application/octet-stream;base64,' + btoa(data);
+			link.download = 'figure.svg';
+			link.click();
+		}
+		$('.toolbar--select-download option[value=empty]').prop('selected', true);
 	});
 });

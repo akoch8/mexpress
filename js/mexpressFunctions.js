@@ -889,7 +889,7 @@ var loadData = function(name, cancer) {
 			// selected main region.
 			plot('region_expression', null, false);
 		} else {
-			$('.plot-window > svg').remove();
+			$('.svg-container > svg').remove();
 			var errorElement = '<p>' + cancerTypeData.msg + '</p>';
 			$('.message--error').append(errorElement).show();
 		}
@@ -917,7 +917,7 @@ var parameterIsNumerical = function(x) {
 };
 
 var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
-	$('.plot-window > svg').remove();
+	$('.svg-container > svg').remove();
 
 	// The plot consists of three main parts:
 	// 1. genomic annotation data (miRNAs, genes, transcripts, CpG islands)
@@ -1170,7 +1170,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 	var x = d3.scaleLinear().domain([0, width]).range([0, width]);
 	var y = d3.scaleLinear().domain([cancerTypeDataFiltered.plot_data.start, cancerTypeDataFiltered.plot_data.end])
 		.range([0, locationLinkedTracksHeight]);
-	svg = d3.select('.plot-window')
+	svg = d3.select('.svg-container')
 		.append('svg')
 			.attr('width', width + margin.left + margin.right)
 			.attr('height', locationLinkedTracksHeight + margin.top + margin.bottom)
