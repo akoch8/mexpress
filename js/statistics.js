@@ -136,7 +136,7 @@ var mean = function(x) {
 	var n = x.length;
 	var sum = 0;
 	for (var i = 0; i < n; i++) {
-		sum += +x[i];
+		sum += x[i];
 	}
 	var m = sum / n;
 	return m;
