@@ -9,6 +9,11 @@
 	<link href="https://fonts.googleapis.com/css?family=Montserrat:700" rel="stylesheet">
 	<link rel="stylesheet" type="text/css" href="css/global.css">
 	<link rel="stylesheet" type="text/css" href="css/index.css">
+	<link rel="apple-touch-icon" sizes="57x57" href="img/apple-icon-57x57.png">
+	<link rel="apple-touch-icon" sizes="72x72" href="img/apple-icon-72x72.png">
+	<link rel="apple-touch-icon" sizes="114x114" href="img/apple-icon-114x114.png">
+	<link rel="apple-touch-icon" sizes="144x144" href="img/apple-icon-144x144.png">
+	<link rel="icon" type="image/png" href="img/favicon.png">
 	<!--[if lt IE 9]>
 	<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
 	<![endif]-->
@@ -139,8 +144,13 @@
 					Download
 					<select class="toolbar--select-download">
 						<option selected value="empty"></option>
-						<option value="json">the plotted data in JSON format</option>
-						<option value="svg">the figure in SVG format</option>
+						<optgroup label="the figure">
+							<option value="svg">in SVG format</option>
+						</optgroup>
+						<optgroup label="the plotted data">
+							<option value="csv">as a CSV file</option>
+							<option value="json">as a JSON file</option>
+						</optgroup>
 					</select>
 				</li>
 			</ul>
