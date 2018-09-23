@@ -1139,6 +1139,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 		dataToSort = cancerTypeDataFiltered.phenotype[sorter];
 		samples = sortSamples(samples, dataToSort);
 	}
+	cancerTypeDataFiltered.samples_filtered_sorted = samples;
 
 	// Calculate the necessary statistics (correlation, t-test, ANOVA) for the sorter. If for
 	// example the samples are sorted by their region expression, then all statistics will be
@@ -1149,7 +1150,6 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 
 	// Adjust the p values for multiple hypothesis testing.
 	stats = pAdjust(stats);
-	console.log(stats);
 
 	// Calculate the amount of horizontal space that is needed to plot the genomic annotation and
 	// all the samples (or the legend, depending on the widest one).

@@ -283,20 +283,70 @@ $(function() {
 	$('.toolbar--select-download').change(function() {
 		var format = $(this).val();
 		var data, link;
+		link = document.createElement('a');
 		if (format === 'json') {
 			data = 'text/json;charset=utf-8,' +
 				encodeURIComponent(JSON.stringify(cancerTypeDataFiltered));
-			link = document.createElement('a');
 			link.href = 'data:' + data;
 			link.download = 'plottedData.json';
-			link.click();
+		} else if (format === 'tsv') {
+			// Format the data in such a way that we can push them into a tab-separated text file.
+			data = '';
+			data += '# region type = ' + cancerTypeDataFiltered.region_annotation.region_type + '\n';
+			data += '# region name = ' + cancerTypeDataFiltered.region_annotation.name + '\n';
+			data += '# region coordinates = chr' + cancerTypeDataFiltered.region_annotation.chr +
+				':' + cancerTypeDataFiltered.region_annotation.start + '-' +
+				cancerTypeDataFiltered.region_annotation.end + '\n';
+			var samples = cancerTypeDataFiltered.samples_filtered_sorted;
+			data += 'data_type\t' + samples.join('\t') + '\n';
+			data += 'cnv\t';
+			$.each(samples, function(index, sample) {
+				if (sample in cancerTypeDataFiltered.cnv) {
+					data += cancerTypeDataFiltered.cnv[sample] + '\t';
+				} else {
+					data += 'null\t';
+				}
+			});
+			data = data.trim() + '\n';
+			$.each(cancerTypeDataFiltered.dna_methylation_data, function(key, value) {
+				data += key + '\t';
+				$.each(samples, function(index, sample) {
+					if (sample in value) {
+						data += value[sample] + '\t';
+					} else {
+						data += 'null\t';
+					}
+				});
+				data = data.trim() + '\n';
+			});
+			$.each(cancerTypeDataFiltered.phenotype, function(key, value) {
+				data += key + '\t';
+				$.each(samples, function(index, sample) {
+					if (sample in value) {
+						data += value[sample] + '\t';
+					} else {
+						data += 'null\t';
+					}
+				});
+				data = data.trim() + '\n';
+			});
+			data += 'expression\t';
+			$.each(samples, function(index, sample) {
+				if (sample in cancerTypeDataFiltered.region_expression) {
+					data += cancerTypeDataFiltered.region_expression[sample] + '\t';
+				} else {
+					data += 'null\t';
+				}
+			});
+			data = data.trim() + '\n';
+			link.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(data);
+			link.download = 'plottedData.txt';
 		} else if (format === 'svg') {
 			data = d3.select('.svg-container').html();
-			link = document.createElement('a');
 			link.href = 'data:application/octet-stream;base64,' + btoa(data);
 			link.download = 'figure.svg';
-			link.click();
 		}
+		link.click();
 		$('.toolbar--select-download option[value=empty]').prop('selected', true);
 	});
 });
