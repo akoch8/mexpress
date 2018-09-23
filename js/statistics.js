@@ -154,18 +154,30 @@ function pAdjust(stats) {
 	// Start by cloning the input object. We do not want to modify the original object.
 	var s = $.extend(true, {}, stats);
 	var allPValues = [];
-	$.each(s, function(key, value) {
-		if (value) {
-			if (value.p) {
-				allPValues.push(value.p);
+	$.each(s, function(key1, value1) {
+		if (value1) {
+			if ('p' in value1) {
+				if (value1.p) {
+					allPValues.push(value1.p);
+				} else {
+					allPValues.push(null);
+				}
 			} else {
-				$.each(value, function(key, value) {
-					allPValues.push(value.p);
+				$.each(value1, function(key2, value2) {
+					if (value2) {
+						if ('p' in value2) {
+							allPValues.push(value2.p);
+						} else {
+							allPValues.push(null);
+						}
+					}
 				});
 			}
 		}
 	});
-	var allPValuesSorted = allPValues.slice().sort(function(a,b) {
+	var allPValuesSorted = allPValues.slice().sort(function(a,b) { // slice() copies the array. We
+																   // don't want to modify the
+																   // original array.
 		if (isFinite(a - b)) {
 			return a - b;
 		} else {
@@ -185,12 +197,14 @@ function pAdjust(stats) {
 				}
 			} else {
 				$.each(value1, function(key2, value2) {
-					if (value2.p) {
-						s[key1][key2].pAdj = value2.p * allPValuesSorted.length / (allPValuesSorted.lastIndexOf(value2.p) + 1);
-						adjustedPvalues.push(s[key1][key2].pAdj);
-					} else {
-						s[key1][key2].pAdj = NaN;
-						adjustedPvalues.push(NaN);
+					if (value2) {
+						if (value2.p) {
+							s[key1][key2].pAdj = value2.p * allPValuesSorted.length / (allPValuesSorted.lastIndexOf(value2.p) + 1);
+							adjustedPvalues.push(s[key1][key2].pAdj);
+						} else {
+							s[key1][key2].pAdj = NaN;
+							adjustedPvalues.push(NaN);
+						}
 					}
 				});
 			}
