@@ -220,6 +220,15 @@ $(function() {
 			plot('region_expression', null, false);
 		}, 100);
 	});
+	$('.button--plot-summary').on('click', function() {
+		$('.plot-loader').show();
+		var showVariants = $('.toolbar--check-variants').prop('checked');
+		var plotStart = cancerTypeDataFiltered.plot_data.start;
+		var plotEnd = cancerTypeDataFiltered.plot_data.end;
+		setTimeout(function() {
+			plotSummary(showVariants, plotStart, plotEnd);
+		}, 100);
+	});
 	$(document).on('click', '.filter-options li', function() {
 		// Indicate which filter command has been selected.
 		$('.filter-options').find('li').removeClass('selected');

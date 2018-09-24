@@ -8,10 +8,15 @@ var plotWidth;
 var svg;
 
 // Define the dimensions.
+var transcriptHeight = 2;
 var transcriptWidth = 2;
+var regionHeight = 4;
 var regionWidth = 4;
+var cpgIslandHeight= 4;
 var cpgIslandWidth = 4;
+var cpgHeight = 8;
 var cpgWidth = 8;
+var genomicCoordinatesHeight = 8;
 var genomicCoordinatesWidth = 8;
 var genomicFeatureLargeMargin = 4;
 var genomicFeatureSmallMargin = 2;

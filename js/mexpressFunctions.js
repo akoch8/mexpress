@@ -508,7 +508,7 @@ var drawBarPlot = function(data, element) {
 	});
 };
 
-var drawCoordinates = function(y) {
+var drawCoordinates = function(axis, horizontal, height) {
 	var coordinates = [];
 	var plotWindow = cancerTypeDataFiltered.plot_data.end - cancerTypeDataFiltered.plot_data.start;
 	var factor = 1000;
@@ -523,21 +523,38 @@ var drawCoordinates = function(y) {
 	coordinates.push(Math.floor(cancerTypeDataFiltered.plot_data.end / factor) * factor);
 	coordinates.push(coordinates[0] + Math.round(Math.abs(coordinates[0] - coordinates[1]) /
 		(2 * factor)) * factor);
-	$.each(coordinates, function(index, value) {
-		svg.append('text')
-			.attr('x', 0)
-			.attr('y', y(value))
-			.attr('text-anchor', 'middle')
-			.attr('alignment-baseline', 'baseline')
-			.attr('transform', 'rotate(-90, ' + 0 + ',' + y(value) + ')')
-			.text(value);
-		svg.append('line')
-			.attr('x1', genomicFeatureLargeMargin)
-			.attr('x2', genomicFeatureLargeMargin + genomicCoordinatesWidth)
-			.attr('y1', y(value))
-			.attr('y2', y(value))
-			.attr('stroke', textColor);
-	});
+	if (horizontal) {
+		$.each(coordinates, function(index, value) {
+			svg.append('text')
+				.attr('x', axis(value))
+				.attr('y', height + genomicCoordinatesHeight)
+				.attr('text-anchor', 'middle')
+				.attr('alignment-baseline', 'baseline')
+				.text(value);
+			svg.append('line')
+				.attr('x1', axis(value))
+				.attr('x2', axis(value))
+				.attr('y1', height - genomicFeatureLargeMargin)
+				.attr('y2', height - genomicFeatureLargeMargin - genomicCoordinatesHeight)
+				.attr('stroke', textColor);
+		});
+	} else {
+		$.each(coordinates, function(index, value) {
+			svg.append('text')
+				.attr('x', 0)
+				.attr('y', axis(value))
+				.attr('text-anchor', 'middle')
+				.attr('alignment-baseline', 'baseline')
+				.attr('transform', 'rotate(-90, ' + 0 + ',' + axis(value) + ')')
+				.text(value);
+			svg.append('line')
+				.attr('x1', genomicFeatureLargeMargin)
+				.attr('x2', genomicFeatureLargeMargin + genomicCoordinatesWidth)
+				.attr('y1', axis(value))
+				.attr('y2', axis(value))
+				.attr('stroke', textColor);
+		});
+	}
 };
 
 var drawDataTrack = function(data, sortedSamples, color, xPosition, yPosition, variable) {
@@ -1368,7 +1385,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 	}
 
 	// Add the genomic coordinates (= y axis).
-	drawCoordinates(y);
+	drawCoordinates(y, false);
 
 	// Draw the individual CpGs and the CpG islands.
 	// Adapt the opacity of the CpG lines to the length of the gene. Otherwise the CpG plot is just
@@ -1856,12 +1873,108 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 			addStatistic(value, xPositionStat, yPositionStat);
 		});
 	}
-
 	$('.plot-loader').hide();
 };
 
 var plotSummary = function(showVariants, plotStart, plotEnd) {
-	console.log('plotSummary()');
+	$('.svg-container > svg').remove();
+
+	// The summarized plot consists of three main parts:
+	// 1. genomic annotation data (miRNAs, genes, transcripts, CpG islands)
+	// 2. location-linked data (DNA methylation and variants)
+	// 3. sample-linked data (expression, copy number variation, clinical data)
+	// It differs from the default plot in that the genome is plotted horizontally, instead of
+	// vertically. The DNA methylation data is summarized (median, quantiles, variance...) and
+	// the correlation with expression is shown, rather than the actual expression data.
+	// In order to draw an accurate plot we need to count:
+	// - the number of genomic features/regions
+	// -=> will determine the height of the plot
+	//
+	// Count the number of regions (including transcripts in the case of genes) that need to be
+	// drawn.
+	var nrOtherGenes = cancerTypeDataFiltered.other_regions.filter(isRegion('gene')).length;
+	var nrTranscripts = 0;
+	if (cancerTypeDataFiltered.region_annotation.region_type === 'gene') {
+		nrTranscripts = Object.keys(cancerTypeDataFiltered.region_annotation.transcripts).length;
+	}
+	var nrOtherTranscripts = 0;
+	$.each(cancerTypeDataFiltered.other_regions.filter(isRegion('gene')), function(key, value) {
+		nrOtherTranscripts += Object.keys(value.transcripts).length;
+	});
+	var nrOtherMirnas = cancerTypeDataFiltered.other_regions.filter(isRegion('mirna')).length;
+	var genomicFeaturesHeight = genomicFeatureLargeMargin +
+								genomicCoordinatesHeight +
+								genomicFeatureSmallMargin +
+								cpgHeight +
+								genomicFeatureSmallMargin +
+								cpgIslandHeight +
+								genomicFeatureLargeMargin +
+								regionHeight +
+								genomicFeatureSmallMargin +
+								nrTranscripts * transcriptHeight +
+								(nrTranscripts - 1) * genomicFeatureSmallMargin +
+								genomicFeatureLargeMargin +
+								nrOtherGenes * regionHeight +
+								(nrOtherGenes - 1) * genomicFeatureSmallMargin +
+								genomicFeatureLargeMargin +
+								nrOtherTranscripts * transcriptHeight +
+								(nrOtherTranscripts - 1) * genomicFeatureSmallMargin +
+								genomicFeatureLargeMargin +
+								nrOtherMirnas * regionHeight +
+								(nrOtherMirnas - 1) * genomicFeatureLargeMargin +
+								genomicFeatureLargeMargin;
+	console.log('genomicCoordinatesHeight = ' + genomicCoordinatesHeight);
+
+	// Build the SVG.
+	var height = 400;
+	var width = 600;
+	var margin = {top: 40, left: 40, bottom: 40, right: 40};
+	var x = d3.scaleLinear().domain([plotStart, plotEnd]).range([0, width]);
+	var y = d3.scaleLinear().domain([0, 1]).range([height, 0]);
+	svg = d3.select('.svg-container')
+		.append('svg')
+			.attr('width', width + margin.left + margin.right)
+			.attr('height', height + margin.top + margin.bottom)
+			.attr('text-rendering', 'geometricPrecision')
+			.attr('font-family', 'arial')
+			.attr('font-size', '9px')
+			.attr('fill', textColor)
+		.append('g')
+			.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+	// Add a white background to the SVG.
+	svg.append('rect')
+		.attr('x', -margin.left)
+		.attr('y', -margin.top)
+		.attr('width', width + margin.left + margin.right)
+		.attr('height', height + margin.top + margin.bottom)
+		.attr('fill', '#fff');
+
+	// Add the genomic coordinates (= y axis).
+	drawCoordinates(x, true, height);
+
+	// Draw the individual CpGs and the CpG islands.
+	// Adapt the opacity of the CpG lines to the length of the gene. Otherwise the CpG plot is just
+	// one big block of green for extremely long genes. Since the longest genes in the human genome
+	// appear to be around 2.3 megabases long, we chose 2,500,000 as the denominator in the
+	// calculation below (basically to normalise the gene length to a value between 0 and 1).
+	/*var cpgOpacity = 1;
+	cpgOpacity = 1 - Math.abs(cancerTypeDataFiltered.region_annotation.start -
+		cancerTypeDataFiltered.region_annotation.end) / 2500000;
+	$.each(cancerTypeDataFiltered.region_annotation.cpg_locations, function(index, value) {
+		if (value > cancerTypeDataFiltered.plot_data.start && value < cancerTypeDataFiltered.plot_data.end) {
+			svg.append('line')
+				.attr('x1', xPosition)
+				.attr('x2', xPosition + cpgWidth)
+				.attr('y1', y(value))
+				.attr('y2', y(value))
+				.style('stroke', cpgColor)
+				.style('stroke-opacity', cpgOpacity)
+				.attr('stroke-width', 1);
+		}
+	});*/
+
+	$('.plot-loader').hide();
 };
 
 var resetClinicalParameters = function() {
