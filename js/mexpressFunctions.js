@@ -1860,6 +1860,10 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 	$('.plot-loader').hide();
 };
 
+var plotSummary = function(showVariants, plotStart, plotEnd) {
+	console.log('plotSummary()');
+};
+
 var resetClinicalParameters = function() {
 	$('.parameters-options li').each(function() {
 		var parameter = $(this).attr('data-value');
