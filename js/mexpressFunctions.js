@@ -1923,7 +1923,6 @@ var plotSummary = function(showVariants, plotStart, plotEnd) {
 								nrOtherMirnas * regionHeight +
 								(nrOtherMirnas - 1) * genomicFeatureLargeMargin +
 								genomicFeatureLargeMargin;
-	console.log('genomicCoordinatesHeight = ' + genomicCoordinatesHeight);
 
 	// Build the SVG.
 	var height = 400;
@@ -1958,21 +1957,201 @@ var plotSummary = function(showVariants, plotStart, plotEnd) {
 	// one big block of green for extremely long genes. Since the longest genes in the human genome
 	// appear to be around 2.3 megabases long, we chose 2,500,000 as the denominator in the
 	// calculation below (basically to normalise the gene length to a value between 0 and 1).
-	/*var cpgOpacity = 1;
+	var yPosition = height -
+					genomicFeatureLargeMargin -
+					genomicCoordinatesHeight -
+					genomicFeatureSmallMargin;
+	var cpgOpacity = 1;
 	cpgOpacity = 1 - Math.abs(cancerTypeDataFiltered.region_annotation.start -
 		cancerTypeDataFiltered.region_annotation.end) / 2500000;
 	$.each(cancerTypeDataFiltered.region_annotation.cpg_locations, function(index, value) {
 		if (value > cancerTypeDataFiltered.plot_data.start && value < cancerTypeDataFiltered.plot_data.end) {
 			svg.append('line')
-				.attr('x1', xPosition)
-				.attr('x2', xPosition + cpgWidth)
-				.attr('y1', y(value))
-				.attr('y2', y(value))
+				.attr('x1', x(value))
+				.attr('x2', x(value))
+				.attr('y1', yPosition)
+				.attr('y2', yPosition - cpgHeight)
 				.style('stroke', cpgColor)
 				.style('stroke-opacity', cpgOpacity)
 				.attr('stroke-width', 1);
 		}
-	});*/
+	});
+
+	yPosition -= cpgHeight + genomicFeatureSmallMargin;
+	$.each(cancerTypeDataFiltered.cpgi_annotation, function(key, value) {
+		var regionStart, regionEnd;
+		regionStart = value.start;
+		regionEnd = value.end;
+		if (regionStart < cancerTypeDataFiltered.plot_data.end && regionEnd > cancerTypeDataFiltered.plot_data.start) {
+			if (regionStart < cancerTypeDataFiltered.plot_data.start) {
+				regionStart = cancerTypeDataFiltered.plot_data.start;
+			}
+			if (regionEnd > cancerTypeDataFiltered.plot_data.end) {
+				regionEnd = cancerTypeDataFiltered.plot_data.end;
+			}
+			svg.append('rect')
+				.attr('fill', cpgColor)
+				.attr('x', x(regionStart))
+				.attr('y', yPosition - cpgIslandHeight)
+				.attr('width', Math.abs(x(regionStart) - x(regionEnd)))
+				.attr('height', cpgIslandHeight);
+		}
+	});
+	yPosition -= cpgIslandHeight - genomicFeatureLargeMargin;
+
+	// Plot any other regions (miRNAs and/or genes with their transcripts).
+	/*var transcripts;
+	$.each(cancerTypeDataFiltered.other_regions, function(key, value) {
+		var regionStart, regionEnd, regionName;
+		xPosition += genomicFeatureLargeMargin;
+		regionStart = value.start;
+		regionEnd = value.end;
+		if (regionStart < cancerTypeDataFiltered.plot_data.end && regionEnd > cancerTypeDataFiltered.plot_data.start) {
+			if (regionStart < cancerTypeDataFiltered.plot_data.start) {
+				regionStart = cancerTypeDataFiltered.plot_data.start;
+			}
+			if (regionEnd > cancerTypeDataFiltered.plot_data.end) {
+				regionEnd = cancerTypeDataFiltered.plot_data.end;
+			}
+			regionName = value.name ? value.name : value.ensembl_id;
+			svg.append('rect')
+				.attr('fill', otherRegionColor)
+				.attr('x', xPosition)
+				.attr('y', y(regionStart))
+				.attr('width', regionWidth)
+				.attr('height', Math.abs(y(regionStart) - y(regionEnd)))
+				.attr('name', regionName)
+				.on('mouseover', function() {
+					var xPositionRegion = $(this).attr('x');
+					var yPositionRegion = $(this).attr('y');
+					var regionName = $(this).attr('name');
+					svg.append('text')
+						.attr('x', xPositionRegion)
+						.attr('y', yPositionRegion - 5)
+						.attr('stroke-width', 4)
+						.attr('stroke', '#fff')
+						.attr('text-anchor', 'start')
+						.attr('alignment-baseline', 'baseline')
+						.attr('class', 'other-region-annotation')
+						.text(regionName);
+					svg.append('text')
+						.attr('x', xPositionRegion)
+						.attr('y', yPositionRegion - 5)
+						.attr('font-weight', 700)
+						.attr('fill', otherRegionColor)
+						.attr('text-anchor', 'start')
+						.attr('alignment-baseline', 'baseline')
+						.attr('class', 'other-region-annotation')
+						.text(regionName);
+				})
+				.on('mouseout', function() {
+					$('.other-region-annotation').remove();
+				});
+
+			// Add an arrow to indicate whether the region is located on the + or - strand.
+			drawArrow(y, xPosition, value, otherRegionColor);
+		}
+		xPosition += regionWidth;
+		if (value.region_type === 'gene') {
+			// Add the transcripts.
+			transcripts = value.transcripts;
+			$.each(transcripts, function(key, value) {
+				var transcriptStart, transcriptEnd;
+				xPosition += genomicFeatureSmallMargin;
+				transcriptStart = value.start;
+				transcriptEnd = value.end;
+				if (transcriptStart < cancerTypeDataFiltered.plot_data.end &&
+					transcriptEnd > cancerTypeDataFiltered.plot_data.start) {
+					if (transcriptStart < cancerTypeDataFiltered.plot_data.start) {
+						transcriptStart = cancerTypeDataFiltered.plot_data.start;
+					} else if (transcriptEnd > cancerTypeDataFiltered.plot_data.end) {
+						transcriptEnd = cancerTypeDataFiltered.plot_data.end;
+					}
+					svg.append('rect')
+						.attr('fill', otherTranscriptColor)
+						.attr('x', xPosition)
+						.attr('y', y(transcriptStart))
+						.attr('width', transcriptWidth)
+						.attr('height', Math.abs(y(transcriptStart) - y(transcriptEnd)));
+				}
+				xPosition += transcriptWidth;
+			});
+		}
+	});
+	xPosition += genomicFeatureLargeMargin;
+
+	// Draw the main region (miRNA or gene with its transcripts).
+	var mainRegionStart = cancerTypeDataFiltered.region_annotation.start;
+	var mainRegionEnd = cancerTypeDataFiltered.region_annotation.end;
+	if (mainRegionStart < cancerTypeDataFiltered.plot_data.start) {
+		mainRegionStart = cancerTypeDataFiltered.plot_data.start;
+	}
+	if (mainRegionEnd > cancerTypeDataFiltered.plot_data.end) {
+		mainRegionEnd = cancerTypeDataFiltered.plot_data.end;
+	}
+	svg.append('rect')
+		.attr('fill', regionColor)
+		.attr('x', xPosition)
+		.attr('y', y(mainRegionStart))
+		.attr('width', regionWidth)
+		.attr('height', Math.abs(y(mainRegionStart) - y(mainRegionEnd)));
+	svg.append('text')
+		.attr('x', xPosition)
+		.attr('y', y(mainRegionStart) - 5)
+		.attr('font-weight', 700)
+		.attr('fill', regionColor)
+		.attr('text-anchor', 'start')
+		.attr('alignment-baseline', 'baseline')
+		.text(cancerTypeDataFiltered.region_annotation.name);
+	xPosition += regionWidth;
+	drawArrow(y, xPosition - regionWidth, cancerTypeDataFiltered.region_annotation, regionColor);
+	if (cancerTypeDataFiltered.region_annotation.region_type === 'gene') {
+		// Add the transcripts.
+		transcripts = cancerTypeDataFiltered.region_annotation.transcripts;
+		$.each(transcripts, function(key, value) {
+			var transcriptStart, transcriptEnd, exons;
+			xPosition += genomicFeatureSmallMargin;
+			transcriptStart = value.start;
+			transcriptEnd = value.end;
+			if (transcriptStart < cancerTypeDataFiltered.plot_data.end && transcriptEnd > cancerTypeDataFiltered.plot_data.start) {
+				if (transcriptStart < cancerTypeDataFiltered.plot_data.start) {
+					transcriptStart = cancerTypeDataFiltered.plot_data.start;
+				}
+				if (transcriptEnd > cancerTypeDataFiltered.plot_data.end) {
+					transcriptEnd = cancerTypeDataFiltered.plot_data.end;
+				}
+				svg.append('rect')
+					.attr('fill', transcriptColor)
+					.attr('x', xPosition)
+					.attr('y', y(transcriptStart))
+					.attr('width', transcriptWidth)
+					.attr('height', Math.abs(y(transcriptStart) - y(transcriptEnd)));
+			}
+			exons = value.exons;
+			$.each(exons, function(key, value) {
+				var exonStart, exonEnd;
+				exonStart = value.start;
+				exonEnd = value.end;
+				if (exonStart < cancerTypeDataFiltered.plot_data.end &&
+					exonEnd > cancerTypeDataFiltered.plot_data.start) {
+					if (exonStart < cancerTypeDataFiltered.plot_data.start) {
+						exonStart = cancerTypeDataFiltered.plot_data.start;
+					}
+					if (exonEnd > cancerTypeDataFiltered.plot_data.end) {
+						exonEnd = cancerTypeDataFiltered.plot_data.end;
+					}
+					svg.append('rect')
+						.attr('fill', exonColor)
+						.attr('x', xPosition)
+						.attr('y', y(exonStart))
+						.attr('width', transcriptWidth)
+						.attr('height', Math.abs(y(exonStart) - y(exonEnd)));
+					}
+			});
+			xPosition += transcriptWidth;
+		});
+	}
+	xPosition += genomicFeatureLargeMargin;*/
 
 	$('.plot-loader').hide();
 };
