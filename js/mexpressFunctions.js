@@ -544,15 +544,15 @@ var drawCoordinates = function(axis, horizontal, height) {
 		$.each(coordinates, function(index, value) {
 			svg.append('text')
 				.attr('x', axis(value))
-				.attr('y', height + genomicCoordinatesHeight)
+				.attr('y', height)
 				.attr('text-anchor', 'middle')
 				.attr('alignment-baseline', 'baseline')
 				.text(value);
 			svg.append('line')
 				.attr('x1', axis(value))
 				.attr('x2', axis(value))
-				.attr('y1', height - genomicFeatureLargeMargin)
-				.attr('y2', height - genomicFeatureLargeMargin - genomicCoordinatesHeight)
+				.attr('y1', height - genomicCoordinatesHeight - genomicFeatureLargeMargin)
+				.attr('y2', height - 2 * genomicCoordinatesHeight - genomicFeatureLargeMargin)
 				.attr('stroke', textColor);
 		});
 	} else {
@@ -1944,7 +1944,10 @@ var plotSummary = function(showVariants, plotStart, plotEnd) {
 	// Build the SVG.
 	var height = 400;
 	var width = 800;
-	var margin = {top: 40, left: 40, bottom: 40, right: 40};
+	var margin = {top: 40,
+				  left: 40,
+				  bottom: 40 + genomicCoordinatesHeight + genomicFeaturesHeight + genomicFeatureLargeMargin,
+				  right: 40};
 	var x = d3.scaleLinear().domain([plotStart, plotEnd]).range([0, width]);
 	var y = d3.scaleLinear().domain([0, 1]).range([height, 0]);
 	svg = d3.select('.svg-container')
@@ -1967,17 +1970,14 @@ var plotSummary = function(showVariants, plotStart, plotEnd) {
 		.attr('fill', '#fff');
 
 	// Add the genomic coordinates (= y axis).
-	drawCoordinates(x, true, height);
+	drawCoordinates(x, true, height + margin.bottom);
 
 	// Draw the individual CpGs and the CpG islands.
 	// Adapt the opacity of the CpG lines to the length of the gene. Otherwise the CpG plot is just
 	// one big block of green for extremely long genes. Since the longest genes in the human genome
 	// appear to be around 2.3 megabases long, we chose 2,500,000 as the denominator in the
 	// calculation below (basically to normalise the gene length to a value between 0 and 1).
-	var yPosition = height -
-					genomicFeatureLargeMargin -
-					genomicCoordinatesHeight -
-					genomicFeatureSmallMargin;
+	var yPosition = height + margin.bottom - 2 * genomicFeatureLargeMargin - 2 * genomicCoordinatesHeight;
 	var cpgOpacity = 1;
 	cpgOpacity = 1 - Math.abs(cancerTypeDataFiltered.region_annotation.start -
 		cancerTypeDataFiltered.region_annotation.end) / 2500000;
@@ -2097,7 +2097,7 @@ var plotSummary = function(showVariants, plotStart, plotEnd) {
 			});
 		}
 	});
-	yPosition -= genomicFeatureLargeMargin;
+	yPosition -= genomicFeatureLargeMargin + regionHeight;
 
 	// Draw the main region (miRNA or gene with its transcripts).
 	var mainRegionStart = cancerTypeDataFiltered.region_annotation.start;
