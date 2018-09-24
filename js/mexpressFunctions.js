@@ -461,6 +461,23 @@ var drawArrow = function(y, xPosition, annotation, color) {
 		.attr('fill', color);
 };
 
+var drawHorizontalArrow = function(x, yPosition, annotation, color) {
+	// Add an arrow to indicate whether the region is located on the + or - strand.
+	svg.append('path')
+		.attr('d', function(d) {
+			var pathX, pathY;
+			pathY = yPosition;
+			if (annotation.strand === '+') {
+				pathX = x(annotation.end);
+				return 'M ' + pathX + ' ' + pathY + 'l -10 0 l 0 -3 z';
+			} else if (annotation.strand === '-') {
+				pathX = x(annotation.start);
+				return 'M ' + pathX + ' ' + pathY + 'l 10 0 l 0 -3 z';
+			}
+		})
+		.attr('fill', color);
+};
+
 var drawBarPlot = function(data, element) {
 	// Calculate the data necessary to create a bar plot.
 	var uniqueDataValues = data.filter(uniqueValues);
@@ -1926,7 +1943,7 @@ var plotSummary = function(showVariants, plotStart, plotEnd) {
 
 	// Build the SVG.
 	var height = 400;
-	var width = 600;
+	var width = 800;
 	var margin = {top: 40, left: 40, bottom: 40, right: 40};
 	var x = d3.scaleLinear().domain([plotStart, plotEnd]).range([0, width]);
 	var y = d3.scaleLinear().domain([0, 1]).range([height, 0]);
@@ -1997,13 +2014,13 @@ var plotSummary = function(showVariants, plotStart, plotEnd) {
 				.attr('height', cpgIslandHeight);
 		}
 	});
-	yPosition -= cpgIslandHeight - genomicFeatureLargeMargin;
+	yPosition -= cpgIslandHeight + genomicFeatureLargeMargin;
 
 	// Plot any other regions (miRNAs and/or genes with their transcripts).
-	/*var transcripts;
+	var transcripts;
 	$.each(cancerTypeDataFiltered.other_regions, function(key, value) {
 		var regionStart, regionEnd, regionName;
-		xPosition += genomicFeatureLargeMargin;
+		yPosition -= genomicFeatureLargeMargin;
 		regionStart = value.start;
 		regionEnd = value.end;
 		if (regionStart < cancerTypeDataFiltered.plot_data.end && regionEnd > cancerTypeDataFiltered.plot_data.start) {
@@ -2016,48 +2033,50 @@ var plotSummary = function(showVariants, plotStart, plotEnd) {
 			regionName = value.name ? value.name : value.ensembl_id;
 			svg.append('rect')
 				.attr('fill', otherRegionColor)
-				.attr('x', xPosition)
-				.attr('y', y(regionStart))
-				.attr('width', regionWidth)
-				.attr('height', Math.abs(y(regionStart) - y(regionEnd)))
+				.attr('x', x(regionStart))
+				.attr('y', yPosition)
+				.attr('width', Math.abs(x(regionStart) - x(regionEnd)))
+				.attr('height', regionHeight)
 				.attr('name', regionName)
 				.on('mouseover', function() {
-					var xPositionRegion = $(this).attr('x');
-					var yPositionRegion = $(this).attr('y');
+					var xPositionRegion = +$(this).attr('x');
+					var yPositionRegion = +$(this).attr('y');
 					var regionName = $(this).attr('name');
+					console.log(regionName + ', x = ' + xPositionRegion + ', y = ' + yPositionRegion);
 					svg.append('text')
-						.attr('x', xPositionRegion)
-						.attr('y', yPositionRegion - 5)
+						.attr('x', xPositionRegion - 5)
+						.attr('y', yPositionRegion + regionHeight)
 						.attr('stroke-width', 4)
 						.attr('stroke', '#fff')
-						.attr('text-anchor', 'start')
+						.attr('text-anchor', 'end')
 						.attr('alignment-baseline', 'baseline')
 						.attr('class', 'other-region-annotation')
 						.text(regionName);
 					svg.append('text')
-						.attr('x', xPositionRegion)
-						.attr('y', yPositionRegion - 5)
+						.attr('x', xPositionRegion - 5)
+						.attr('y', yPositionRegion + regionHeight)
 						.attr('font-weight', 700)
 						.attr('fill', otherRegionColor)
-						.attr('text-anchor', 'start')
+						.attr('text-anchor', 'end')
 						.attr('alignment-baseline', 'baseline')
 						.attr('class', 'other-region-annotation')
 						.text(regionName);
+					//console.log("d3.selectAll('svg').append('text').attr('x', " + (xPositionRegion - 5) + ").attr('y', "+ (yPositionRegion + regionHeight) + ").attr('font-weight', 700).attr('fill', '" + otherRegionColor + "').attr('text-anchor', 'end').attr('alignment-baseline', 'baseline').attr('class', 'other-region-annotation').text('" + regionName + "');");
 				})
 				.on('mouseout', function() {
 					$('.other-region-annotation').remove();
 				});
 
 			// Add an arrow to indicate whether the region is located on the + or - strand.
-			drawArrow(y, xPosition, value, otherRegionColor);
+			drawHorizontalArrow(x, yPosition, value, otherRegionColor);
 		}
-		xPosition += regionWidth;
+		yPosition -= regionHeight;
 		if (value.region_type === 'gene') {
 			// Add the transcripts.
 			transcripts = value.transcripts;
 			$.each(transcripts, function(key, value) {
 				var transcriptStart, transcriptEnd;
-				xPosition += genomicFeatureSmallMargin;
+				yPosition -= genomicFeatureSmallMargin;
 				transcriptStart = value.start;
 				transcriptEnd = value.end;
 				if (transcriptStart < cancerTypeDataFiltered.plot_data.end &&
@@ -2069,16 +2088,16 @@ var plotSummary = function(showVariants, plotStart, plotEnd) {
 					}
 					svg.append('rect')
 						.attr('fill', otherTranscriptColor)
-						.attr('x', xPosition)
-						.attr('y', y(transcriptStart))
-						.attr('width', transcriptWidth)
-						.attr('height', Math.abs(y(transcriptStart) - y(transcriptEnd)));
+						.attr('x', x(transcriptStart))
+						.attr('y', yPosition)
+						.attr('width', Math.abs(x(transcriptStart) - x(transcriptEnd)))
+						.attr('height', transcriptHeight);
 				}
-				xPosition += transcriptWidth;
+				yPosition -= transcriptHeight;
 			});
 		}
 	});
-	xPosition += genomicFeatureLargeMargin;
+	yPosition -= genomicFeatureLargeMargin;
 
 	// Draw the main region (miRNA or gene with its transcripts).
 	var mainRegionStart = cancerTypeDataFiltered.region_annotation.start;
@@ -2091,26 +2110,26 @@ var plotSummary = function(showVariants, plotStart, plotEnd) {
 	}
 	svg.append('rect')
 		.attr('fill', regionColor)
-		.attr('x', xPosition)
-		.attr('y', y(mainRegionStart))
-		.attr('width', regionWidth)
-		.attr('height', Math.abs(y(mainRegionStart) - y(mainRegionEnd)));
+		.attr('x', x(mainRegionStart))
+		.attr('y', yPosition)
+		.attr('width', Math.abs(x(mainRegionStart) - x(mainRegionEnd)))
+		.attr('height', regionHeight);
 	svg.append('text')
-		.attr('x', xPosition)
-		.attr('y', y(mainRegionStart) - 5)
+		.attr('x', x(mainRegionStart) - 5)
+		.attr('y', yPosition + regionHeight)
 		.attr('font-weight', 700)
 		.attr('fill', regionColor)
-		.attr('text-anchor', 'start')
+		.attr('text-anchor', 'end')
 		.attr('alignment-baseline', 'baseline')
 		.text(cancerTypeDataFiltered.region_annotation.name);
-	xPosition += regionWidth;
-	drawArrow(y, xPosition - regionWidth, cancerTypeDataFiltered.region_annotation, regionColor);
+	yPosition -= regionHeight;
+	drawHorizontalArrow(x, yPosition + regionHeight, cancerTypeDataFiltered.region_annotation, regionColor);
 	if (cancerTypeDataFiltered.region_annotation.region_type === 'gene') {
 		// Add the transcripts.
 		transcripts = cancerTypeDataFiltered.region_annotation.transcripts;
 		$.each(transcripts, function(key, value) {
 			var transcriptStart, transcriptEnd, exons;
-			xPosition += genomicFeatureSmallMargin;
+			yPosition -= genomicFeatureSmallMargin;
 			transcriptStart = value.start;
 			transcriptEnd = value.end;
 			if (transcriptStart < cancerTypeDataFiltered.plot_data.end && transcriptEnd > cancerTypeDataFiltered.plot_data.start) {
@@ -2122,10 +2141,10 @@ var plotSummary = function(showVariants, plotStart, plotEnd) {
 				}
 				svg.append('rect')
 					.attr('fill', transcriptColor)
-					.attr('x', xPosition)
-					.attr('y', y(transcriptStart))
-					.attr('width', transcriptWidth)
-					.attr('height', Math.abs(y(transcriptStart) - y(transcriptEnd)));
+					.attr('x', x(transcriptStart))
+					.attr('y', yPosition)
+					.attr('width', Math.abs(x(transcriptStart) - x(transcriptEnd)))
+					.attr('height', transcriptHeight);
 			}
 			exons = value.exons;
 			$.each(exons, function(key, value) {
@@ -2142,16 +2161,17 @@ var plotSummary = function(showVariants, plotStart, plotEnd) {
 					}
 					svg.append('rect')
 						.attr('fill', exonColor)
-						.attr('x', xPosition)
-						.attr('y', y(exonStart))
-						.attr('width', transcriptWidth)
-						.attr('height', Math.abs(y(exonStart) - y(exonEnd)));
+						.attr('x', x(exonStart))
+						.attr('y', yPosition)
+						.attr('width', Math.abs(x(exonStart) - x(exonEnd)))
+						.attr('height', transcriptHeight);
 					}
 			});
-			xPosition += transcriptWidth;
+			yPosition -= transcriptHeight;
 		});
 	}
-	xPosition += genomicFeatureLargeMargin;*/
+	
+	// Draw the data.
 
 	$('.plot-loader').hide();
 };
