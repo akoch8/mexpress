@@ -228,7 +228,7 @@ $(function() {
 		var plotStart = cancerTypeDataFiltered.plot_data.start;
 		var plotEnd = cancerTypeDataFiltered.plot_data.end;
 		setTimeout(function() {
-			plotSummary(sorter, showVariants, plotStart, plotEnd);
+			plotSummary(sampleSorter, showVariants, plotStart, plotEnd);
 		}, 100);
 	});
 	$(document).on('click', '.filter-options li', function() {
