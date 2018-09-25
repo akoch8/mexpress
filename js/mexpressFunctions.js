@@ -585,7 +585,7 @@ var drawDataTrack = function(data, sortedSamples, color, xPosition, yPosition, v
 	});
 	if (parameterIsNumerical(dataValues)) {
 		dataValues = dataValues.map(makeNumeric);
-		var factor = Math.max.apply(Math, dataValues) / dataTrackHeight;
+		var factor = maximum(dataValues) / dataTrackHeight;
 		if (factor === 0) {
 			factor = 1;
 		}
@@ -783,7 +783,7 @@ var drawHistogram = function(data, element) {
 				 // upper limit. Otherwise we would fail to count the values that are equal to
 				 // the maximum.
 	var x = d3.scaleLinear().domain([0, histogramDataCounts.length]).range([0, 100]);
-	var y = d3.scaleLinear().domain([0, Math.max.apply(Math, histogramDataCounts)])
+	var y = d3.scaleLinear().domain([0, maximum(histogramDataCounts)])
 		.range([0, 80]);
 	var histogramSvg = d3.select(element)
 		.append('svg')
@@ -1945,9 +1945,9 @@ var plotSummary = function(showVariants, plotStart, plotEnd) {
 	var height = 400;
 	var width = 800;
 	var margin = {top: 40,
-				  left: 40,
+				  left: 100,
 				  bottom: 40 + genomicCoordinatesHeight + genomicFeaturesHeight + genomicFeatureLargeMargin,
-				  right: 40};
+				  right: 100};
 	var x = d3.scaleLinear().domain([plotStart, plotEnd]).range([0, width]);
 	var y = d3.scaleLinear().domain([0, 1]).range([height, 0]);
 	svg = d3.select('.svg-container')
@@ -1971,6 +1971,26 @@ var plotSummary = function(showVariants, plotStart, plotEnd) {
 
 	// Add the genomic coordinates (= y axis).
 	drawCoordinates(x, true, height + margin.bottom);
+
+	// Add the x axis (DNA methylation beta values: [0,1]).
+	svg.append('g')
+		.attr('class', 'axis')
+		.call(d3.axisLeft(y));
+	d3.selectAll('.axis path')
+		.attr('stroke', textColor);
+	d3.selectAll('.axis text')
+		.attr('font-size', '9px')
+		.attr('fill', textColor);
+	d3.selectAll('.axis line')
+		.attr('stroke', textColor);
+	svg.append('text')
+		.attr('x', 0)
+		.attr('y', y(1) - genomicCoordinatesHeight)
+		.attr('text-anchor', 'start')
+		.attr('alignment-baseline', 'baseline')
+		.attr('fill', textColor)
+		.attr('font-size', '12px')
+		.text('beta value');
 
 	// Draw the individual CpGs and the CpG islands.
 	// Adapt the opacity of the CpG lines to the length of the gene. Otherwise the CpG plot is just
@@ -2042,7 +2062,6 @@ var plotSummary = function(showVariants, plotStart, plotEnd) {
 					var xPositionRegion = +$(this).attr('x');
 					var yPositionRegion = +$(this).attr('y');
 					var regionName = $(this).attr('name');
-					console.log(regionName + ', x = ' + xPositionRegion + ', y = ' + yPositionRegion);
 					svg.append('text')
 						.attr('x', xPositionRegion - 5)
 						.attr('y', yPositionRegion + regionHeight)
@@ -2061,7 +2080,6 @@ var plotSummary = function(showVariants, plotStart, plotEnd) {
 						.attr('alignment-baseline', 'baseline')
 						.attr('class', 'other-region-annotation')
 						.text(regionName);
-					//console.log("d3.selectAll('svg').append('text').attr('x', " + (xPositionRegion - 5) + ").attr('y', "+ (yPositionRegion + regionHeight) + ").attr('font-weight', 700).attr('fill', '" + otherRegionColor + "').attr('text-anchor', 'end').attr('alignment-baseline', 'baseline').attr('class', 'other-region-annotation').text('" + regionName + "');");
 				})
 				.on('mouseout', function() {
 					$('.other-region-annotation').remove();
@@ -2171,7 +2189,34 @@ var plotSummary = function(showVariants, plotStart, plotEnd) {
 		});
 	}
 	
-	// Draw the data.
+	// Calculate and draw the median DNA methylation value for each probe.
+	$.each(cancerTypeDataFiltered.dna_methylation_data, function(key, value) {
+		var probeLocation = cancerTypeDataFiltered.probe_annotation_450[key].cpg_location;
+		var methylationSummary = summary(Object.values(value), true);
+		if (methylationSummary.median !== null) {
+			svg.append('line')
+				.attr('x1', x(probeLocation) - 4)
+				.attr('x2', x(probeLocation) + 4)
+				.attr('y1', y(methylationSummary.median))
+				.attr('y2', y(methylationSummary.median))
+				.attr('stroke', 'red')
+				.attr('stroke-width', '2px');
+			svg.append('line')
+				.attr('x1', x(probeLocation))
+				.attr('x2', x(probeLocation))
+				.attr('y1', y(methylationSummary.quantile25))
+				.attr('y2', y(methylationSummary.quantile75))
+				.attr('stroke', 'red')
+				.attr('stroke-width', '1px');
+		}
+		svg.append('line')
+			.attr('x1', x(probeLocation))
+			.attr('x2', x(probeLocation))
+			.attr('y1', height + genomicFeatureLargeMargin)
+			.attr('y2', height + genomicFeatureLargeMargin + cpgHeight)
+			.attr('stroke', textColor)
+			.attr('stroke-width', sampleWidth);
+	});
 
 	$('.plot-loader').hide();
 };
