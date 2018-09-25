@@ -19,6 +19,9 @@ $(function() {
 		});
 	});
 
+	// Autofocus on the gene name text input box.
+	$('#name-input').focus();
+
 	// Scroll down the cancer type list when a user clicks on the scroll button.
 	$('.scroll-button').on('click', function() {
 		var list = $('.select-cancer-type').find('ul');
