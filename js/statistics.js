@@ -388,8 +388,8 @@ var summary = function(x, addQuantile) {
 		'null': countNull(x)
 	};
 	if (addQuantile) {
-		result['quantile 25%'] = quantile(x, 0.25);
-		result['quantile 75%'] = quantile(x, 0.75);
+		result.quantile25 = quantile(x, 0.25);
+		result.quantile75 = quantile(x, 0.75);
 	}
 	return result;
 };
