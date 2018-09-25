@@ -222,11 +222,13 @@ $(function() {
 	});
 	$('.button--plot-summary').on('click', function() {
 		$('.plot-loader').show();
+		var sampleSorter = $('#sample-sorter').text();
+		sampleSorter = sampleSorter === '' ? 'region_expression' : sampleSorter;
 		var showVariants = $('.toolbar--check-variants').prop('checked');
 		var plotStart = cancerTypeDataFiltered.plot_data.start;
 		var plotEnd = cancerTypeDataFiltered.plot_data.end;
 		setTimeout(function() {
-			plotSummary(showVariants, plotStart, plotEnd);
+			plotSummary(sorter, showVariants, plotStart, plotEnd);
 		}, 100);
 	});
 	$(document).on('click', '.filter-options li', function() {

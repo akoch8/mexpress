@@ -1893,9 +1893,9 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 	$('.plot-loader').hide();
 };
 
-var plotSummary = function(showVariants, plotStart, plotEnd) {
+var plotSummary = function(sorter, showVariants, plotStart, plotEnd) {
 	$('.svg-container > svg').remove();
-
+	console.log(sorter);
 	// The summarized plot consists of three main parts:
 	// 1. genomic annotation data (miRNAs, genes, transcripts, CpG islands)
 	// 2. location-linked data (DNA methylation and variants)
