@@ -1991,9 +1991,9 @@ var plotSummary = function(sorter, showVariants, plotStart, plotEnd) {
 								genomicFeatureLargeMargin;
 
 	// Build the SVG.
-	var height = 400;
+	var height = 300;
 	var width = 800;
-	var margin = {top: 40,
+	var margin = {top: 100,
 				  left: 100,
 				  bottom: 40 + genomicCoordinatesHeight + genomicFeaturesHeight + genomicFeatureLargeMargin,
 				  right: 100};
