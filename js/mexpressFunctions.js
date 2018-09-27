@@ -915,7 +915,6 @@ var loadData = function(name, cancer) {
 		$('.button__text').css('visibility', 'visible');
 		cancerTypeData = $.parseJSON(reply);
 		if (cancerTypeData.success) {
-			console.log(cancerTypeData);
 			addToolbar();
 			addClinicalParameters();
 
@@ -1174,6 +1173,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 		samples = sortSamples(samples, dataToSort);
 	}
 	cancerTypeDataFiltered.samples_filtered_sorted = samples;
+	console.log(cancerTypeDataFiltered);
 
 	// Calculate the necessary statistics (correlation, t-test, ANOVA) for the sorter. If for
 	// example the samples are sorted by their region expression, then all statistics will be
@@ -1895,7 +1895,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 
 var plotSummary = function(sorter, showVariants, plotStart, plotEnd) {
 	$('.svg-container > svg').remove();
-	console.log(sorter);
+	
 	// The summarized plot consists of three main parts:
 	// 1. genomic annotation data (miRNAs, genes, transcripts, CpG islands)
 	// 2. location-linked data (DNA methylation and variants)
@@ -1907,6 +1907,55 @@ var plotSummary = function(sorter, showVariants, plotStart, plotEnd) {
 	// - the number of genomic features/regions
 	// -=> will determine the height of the plot
 	//
+	// The DNA methylation data is split up into different groups, depending on the sorter. In the
+	// case of a categorical sorter (e.g. sample type), we can just use these categories. In the
+	// case of a numerical sorter (e.g. gene expression), we will have to create new groups.
+	var sorterData;
+	var sorterDataValues;
+	var groups = {};
+	if (sorter in cancerTypeDataFiltered) {
+		sorterData = cancerTypeDataFiltered[sorter];
+	} else if (sorter in cancerTypeDataFiltered.phenotype) {
+		sorterData = cancerTypeDataFiltered.phenotype[sorter];
+	} else {
+		sorterData = null;
+	}
+	console.log(sorter);
+	if (sorterData === null) {
+		groups['all samples'] = cancerTypeDataFiltered.samples_filtered_sorted;
+	} else {
+		sorterDataValues = Object.values(sorterData);
+		if (parameterIsNumerical(sorterDataValues)) {
+			// Split the samples in two groups based on whether their value is greater or smaller than
+			// the median value.
+			var sorterSummary = summary(sorterDataValues);
+			var highValueSamples = [];
+			var lowValueSamples = [];
+			$.each(sorterData, function(key, value) {
+				if (value === null) {
+					return true; // Continue to the next iteration.
+				} else if (+value >= sorterSummary.median) {
+					highValueSamples.push(key);
+				} else {
+					lowValueSamples.push(key);
+				}
+			});
+			groups['low ' + sorter.replace(/_/g, ' ')] = lowValueSamples;
+			groups['high ' + sorter.replace(/_/g, ' ')] = highValueSamples;
+		} else {
+			sorterDataValues = Object.values(sorterData);
+			var categories = sorterDataValues.filter(uniqueValues);
+			categories.sort(sortAlphabetically);
+			$.each(categories, function(index, value) {
+				groups[value] = [];
+			});
+			$.each(sorterData, function(key, value) {
+				groups[value].push(key);
+			});
+		}	
+	}
+	console.log(groups);
+
 	// Count the number of regions (including transcripts in the case of genes) that need to be
 	// drawn.
 	var nrOtherGenes = cancerTypeDataFiltered.other_regions.filter(isRegion('gene')).length;
@@ -2189,35 +2238,80 @@ var plotSummary = function(sorter, showVariants, plotStart, plotEnd) {
 		});
 	}
 	
-	// Calculate and draw the median DNA methylation value for each probe.
+	// Calculate and draw the median DNA methylation value for each group and each probe. In case
+	// the groups are the categories of a phenotype variable, ensure that the groups have the same
+	// colors as the categories in the default plot.
+	var groupNames = Object.keys(groups);
+	var re = new RegExp('^(clinical|pathologic)_|tumor_stage_*|clinical_stage_');
+	var groupColors;
+	if (re.test(sorter)) {
+		groupColors = groupNames.map(function(x) {
+			if (x) {
+				if (sorter.endsWith('simplified')) {
+					return stageColorsSimplified[groupNames.indexOf(x)];
+				} else {
+					return stageColors[groupNames.indexOf(x)];
+				}
+			} else {
+				return missingValueColor;
+			}
+		});
+	} else {
+		groupColors = groupNames.map(function(x) {
+			if (x) {
+				return categoricalColors[groupNames.indexOf(x)];
+			} else {
+				return missingValueColor;
+			}
+		});
+	}
+
+	// To prevent the DNA methylation data lines for different groups at the same probe location
+	// from overlapping, we'll add a small x adjustment to each group.
+	var nrGroups = Object.keys(groups).length;
+	var nrGroupsFactor = Math.floor(nrGroups / 2);
+	var xAdj = [];
+	for (i = -nrGroupsFactor; i <= nrGroupsFactor; i++) {
+		xAdj.push(i * 2);
+	}
 	$.each(cancerTypeDataFiltered.dna_methylation_data, function(key, value) {
 		var probeLocation = cancerTypeDataFiltered.probe_annotation_450[key].cpg_location;
-		var methylationSummary = summary(Object.values(value), true);
-		if (methylationSummary.median !== null) {
-			svg.append('line')
-				.attr('x1', x(probeLocation) - 4)
-				.attr('x2', x(probeLocation) + 4)
-				.attr('y1', y(methylationSummary.median))
-				.attr('y2', y(methylationSummary.median))
-				.attr('stroke', 'red')
-				.attr('stroke-width', '2px');
-			svg.append('line')
-				.attr('x1', x(probeLocation))
-				.attr('x2', x(probeLocation))
-				.attr('y1', y(methylationSummary.quantile25))
-				.attr('y2', y(methylationSummary.quantile75))
-				.attr('stroke', 'red')
-				.attr('stroke-width', '1px');
-		}
 		svg.append('line')
 			.attr('x1', x(probeLocation))
 			.attr('x2', x(probeLocation))
 			.attr('y1', height + genomicFeatureLargeMargin)
 			.attr('y2', height + genomicFeatureLargeMargin + cpgHeight)
 			.attr('stroke', textColor)
+			.attr('shape-rendering', 'crispEdges')
 			.attr('stroke-width', sampleWidth);
+		$.each(groups, function(group, samples) {
+			var groupValues = [];
+			var groupColor = groupColors[groupNames.indexOf(group)];
+			$.each(samples, function(index, sample) {
+				if (samples.indexOf(sample) > -1) {
+					groupValues.push(value[sample]);
+				}
+			});
+			var methylationSummary = summary(groupValues, true);
+			if (methylationSummary.median !== null) {
+				svg.append('line')
+					.attr('x1', x(probeLocation) - 4  + xAdj[groupNames.indexOf(group)])
+					.attr('x2', x(probeLocation) + 4 + xAdj[groupNames.indexOf(group)])
+					.attr('y1', y(methylationSummary.median))
+					.attr('y2', y(methylationSummary.median))
+					.attr('stroke', groupColor)
+					.attr('stroke-width', '2px');
+				svg.append('line')
+					.attr('x1', x(probeLocation) + xAdj[groupNames.indexOf(group)])
+					.attr('x2', x(probeLocation) + xAdj[groupNames.indexOf(group)])
+					.attr('y1', y(methylationSummary.quantile25))
+					.attr('y2', y(methylationSummary.quantile75))
+					.attr('stroke', groupColor)
+					.attr('shape-rendering', 'crispEdges')
+					.attr('stroke-width', '1px');
+			}
+		});
 	});
-
 	$('.plot-loader').hide();
 };
 
