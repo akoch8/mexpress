@@ -1955,6 +1955,12 @@ var plotSummary = function(sorter, showVariants, plotStart, plotEnd) {
 			});
 		}	
 	}
+	$.each(groups, function(key, value) {
+		if (value.length <= 3) {
+			delete groups[key];
+		}
+	});
+	console.log(groups);
 
 	// Count the number of regions (including transcripts in the case of genes) that need to be
 	// drawn.
@@ -1991,7 +1997,7 @@ var plotSummary = function(sorter, showVariants, plotStart, plotEnd) {
 								genomicFeatureLargeMargin;
 
 	// Build the SVG.
-	var height = 300;
+	var height = 200;
 	var width = 800;
 	var margin = {top: 100,
 				  left: 100,
@@ -2018,13 +2024,35 @@ var plotSummary = function(sorter, showVariants, plotStart, plotEnd) {
 		.attr('height', height + margin.top + margin.bottom)
 		.attr('fill', '#fff');
 
-	// Add the genomic coordinates (= y axis).
+	// Add the genomic coordinates (= x axis).
 	drawCoordinates(x, true, height + margin.bottom);
 
-	// Add the x axis (DNA methylation beta values: [0,1]).
+	// Add the y axis (DNA methylation beta values: [0,1]).
+	svg.append('line')
+		.attr('x1', x(plotStart))
+		.attr('x2', x(plotEnd))
+		.attr('y1', y(0))
+		.attr('y2', y(0))
+		.attr('shape-rendering', 'crispEdges')
+		.attr('stroke', probeLineColor);
+	svg.append('line')
+		.attr('x1', x(plotStart))
+		.attr('x2', x(plotEnd))
+		.attr('y1', y(0.5))
+		.attr('y2', y(0.5))
+		.attr('shape-rendering', 'crispEdges')
+		.attr('stroke', probeLineColor);
+	svg.append('line')
+		.attr('x1', x(plotStart))
+		.attr('x2', x(plotEnd))
+		.attr('y1', y(1))
+		.attr('y2', y(1))
+		.attr('shape-rendering', 'crispEdges')
+		.attr('stroke', probeLineColor);
 	svg.append('g')
 		.attr('class', 'axis')
-		.call(d3.axisLeft(y));
+		.call(d3.axisLeft(y)
+			.tickValues([0, 0.2, 0.4, 0.6, 0.8, 1]));
 	d3.selectAll('.axis path')
 		.attr('stroke', textColor);
 	d3.selectAll('.axis text')
@@ -2062,7 +2090,6 @@ var plotSummary = function(sorter, showVariants, plotStart, plotEnd) {
 				.attr('stroke-width', 1);
 		}
 	});
-
 	yPosition -= cpgHeight + genomicFeatureSmallMargin;
 	$.each(cancerTypeDataFiltered.cpgi_annotation, function(key, value) {
 		var regionStart, regionEnd;
