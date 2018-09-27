@@ -243,46 +243,6 @@ function pAdjust(stats) {
 	return s;
 }
 
-function pAdjust2(p) {
-	var c;
-	var n = p.length;
-	var i = [];
-	for (c = n; c > 0; c--) {
-		i.push(c);
-	}
-	var pValues = [];
-	for (c = 0; c < n; c++) {
-		pValues[c] = [p[c], c];
-	}
-	// sort the p values
-	var pValuesSorted = nestedArraySort(pValues, true, 0);
-	var cumMin;
-	for (c = 0; c < n; c++) {
-		var x = pValuesSorted[c][0]*n/i[c];
-		if (c !== 0) {
-			if (x < cumMin) {
-				cumMin = x;
-			} else {
-				x = cumMin;
-			}
-		} else {
-			cumMin = x;
-		}
-		if (x > 1) {
-			x = 1;
-		}
-		console.log('c = ' + c + ', p = ' + pValuesSorted[c][0] + ', x = ' + x + ', cumMin = ' + cumMin);
-		pValuesSorted[c][0] = x;
-	}
-	// put the adjusted p values back in their original order
-	pValuesSorted = nestedArraySort(pValuesSorted, false, 1);
-	result = [];
-	for (c = 0; c < pValuesSorted.length; c++) {
-		result.push(pValuesSorted[c][0]);
-	}
-	return result;
-}
-
 function nestedArraySort(x, descending, sortIndex) {
 	// This function sorts an array of nested arrays on the first element of each nested array.
 	if (descending) {
@@ -456,19 +416,3 @@ var variance = function(x) {
 	var v = diff / n;
 	return v;
 };
-
-/*
-var testP = [0.00001, 0.003, 0.003, 0.003, 0.9873, 0.00009872, 0.045, 0.056, 0.6, 0.00826];
-console.log(testP);
-var testPSorted = testP.sort(function(a,b) {
-	return a - b;
-});
-console.log(testPSorted);
-$.each(testP, function(i,v) {
-	console.log(v * testP.length / (testPSorted.lastIndexOf(v) + 1));
-});
-var testPAdj = pAdjust2(testP);
-console.log('testPAdj:');
-console.log(testPAdj);
-
-*/
