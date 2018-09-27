@@ -1920,7 +1920,6 @@ var plotSummary = function(sorter, showVariants, plotStart, plotEnd) {
 	} else {
 		sorterData = null;
 	}
-	console.log(sorter);
 	if (sorterData === null) {
 		groups['all samples'] = cancerTypeDataFiltered.samples_filtered_sorted;
 	} else {
@@ -2275,16 +2274,13 @@ var plotSummary = function(sorter, showVariants, plotStart, plotEnd) {
 	for (i = -nrGroupsFactor; i <= nrGroupsFactor; i++) {
 		xAdj.push(i * 2);
 	}
+	var groupsLineData = {};
+	$.each(groups, function(key, value) {
+		groupsLineData[key] = [];
+	});
 	$.each(cancerTypeDataFiltered.dna_methylation_data, function(key, value) {
 		var probeLocation = cancerTypeDataFiltered.probe_annotation_450[key].cpg_location;
-		svg.append('line')
-			.attr('x1', x(probeLocation))
-			.attr('x2', x(probeLocation))
-			.attr('y1', height + genomicFeatureLargeMargin)
-			.attr('y2', height + genomicFeatureLargeMargin + cpgHeight)
-			.attr('stroke', textColor)
-			.attr('shape-rendering', 'crispEdges')
-			.attr('stroke-width', sampleWidth);
+		var groupData = [];
 		$.each(groups, function(group, samples) {
 			var groupValues = [];
 			var groupColor = groupColors[groupNames.indexOf(group)];
@@ -2294,6 +2290,8 @@ var plotSummary = function(sorter, showVariants, plotStart, plotEnd) {
 				}
 			});
 			var methylationSummary = summary(groupValues, true);
+			groupData.push(groupValues);
+			groupsLineData[group].push({x: probeLocation, y:methylationSummary.median});
 			if (methylationSummary.median !== null) {
 				svg.append('line')
 					.attr('x1', x(probeLocation) - 4  + xAdj[groupNames.indexOf(group)])
@@ -2312,11 +2310,74 @@ var plotSummary = function(sorter, showVariants, plotStart, plotEnd) {
 					.attr('stroke-width', '1px');
 			}
 		});
+		var p;
+		if (nrGroups === 2) {
+			p = tTest(groupData[0], groupData[1]);
+		} else if (nrGroups > 2) {
+			p = anova(groupData);
+		}
+		var probeLocationLineColor = textColorLight;
+		var probeSignificance = '';
+		if (p) {
+			if (!isNaN(p) && p < 0.05) {
+				probeLocationLineColor = textColor;
+				probeSignificance = '*';
+				if (p < 0.01) {
+					probeSignificance = '**';
+				}
+				if (p < 0.001) {
+					probeSignificance = '***';
+				}
+			}
+		}
+
+		// Draw a line to indicate the location of the probe.
+		svg.append('line')
+			.attr('x1', x(probeLocation))
+			.attr('x2', x(probeLocation))
+			.attr('y1', height + genomicFeatureLargeMargin)
+			.attr('y2', height + genomicFeatureLargeMargin + cpgHeight)
+			.attr('stroke', probeLocationLineColor)
+			.attr('shape-rendering', 'crispEdges')
+			.attr('stroke-width', sampleWidth);
+		var yPositionText = height + genomicFeatureLargeMargin + cpgHeight + genomicFeatureSmallMargin;
+		svg.append('text')
+			.attr('x', x(probeLocation))
+			.attr('y', yPositionText)
+			.attr('text-anchor', 'start')
+			.attr('alignment-baseline', 'middle')
+			.attr('transform', 'rotate(90, ' + (x(probeLocation) - 3) + ',' + yPositionText + ')')
+			.text(probeSignificance);
+	});
+
+	// Draw a line that connects the different median DNA methylation values at consecutive probes.
+	var line = d3.line()
+		.defined(function(d) {
+			return d.y !== null;
+		})
+		.x(function(d) { return x(d.x); })
+		.y(function(d) { return y(d.y); });
+	$.each(groupsLineData, function(group, data) {
+		svg.append('path')
+			.data([data])
+			.attr('fill', 'none')
+			.attr('stroke-width', 1)
+			.attr('stroke-linecap', 'round')
+			.attr('stroke-linejoin', 'round')
+			.attr('stroke-opacity', 0.5)
+			.attr('stroke', groupColors[groupNames.indexOf(group)])
+			.attr('d', line);
 	});
 
 	// Draw the legend.
 	var xPositionLegend = 0;
-	yPosition = -margin.top / 2;
+	yPosition = -margin.top + dataTrackHeight;
+	svg.append('text')
+		.attr('x', -marginBetweenMainParts / 2)
+		.attr('y', yPosition + dataTrackHeight / 2)
+		.attr('text-anchor', 'end')
+		.attr('alignment-baseline', 'middle')
+		.text('groups');
 	$.each(groupNames, function(index, value) {
 		value = value ? value : 'null';
 		var textWidth = calculateTextWidth(value, '9px arial');
@@ -2334,6 +2395,30 @@ var plotSummary = function(sorter, showVariants, plotStart, plotEnd) {
 			.text(value);
 		xPositionLegend += textWidth + 2 * legendRectWidth + 5;
 	});
+	yPosition += dataTrackHeight + dataTrackSeparator;
+	var addStats = true;
+	if (addStats) {
+		svg.append('text')
+			.attr('x', -marginBetweenMainParts / 2)
+			.attr('y', yPosition + dataTrackHeight / 2)
+			.attr('text-anchor', 'end')
+			.attr('alignment-baseline', 'middle')
+			.text('statistics');
+		var statsLegend = ['p >= 0.05', '* p < 0.05', '** p < 0.01', '*** p < 0.001'];
+		xPositionLegend = 0;
+		$.each(statsLegend, function(i, v) {
+			var statsTextColor = v === 'p >= 0.05' ? textColorLight : textColor;
+			var textWidth = calculateTextWidth(v, '9px arial');
+			svg.append('text')
+				.attr('fill', statsTextColor)
+				.attr('x', xPositionLegend)
+				.attr('y', yPosition + dataTrackHeight / 2)
+				.attr('text-anchor', 'start')
+				.attr('alignment-baseline', 'middle')
+				.text(v);
+			xPositionLegend += textWidth + 5 * sampleWidth + 5;
+		});
+	}
 	$('.plot-loader').hide();
 };
 
