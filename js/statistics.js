@@ -130,10 +130,28 @@ var makeNumeric = function(x) {
 	}
 };
 
+var maximum = function(x) {
+	x = x.map(makeNumeric);
+	x = x.filter(function(a) {
+		return a !== null && a !== undefined;
+	});
+	if (x.length === 0) {
+		return null;
+	} else {
+		return Math.max.apply(Math, x);
+	}
+};
+
 var mean = function(x) {
 	// Calculate the mean of an array of numeric values.
 	x = x.map(makeNumeric);
+	x = x.filter(function(a) {
+		return a !== null && a !== undefined;
+	});
 	var n = x.length;
+	if (n === 0) {
+		return null;
+	}
 	var sum = 0;
 	for (var i = 0; i < n; i++) {
 		sum += x[i];
@@ -145,6 +163,18 @@ var mean = function(x) {
 var median = function(x) {
 	// Calculate the median of an array of numeric values.
 	return quantile(x, 0.5);
+};
+
+var minimum = function(x) {
+	x = x.map(makeNumeric);
+	x = x.filter(function(a) {
+		return a !== null && a !== undefined;
+	});
+	if (x.length === 0) {
+		return null;
+	} else {
+		return Math.min.apply(Math, x);
+	}
 };
 
 function pAdjust(stats) {
@@ -325,12 +355,15 @@ var pearsonCorrelation = function(x, y) {
 var quantile = function(x, q) {
 	// Calculate the q-th quantile of an array of numeric values.
 	x = x.map(makeNumeric);
+	x = x.filter(function(a) {
+		return a !== null && a !== undefined;
+	});
+	if (x.length === 0) {
+		return null;
+	}
 	x = x.sort(function(a,b) {
 		return a - b;
 	});
-	if (x.length === 0) {
-		return 0;
-	}
 	var position = (x.length - 1) * q;
 	var base = Math.floor(position);
 	var rest = position - base;
@@ -348,15 +381,15 @@ var summary = function(x, addQuantile) {
 	// - 25%, 50% (median) and 75% quantiles
 	// - the number of null values
 	var result = {
-		'minimum': Math.min.apply(Math, x),
-		'maximum': Math.max.apply(Math, x),
+		'minimum': minimum(x),
+		'maximum': maximum(x),
 		'mean': mean(x),
 		'median': median(x),
 		'null': countNull(x)
 	};
 	if (addQuantile) {
-		result['quantile 25%'] = quantile(x, 0.25);
-		result['quantile 75%'] = quantile(x, 0.75);
+		result.quantile25 = quantile(x, 0.25);
+		result.quantile75 = quantile(x, 0.75);
 	}
 	return result;
 };
