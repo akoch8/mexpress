@@ -1947,14 +1947,15 @@ var plotSummary = function(sorter, showVariants, plotStart, plotEnd) {
 			var categories = sorterDataValues.filter(uniqueValues);
 			categories.sort(sortAlphabetically);
 			$.each(categories, function(index, value) {
-				groups[value] = [];
+				value = value ? value : 'null';
+				groups[value.replace(/_/g, ' ')] = [];
 			});
 			$.each(sorterData, function(key, value) {
-				groups[value].push(key);
+				value = value ? value : 'null';
+				groups[value.replace(/_/g, ' ')].push(key);
 			});
 		}	
 	}
-	console.log(groups);
 
 	// Count the number of regions (including transcripts in the case of genes) that need to be
 	// drawn.
@@ -2246,7 +2247,7 @@ var plotSummary = function(sorter, showVariants, plotStart, plotEnd) {
 	var groupColors;
 	if (re.test(sorter)) {
 		groupColors = groupNames.map(function(x) {
-			if (x) {
+			if (x !== 'null') {
 				if (sorter.endsWith('simplified')) {
 					return stageColorsSimplified[groupNames.indexOf(x)];
 				} else {
@@ -2258,7 +2259,7 @@ var plotSummary = function(sorter, showVariants, plotStart, plotEnd) {
 		});
 	} else {
 		groupColors = groupNames.map(function(x) {
-			if (x) {
+			if (x !== 'null') {
 				return categoricalColors[groupNames.indexOf(x)];
 			} else {
 				return missingValueColor;
@@ -2311,6 +2312,27 @@ var plotSummary = function(sorter, showVariants, plotStart, plotEnd) {
 					.attr('stroke-width', '1px');
 			}
 		});
+	});
+
+	// Draw the legend.
+	var xPositionLegend = 0;
+	yPosition = -margin.top / 2;
+	$.each(groupNames, function(index, value) {
+		value = value ? value : 'null';
+		var textWidth = calculateTextWidth(value, '9px arial');
+		svg.append('rect')
+			.attr('fill', groupColors[index])
+			.attr('x', xPositionLegend)
+			.attr('y', yPosition + Math.floor(dataTrackHeight / 2) - legendRectHeight / 2)
+			.attr('width', legendRectWidth)
+			.attr('height', legendRectHeight);
+		svg.append('text')
+			.attr('x', legendRectWidth + 5 + xPositionLegend)
+			.attr('y', yPosition + dataTrackHeight / 2)
+			.attr('text-anchor', 'start')
+			.attr('alignment-baseline', 'middle')
+			.text(value);
+		xPositionLegend += textWidth + 2 * legendRectWidth + 5;
 	});
 	$('.plot-loader').hide();
 };
