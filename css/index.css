@@ -235,8 +235,18 @@ main {
 	background: #34495e;
 	color: #fcfcfc;
 	margin: 2em;
-	opacity: 0;
 	padding: 1em 1em 0 1em;
+	position: relative;
+}
+
+.toolbar__cover {
+	background: #fff;
+	bottom: 0;
+	left: 0;
+	position: absolute;
+	right: 0;
+	top: 0;
+	z-index: 1;
 }
 
 .toolbar svg {

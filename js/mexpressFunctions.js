@@ -172,9 +172,10 @@ var addToolbar = function() {
 		$('.toolbar--select-sorter').append('<option value="' + value + '" data-type="clinical">' +
 			parameterText + '</option>');
 	});
-	$('.toolbar').animate({
-		opacity: 1
-	}, 500);
+	//$('.toolbar').animate({
+	//	opacity: 1
+	//}, 500);
+	$('.toolbar__cover').fadeOut(500);
 };
 
 var calculateStatistics = function(samples, sorter) {
