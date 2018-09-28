@@ -62,7 +62,7 @@
 			<div class="toolbar__cover"></div>
 			<div class="data-summary"></div>
 			<ul>
-				<li>
+				<li class="toolbar-detail">
 					<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-shuffle">
 						<polyline points="16 3 21 3 21 8"></polyline>
 						<line x1="4" y1="20" x2="21" y2="3"></line>
@@ -75,7 +75,7 @@
 						<option value="region_expression" selected>expression</option>
 					</select>
 				</li>
-				<li>
+				<li class="toolbar-detail">
 					<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-filter">
 						<polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
 					</svg>
@@ -84,7 +84,7 @@
 						<option selected value="no filter">no filter</option>
 					</select>
 				</li>
-				<li>
+				<li class="toolbar-detail">
 					<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-list">
 						<line x1="8" y1="6" x2="21" y2="6"></line>
 						<line x1="8" y1="12" x2="21" y2="12"></line>
@@ -98,7 +98,7 @@
 					</div>
 					clinical parameters
 				</li>
-				<li>
+				<li class="toolbar-detail">
 					<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-toggle-left">
 						<rect x="1" y="5" width="22" height="14" rx="7" ry="7"></rect>
 						<circle cx="8" cy="12" r="3"></circle>
@@ -106,7 +106,7 @@
 					Show the genomic variants
 					<input type="checkbox" class="toolbar--check-variants"/>
 				</li>
-				<li>
+				<li class="toolbar-detail">
 					<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-refresh-ccw">
 						<polyline points="1 4 1 10 7 10"></polyline>
 						<polyline points="23 20 23 14 17 14"></polyline>
@@ -117,7 +117,7 @@
 					</div>
 					the plot
 				</li>
-				<li>
+				<li class="toolbar-detail">
 					<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-info">
 						<circle cx="12" cy="12" r="10"></circle>
 						<line x1="12" y1="16" x2="12" y2="12"></line>
@@ -154,14 +154,23 @@
 						</optgroup>
 					</select>
 				</li>
-				<li>
+				<li class="toolbar-detail">
+					<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-maximize">
+						<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+					</svg>
+					Show the 
+					<div class="button button--plot-summary button--extra-small">
+						<div class="button__text">summarized view</div>
+					</div>
+				</li>
+				<li class="toolbar-summary">
 					<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-minimize">
 						<path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path>
 					</svg>
-					<div class="button button--plot-summary button--extra-small">
-						<div class="button__text">Switch</div>
+					Show the 
+					<div class="button button--plot-detail button--extra-small">
+						<div class="button__text">detailed view</div>
 					</div>
-					to a summarized view
 				</li>
 			</ul>
 		</div>

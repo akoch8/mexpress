@@ -230,8 +230,35 @@ $(function() {
 		var showVariants = $('.toolbar--check-variants').prop('checked');
 		var plotStart = cancerTypeDataFiltered.plot_data.start;
 		var plotEnd = cancerTypeDataFiltered.plot_data.end;
+		$('.toolbar').find('li').each(function() {
+			if ($(this).hasClass('toolbar-detail')) {
+				$(this).hide();
+			} else if ($(this).hasClass('toolbar-summary')) {
+				$(this).css('display', 'inline-block');
+			}
+		});
 		setTimeout(function() {
 			plotSummary(sampleSorter, showVariants, plotStart, plotEnd);
+		}, 100);
+	});
+	$('.button--plot-detail').on('click', function() {
+		$('.plot-loader').show();
+		var sampleSorter = $('#sample-sorter').text();
+		sampleSorter = sampleSorter === '' ? 'region_expression' : sampleSorter;
+		var sampleFilter = $('#sample-filter').text();
+		sampleFilter = sampleFilter === '' ? null : sampleFilter;
+		var showVariants = $('.toolbar--check-variants').prop('checked');
+		var plotStart = cancerTypeDataFiltered.plot_data.start;
+		var plotEnd = cancerTypeDataFiltered.plot_data.end;
+		$('.toolbar').find('li').each(function() {
+			if ($(this).hasClass('toolbar-detail')) {
+				$(this).show();
+			} else if ($(this).hasClass('toolbar-summary')) {
+				$(this).hide();
+			}
+		});
+		setTimeout(function() {
+			plot(sampleSorter, sampleFilter, showVariants, plotStart, plotEnd);
 		}, 100);
 	});
 	$(document).on('click', '.filter-options li', function() {

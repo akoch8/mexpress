@@ -264,6 +264,10 @@ main {
 	margin-left: 0.5em;
 }
 
+li.toolbar-summary {
+	display: none;
+}
+
 .plot-window {
 	background: #fff;
 	margin: 2em;
