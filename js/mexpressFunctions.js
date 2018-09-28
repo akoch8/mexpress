@@ -2639,6 +2639,8 @@ var updateDropdowns = function(parameters) {
 		$('.toolbar--select-sorter').append('<option value="' + value +
 			'" data-type="clinical">' + parameterText + '</option>');
 	});
+	$('.toolbar--select-filter').find('option[value="no filter"]').prop('selected', true);
+	$('.toolbar--select-sorter').find('option[value="region_expression"]').prop('selected', true);
 };
 
 var variantsByStartValue = function(data) {
