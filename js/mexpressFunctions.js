@@ -2055,6 +2055,7 @@ var plotSummary = function(sorter, showVariants, plotStart, plotEnd) {
 		.attr('stroke', textColor);
 	d3.selectAll('.axis text')
 		.attr('font-size', '9px')
+		.attr('font-family', 'arial')
 		.attr('fill', textColor);
 	d3.selectAll('.axis line')
 		.attr('stroke', textColor);
