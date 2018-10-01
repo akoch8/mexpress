@@ -330,6 +330,7 @@ $(function() {
 				encodeURIComponent(JSON.stringify(cancerTypeDataFiltered));
 			link.href = 'data:' + data;
 			link.download = 'plottedData.json';
+			link.click();
 		} else if (format === 'tsv') {
 			// Format the data in such a way that we can push them into a tab-separated text file.
 			data = '';
@@ -382,12 +383,32 @@ $(function() {
 			data = data.trim() + '\n';
 			link.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(data);
 			link.download = 'plottedData.txt';
+			link.click();
+		} else if (format === 'png') {
+			data = d3.select('.svg-container')
+				.attr('version', 1.1)
+				.attr('xlmns', 'http://www.w3.org/2000/svg')
+				.html();
+			$.ajax({
+				data: 'svgHtml=' + encodeURIComponent(data),
+				url: 'php/svg2png.php',
+				method: 'POST',
+				success: function(data) {
+					var imageName = data.replace(/^.+\//, '');
+					var imageFileName = 'php/downloads/' + imageName;
+					link.href = imageFileName;
+					link.download = imageName;
+					link.click(function() {
+						console.log('CLICKEDEDEDEDDE');
+					});
+				}
+			});
 		} else if (format === 'svg') {
 			data = d3.select('.svg-container').html();
 			link.href = 'data:application/octet-stream;base64,' + btoa(data);
 			link.download = 'figure.svg';
+			link.click();
 		}
-		link.click();
 		$('.toolbar--select-download option[value=empty]').prop('selected', true);
 	});
 });

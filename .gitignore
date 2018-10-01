@@ -6,3 +6,5 @@ img/design/
 img/feather/
 *.ai
 *.pyc
+php/downloads/*
+
