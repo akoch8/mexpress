@@ -214,6 +214,13 @@ $(function() {
 	});
 	$('.button--reset-plot').on('click', function() {
 		$('.plot-loader').show();
+		$('.toolbar').find('li').each(function() {
+			if ($(this).hasClass('toolbar-detail')) {
+				$(this).show();
+			} else if ($(this).hasClass('toolbar-summary')) {
+				$(this).hide();
+			}
+		});
 		setTimeout(function() {
 			updateDropdowns(cancerTypeAnnotation.default);
 			$('.toolbar--check-variants').prop('checked', false);
