@@ -406,8 +406,11 @@ $(function() {
 					var imageFileName = 'php/downloads/' + imageName;
 					link.href = imageFileName;
 					link.download = imageName;
-					link.click(cleanUpImages(imageName));
+					link.click();
 					$('.png-conversion').addClass('hidden');
+					setTimeout(function() {
+						cleanUpImages(imageName);
+					}, 5000);
 				}
 			});
 		} else if (format === 'svg') {
