@@ -2384,15 +2384,21 @@ var plotSummary = function(sorter, showVariants, plotStart, plotEnd) {
 		.x(function(d) { return x(d.x); })
 		.y(function(d) { return y(d.y); });
 	$.each(groupsLineData, function(group, data) {
+		// The d3.line function automatically adds a 'Z' to the end of the SVG path data, which
+		// closes the path by drawing a line from the last point of the path to the first. If we
+		// specify the 'fill' attribute of the path to be 'none', the path won't appear to be
+		// closed in the browser. However, when a user downloads the plot as an .svg file and then
+		// opens this file in Adobe Illustrator, the line paths are in fact closed, because of the
+		// trailing 'Z'. To prevent this, we remove this trailing 'Z' (or 'z') from the path data:
+		var lineData = line(data).replace(/Z$/i, '');
 		svg.append('path')
-			.data([data])
 			.attr('fill', 'none')
 			.attr('stroke-width', 1)
 			.attr('stroke-linecap', 'round')
 			.attr('stroke-linejoin', 'round')
 			.attr('stroke-opacity', 0.5)
 			.attr('stroke', groupColors[groupNames.indexOf(group)])
-			.attr('d', line);
+			.attr('d', lineData);
 	});
 
 	// Draw the legend.
