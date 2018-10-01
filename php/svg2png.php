@@ -14,12 +14,12 @@ $cwd = getcwd();
 $svgFileName = $cwd.'/downloads/'.$uniqueFileName.'.svg';
 $pngFileName = $cwd.'/downloads/'.$uniqueFileName.'.png';
 file_put_contents($svgFileName, $svgHtml);
-chmod($svgFileName, 0766);
+chmod($svgFileName, 0777);
 
 // Convert the svg file to a png image using inkscape.
 $cmd = '/Applications/Inkscape.app/Contents/Resources/bin/inkscape --export-png='.escapeshellarg($pngFileName).' --export-background=white  --export-dpi=300 '.escapeshellarg($svgFileName);
 exec($cmd);
-chmod($pngFileName, 0766);
+chmod($pngFileName, 0777);
 echo $pngFileName;
 
 ?>

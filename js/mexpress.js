@@ -392,6 +392,7 @@ $(function() {
 			link.download = 'plottedData.txt';
 			link.click();
 		} else if (format === 'png') {
+			$('.png-conversion').removeClass('hidden');
 			data = d3.select('.svg-container')
 				.attr('version', 1.1)
 				.attr('xlmns', 'http://www.w3.org/2000/svg')
@@ -405,9 +406,8 @@ $(function() {
 					var imageFileName = 'php/downloads/' + imageName;
 					link.href = imageFileName;
 					link.download = imageName;
-					link.click(function() {
-						console.log('CLICKEDEDEDEDDE');
-					});
+					link.click(cleanUpImages(imageName));
+					$('.png-conversion').addClass('hidden');
 				}
 			});
 		} else if (format === 'svg') {

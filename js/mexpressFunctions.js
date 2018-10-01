@@ -442,6 +442,19 @@ var clearFilterSelection = function() {
 	//$('.toolbar--select-filter')[0].selectedIndex = 0;
 };
 
+var cleanUpImages = function(file) {
+	$.ajax({
+		type: 'POST',
+		url: 'php/cleanUpImages.php',
+		data: {file: file},
+	}).done(function(reply) {
+		reply = $.parseJSON(reply);
+		if (!reply.success) {
+			console.log('Could not delete the images.');
+		}
+	});
+};
+
 var drawArrow = function(y, xPosition, annotation, color) {
 	// Add an arrow to indicate whether the region is located on the + or - strand.
 	svg.append('path')
