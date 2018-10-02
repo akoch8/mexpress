@@ -321,6 +321,12 @@ var quantile = function(x, q) {
 	if (x.length === 0) {
 		return null;
 	}
+	if (x.length === 1 && q !== 0.5) {
+		return null;
+	}
+	if (x.length === 1 && q === 0.5) {
+		return x;
+	}
 	x = x.sort(function(a,b) {
 		return a - b;
 	});
