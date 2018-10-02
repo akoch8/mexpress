@@ -2324,7 +2324,7 @@ var plotSummary = function(sorter, showVariants, plotStart, plotEnd) {
 			var groupValues = [];
 			var groupColor = groupColors[groupNames.indexOf(group)];
 			$.each(samples, function(index, sample) {
-				if (samples.indexOf(sample) > -1) {
+				if (cancerTypeDataFiltered.samples_filtered_sorted.indexOf(sample) > -1) {
 					groupValues.push(value[sample]);
 				}
 			});
@@ -2339,6 +2339,8 @@ var plotSummary = function(sorter, showVariants, plotStart, plotEnd) {
 					.attr('y2', y(methylationSummary.median))
 					.attr('stroke', groupColor)
 					.attr('stroke-width', '2px');
+			}
+			if (methylationSummary.quantile25 !== null && methylationSummary.quantile75 !== null) {
 				svg.append('line')
 					.attr('x1', x(probeLocation) + xAdj[groupNames.indexOf(group)])
 					.attr('x2', x(probeLocation) + xAdj[groupNames.indexOf(group)])
