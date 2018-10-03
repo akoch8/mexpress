@@ -39,9 +39,121 @@
 				</p>
 			</section>
 			<section>
+				<h2>Why?</h2>
+				<p>
+					While there are several other excellent tools available, such as <a href="http://www.cbioportal.org" target="_blank">cBioPortal</a>, <a href="https://xenabrowser.net" target="_blank">Xena</a>, or <a href="#" target="_blank">TSVdb</a>, none of them allow you to look at DNA methylation data in relation to <a href="#" target="_blank">its genomic location</a> and other data types quite like MEXPRESS does.
+				</p>
+			</section>
+			<section>
 				<h2>How?</h2>
 				<p>
 					Easy! Just enter the name of the gene or miRNA you are interested in, select the cancer type you are interested in, and click the plot button. MEXPRESS will then plot the corresponding expression, DNA methylation, and clinical data. Done!
+				</p>
+			</section>
+			<section>
+				<h2>Getting started</h2>
+				<p>
+					This is the MEXPRESS start screen:
+				</p>
+				<figure>
+					<img alt="The MEXPRESS start screen." src="img/startScreen.png">
+				</figure>
+				<p>
+					On the left side you will notice the text input field where you can enter a gene or miRNA name (HGNC symbols, Ensembl gene IDs and Entrez IDs are recognized) as well as the list of cancer types you can choose from. Let's say you are interested in the expression and methylation data of the <em>CDO1</em> gene in bladder cancer. Simply enter <em>CDO1</em> in the text field and select BLCA (bladder urothelial carcinoma).
+				</p>
+				<p>
+					All that is left to do after selecting a gene and cancer type is clicking the <span class="fake-button">plot</span> button and the data you selected will be visualised:
+				</p>
+				<figure>
+					<img alt="MEXPRESS visualization" src="img/visualization.png">
+				</figure>
+				<p>
+					There is a lot to see on the screen, so let's go over the different parts in detail.
+				</p>
+			</section>
+			<section>
+				<h2>The figure</h2>
+				<p>
+					The most important thing on the screen is the figure that shows you the DNA methylation, expression and clinical data for the gene (<em>CDO1</em>) and cancer type (bladder cancer) you selected. This figure consists of several main parts. From top to bottom you'll see the legend, the clinical data, the expression and copy number data, and the DNA methylation data.
+				</p>
+				<figure>
+					<img alt="A figure created with MEXPRESS" src="img/figure.png">
+				</figure>
+				<p>
+					On the left side of the DNA methylation data you can see the genomic annotation. Here, all the genes, transcripts, miRNAs, CpGs and CpG islands that are located within the plot window are drawn.
+				</p>
+				<p>
+					Samples are arranged from left to right. By default, the samples are ordered by the expression of the gene you entered. So in this case, samples with low <em>CDO1</em> expression are located on the left side of the plot, whereas samples with high <em>CDO1</em> expression are on the right.
+				</p>
+				<p>
+					The DNA methylation data are plotted for each probe separately and the data are linked to the genomic location of the probe. If you hover over the DNA methylation data the probe location will be highlighted and if you click on the data, a small box will pop up with some extra information on the probe.
+				</p>
+			</section>
+			<section>
+				<h2>Zooming in</h2>
+				<p>
+					If you are looking at a long gene or a gene with many DNA methylation probes, the plot can become quite large and complex. You can reduce the size of the figure by zooming on a specific part. To do this, you just have to click on the genomic annotation at the left side of the figure and drag a box over the area you would like to zoom in on.
+				</p>
+				<figure>
+					<img alt="Zooming in on the figure" src="img/zooming.png">
+				</figure>
+				<p>
+					You can also reduce the complexity of your figure by creating a summary view. We will show you how to do that in the following section.
+				</p>
+			</section>
+			<section>
+				<h2>The toolbar</h2>
+				<figure>
+					<img alt="The MEXPRESS toolbar" src="img/toolbar.png">
+				</figure>
+				<p>
+					The toolbar lets you control the plot by filtering and rearranging the samples and by adding or removing data types. 
+				</p>
+				<p>
+					At the top of the toolbar you can see which gene and cancer type you selected as well as the number of samples that are plotted in the figure. Below that, you will find the following options:
+				</p>
+				<ul>
+					<li>
+						<strong>Sort the samples:</strong> select a data type from the drop down list to reorder the samples by their value for this data type (remember that by default, the samples are sorted by their expression)
+					</li>
+					<li>
+						<strong>Filter the samples:</strong> select the data type from the drop down list by which you would like to filter the samples. When you select a data type, a new window will pop up with a histogram of the selected data and the different filtering options.
+					</li>
+					<li>
+						<strong>Select clinical parameters:</strong> click the button and select which clinical variables you would like to see in the plot from the full list of all available variables. If you want to go back to the default variables, simply click the "reset" button in the pop up.
+					</li>
+					<li>
+						<strong>Show the genomic variants:</strong> check or uncheck the box to show or hide the genomic variants that are available in the TCGA data. Be aware that for some genes there might not be any variants available.
+					</li>
+					<li>
+						<strong>Show the summarized view:</strong> click this button to generate the summarized view we mentioned in the previous section. In the summarized view, the genomic annotation is drawn horizontally instead of vertically. The samples are split up in different groups based on the variable by which the samples are sorted. If this variable is categorical (for example gender), then the groups will simply match the different categories (male and female). However, if the variable is numerical (for example expression), the samples will be split in two groups based on the median value of the variable (low expression, i.e. expression < median expression, and high expression, i.e expression >= median expression).
+					</li>
+				</ul>
+				<figure>
+					<img alt="The summary plot" src="img/summary.png">
+				</figure>
+				<ul>
+					<li>
+						<strong>Reset the plot:</strong> click this button to recreate the default plot.
+					</li>
+					<li>
+						<strong>Download:</strong> select one of the options from the drop down list to download the figure (as a PNG or SVG image) or the data (as a text file or in JSON format). Note that generating a PNG image might take a few seconds.
+					</li>
+					<li>
+						<strong>Show information about:</strong> select a data type from the drop down list and you will see a pop up window describing this data type in more detail.
+					</li>
+				</ul>
+			</section>
+			<section>
+				<h2>Statistics</h2>
+				<p>
+					Another important feature of MEXPRESS is that every figure provides not just a visualization of the data, but also a statistical analysis. The numbers on the right side of the figure show you the p values and Pearson correlation coefficients for the comparison between the variable by which the samples are sorted and all the other variables. Note that all p values you see are Benjamini-Hochberg-adjusted p values, which means that they have been corrected for multiple hypothesis testing.
+				</p>
+				<p>
+					If we take the default plot as an example, the samples are sorted by their expression, which is a numeric variable. MEXPRESS will then go over all the other variables in the figure and perform the appropriate test. If the other variable is also numeric (for example the DNA methylation data for a specific probe), MEXPRESS will calculate the correlation between the expression data and the DNA methylation data. If the other variable is categorical, MEXPRESS will check the number of categories of this variable. If there are two categories (for example male and female for gender), MEXPRESS will perform a t test check whether there is a statistically significant difference in expression between the male samples and the female samples. When there are more than two categories (for example tumor stage), MEXPRESS will run an ANOVA test to check whether there is a statistically significant difference in expression between the different categories. Note that MEXPRESS can't compare two categorical variables.
+				</p>
+				<p>
+					We implemented the necessary statistical functions in JavaScript (check the code on <a href="https://github.com/akoch8/mexpress/blob/master/js/statistics.js" target="_blank">GitHub</a>) and we used numerical approximations to calculate the p values, so it is possible that you might obtain slightly different p values when you recalculate them yourself using other tools (such as <a href="https://www.r-project.org/" target="_blank">R</a>).
 				</p>
 			</section>
 		</article>
