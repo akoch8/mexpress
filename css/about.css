@@ -11,6 +11,7 @@ article {
 
 section {
 	margin: 1rem 0 2rem 0;
+	padding: 1em 0;
 }
 
 section:first-of-type {
@@ -37,4 +38,30 @@ article ul {
 
 article li {
 	margin: 0.5em 0;
+}
+
+section figure {
+	margin: 2em auto;
+	padding: 0;
+	width: 100%;
+}
+
+section img {
+	box-shadow: 0 20px 40px 0 #dcdcdc;
+	width: 100%;
+}
+
+.fake-button {
+	background: #ff6666;
+	color: #fbe8d3;
+	font-family: 'Montserrat';
+	font-weight: 700;
+	justify-content: center;
+	letter-spacing: 0.2em;
+	margin: 0 0.25em;
+	padding: 0.25em 0.5em;
+	position: relative;
+	text-align: center;
+	text-transform: uppercase;
+	user-select: none;
 }
