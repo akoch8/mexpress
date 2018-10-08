@@ -1192,6 +1192,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 	// methylation, correlation between expression and numerical clinical parameters, t-test or
 	// ANOVA comparing expression in different groups for categorical clinical parameters.
 	var stats = calculateStatistics(samples, sorter);
+	console.log(stats);
 
 	// Adjust the p values for multiple hypothesis testing.
 	stats = pAdjust(stats);
@@ -1971,7 +1972,6 @@ var plotSummary = function(sorter, showVariants, plotStart, plotEnd) {
 			delete groups[key];
 		}
 	});
-	console.log(groups);
 
 	// Count the number of regions (including transcripts in the case of genes) that need to be
 	// drawn.
