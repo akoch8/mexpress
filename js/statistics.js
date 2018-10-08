@@ -389,10 +389,10 @@ var tTest = function(x, y) {
 
 	// Remove missing values.
 	x = x.filter(function(a) {
-		return a !== null && a !== undefined;
+		return a !== null && a !== undefined && !isNaN(a);
 	});
 	y = y.filter(function(a) {
-		return a !== null && a !== undefined;
+		return a !== null && a !== undefined && !isNaN(a);
 	});
 	var nx = x.length;
 	var ny = y.length;
