@@ -227,6 +227,7 @@ $(function() {
 			$('#sample-sorter').text('');
 			$('#sample-filter').text('');
 			$('#clinical-parameters').text('default');
+			cancerTypeDataFiltered = $.extend(true, {}, cancerTypeData);
 			plot('region_expression', null, false);
 		}, 100);
 	});

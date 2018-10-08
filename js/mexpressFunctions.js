@@ -146,7 +146,7 @@ var addVariantAnnotation = function(annotation, xPosition, yPosition) {
 var addToolbar = function() {
 	// Reset the toolbar.
 	$('.toolbar .data-summary').empty()
-		.append('<p><strong>' + cancerTypeData.region_annotation.name + '</strong> &mdash; ' +
+		.append('<p><strong>' + cancerTypeDataFiltered.region_annotation.name + '</strong> &mdash; ' +
 			cancerTypeAnnotation.full_name + '</p>')
 		.append('<p>Showing data for <span class="nr_samples"></span> samples.</p>');
 	$('.toolbar--select-sorter option:not(:first)').remove();
@@ -156,7 +156,7 @@ var addToolbar = function() {
 	// Add the available variables to the 'sorter' select dropdown. Here, the user can choose to
 	// reorder the samples by any of the available variables.
 	$('.toolbar--select-filter').append('<option value="region_expression">expression</option>');
-	if (Object.keys(cancerTypeData.cnv).length) {
+	if (Object.keys(cancerTypeDataFiltered.cnv).length) {
 		$('.toolbar--select-filter').append('<option value="cnv">copy number</option>');
 		$('.toolbar--select-sorter').append('<option value="cnv">copy number</option>');
 	} else {
@@ -732,7 +732,7 @@ var drawDataTrackVariants = function(data, sortedSamples, variantPosition, xPosi
 			dataValues.push(null);
 		}
 	});
-	var variantCategories = getVariantCategories(cancerTypeData.snv);
+	var variantCategories = getVariantCategories(cancerTypeDataFiltered.snv);
 	var variantColors = dataValues.map(function(x) {
 		if (x) {
 			return categoricalColors[variantCategories.indexOf(x.effect)];
@@ -839,10 +839,10 @@ var filterSamples = function(sampleFilter) {
 		var filterCommand = sampleFilter[1];
 		var filterValues = sampleFilter[2].split('+');
 		var dataToFilter;
-		if (parameterToFilter in cancerTypeData) {
-			dataToFilter = cancerTypeData[parameterToFilter];
-		} else if (parameterToFilter in cancerTypeData.phenotype) {
-			dataToFilter = cancerTypeData.phenotype[parameterToFilter];
+		if (parameterToFilter in cancerTypeDataFiltered) {
+			dataToFilter = cancerTypeDataFiltered[parameterToFilter];
+		} else if (parameterToFilter in cancerTypeDataFiltered.phenotype) {
+			dataToFilter = cancerTypeDataFiltered.phenotype[parameterToFilter];
 		} else {
 			console.log('ERROR: cannot find "' + parameterToFilter + '" in the data object keys.');
 			return false;
@@ -926,6 +926,7 @@ var loadData = function(name, cancer) {
 		$('.button__text').css('visibility', 'visible');
 		cancerTypeData = $.parseJSON(reply);
 		if (cancerTypeData.success) {
+			cancerTypeDataFiltered = $.extend(true, {}, cancerTypeData);
 			addToolbar();
 			addClinicalParameters();
 
@@ -975,18 +976,73 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 	// - the number of location-linked data tracks
 	// -=> will determine the height of the plot
 	//
+	// Count the number of samples.
+	var dnaMethylationSamples = 0;
+	if (cancerTypeDataFiltered.dna_methylation_data.length) {
+		var dnaMethProbe = Object.keys(cancerTypeDataFiltered.dna_methylation_data)[0];
+		dnaMethylationSamples = Object.keys(cancerTypeDataFiltered.dna_methylation_data[dnaMethProbe]);
+	}
+	var regionExpressionSamples = Object.keys(cancerTypeDataFiltered.region_expression);
+	var phenotypeVariable = Object.keys(cancerTypeDataFiltered.phenotype)[0];
+	var phenotypeSamples = Object.keys(cancerTypeDataFiltered.phenotype[phenotypeVariable]);
+	var cnvSamples = 0;
+	if (cancerTypeDataFiltered.cnv.length) {
+		cnvSamples = Object.keys(cancerTypeDataFiltered.cnv);
+	}
+
+	// Create an array that holds all the samples for which there is any type of data. This array
+	// will be used to sort the samples by whichever variable the user chooses. It will also be
+	// used to filter the data (e.g. to show only primary tumor samples).
+	allSamples = merge(dnaMethylationSamples, regionExpressionSamples, phenotypeSamples,
+		cnvSamples);
+
+	// Filter the samples. By default, there is no filtering applied.
+	var samples = filterSamples(sampleFilter);
+	var removedSamples = allSamples.filter(function(x) {
+		return samples.indexOf(x) === -1;
+	});
+
+	// Sort the samples by the selected variable.
+	var dataToSort;
+	if (!sorter) {
+		sorter = 'region_expression';
+	}
+	if (sorter in cancerTypeDataFiltered) {
+		dataToSort = cancerTypeDataFiltered[sorter];
+		samples = sortSamples(samples, dataToSort);
+	} else if (sorter in cancerTypeDataFiltered.phenotype) {
+		dataToSort = cancerTypeDataFiltered.phenotype[sorter];
+		samples = sortSamples(samples, dataToSort);
+	}
+	cancerTypeDataFiltered.samples_filtered_sorted = samples;
+
+	// Filter the data based on the list of filtered and sorted samples.
+	$.each(removedSamples, function(index, sample) {
+		$.each(Object.keys(cancerTypeDataFiltered.dna_methylation_data), function(index, probe) {
+			delete cancerTypeDataFiltered.dna_methylation_data[probe][sample];
+		});
+		$.each(Object.keys(cancerTypeDataFiltered.phenotype), function(index, value) {
+			delete cancerTypeDataFiltered.phenotype[value][sample];
+		});
+		delete cancerTypeDataFiltered.snv[sample];
+		delete cancerTypeDataFiltered.region_expression[sample];
+		delete cancerTypeDataFiltered.cnv[sample];
+	});
+	console.log('cancerTypeDataFiltered');
+	console.log(cancerTypeDataFiltered);
+
 	// Count the number of regions (including transcripts in the case of genes) that need to be
 	// drawn.
-	var nrOtherGenes = cancerTypeData.other_regions.filter(isRegion('gene')).length;
+	var nrOtherGenes = cancerTypeDataFiltered.other_regions.filter(isRegion('gene')).length;
 	var nrTranscripts = 0;
-	if (cancerTypeData.region_annotation.region_type === 'gene') {
-		nrTranscripts = Object.keys(cancerTypeData.region_annotation.transcripts).length;
+	if (cancerTypeDataFiltered.region_annotation.region_type === 'gene') {
+		nrTranscripts = Object.keys(cancerTypeDataFiltered.region_annotation.transcripts).length;
 	}
 	var nrOtherTranscripts = 0;
-	$.each(cancerTypeData.other_regions.filter(isRegion('gene')), function(key, value) {
+	$.each(cancerTypeDataFiltered.other_regions.filter(isRegion('gene')), function(key, value) {
 		nrOtherTranscripts += Object.keys(value.transcripts).length;
 	});
-	var nrOtherMirnas = cancerTypeData.other_regions.filter(isRegion('mirna')).length;
+	var nrOtherMirnas = cancerTypeDataFiltered.other_regions.filter(isRegion('mirna')).length;
 	//console.log('# transcripts = ' + nrTranscripts);
 	//console.log('# other genes = ' + nrOtherGenes);
 	//console.log('# other transcripts = ' + nrOtherTranscripts);
@@ -1032,14 +1088,14 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 	// categorical clinical parameters as well as the genomic variant categories (if they
 	// need to be shown) and the copy number data annotation.
 	var categoricalClinicalParameters = clinicalParameters.filter(function(a) {
-		return !parameterIsNumerical(Object.values(cancerTypeData.phenotype[a]));
+		return !parameterIsNumerical(Object.values(cancerTypeDataFiltered.phenotype[a]));
 	});
 	var legendHeight = 0;
 	legendHeight = categoricalClinicalParameters.length * (dataTrackHeight + dataTrackSeparator) +
 		dataTrackHeight + dataTrackSeparator; // Add an extra track for the copy number data.
 	var legendWidth = 0;
 	$.each(categoricalClinicalParameters, function(index, value) {
-		var categoryData = Object.values(cancerTypeData.phenotype[value]);
+		var categoryData = Object.values(cancerTypeDataFiltered.phenotype[value]);
 		var categories = categoryData.filter(uniqueValues);
 		var categoryWidth = 0;
 		$.each(categories, function(i, v) {
@@ -1054,7 +1110,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 	var variantCategories;
 	if (showVariants) {
 		legendHeight += dataTrackHeight + dataTrackSeparator;
-		variantCategories = getVariantCategories(cancerTypeData.snv);
+		variantCategories = getVariantCategories(cancerTypeDataFiltered.snv);
 		var variantCategoriesWidth = 0;
 		$.each(variantCategories, function(i, v) {
 			v = v ? v : 'null';
@@ -1085,9 +1141,9 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 	// track per variant).
 	var nrDnaMethylationTracks = 0;
 	var nrVariantTracks = 0;
-	var variants = showVariants ? variantsByStartValue(cancerTypeData.snv) : {};
+	var variants = showVariants ? variantsByStartValue(cancerTypeDataFiltered.snv) : {};
 	var filteredVariants = variants;
-	cancerTypeDataFiltered = $.extend(true, {}, cancerTypeData);
+	//cancerTypeDataFiltered = $.extend(true, {}, cancerTypeData);
 	if (plotStart && plotEnd) {
 		// Filter the DNA methylation probes and genomic variants based on the provided genomic
 		// window.
@@ -1147,44 +1203,6 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 	if (locationLinkedTracksHeight < 400) {
 		locationLinkedTracksHeight = 400;
 	}
-	
-	// Count the number of samples.
-	var dnaMethylationSamples = 0;
-	if (cancerTypeDataFiltered.dna_methylation_data.length) {
-		var dnaMethProbe = Object.keys(cancerTypeDataFiltered.dna_methylation_data)[0];
-		dnaMethylationSamples = Object.keys(cancerTypeDataFiltered.dna_methylation_data[dnaMethProbe]);
-	}
-	var regionExpressionSamples = Object.keys(cancerTypeDataFiltered.region_expression);
-	var phenotypeVariable = Object.keys(cancerTypeDataFiltered.phenotype)[0];
-	var phenotypeSamples = Object.keys(cancerTypeDataFiltered.phenotype[phenotypeVariable]);
-	var cnvSamples = 0;
-	if (cancerTypeDataFiltered.cnv.length) {
-		cnvSamples = Object.keys(cancerTypeDataFiltered.cnv);
-	}
-
-	// Create an array that holds all the samples for which there is any type of data. This array
-	// will be used to sort the samples by whichever variable the user chooses. It will also be
-	// used to filter the data (e.g. to show only primary tumor samples).
-	allSamples = merge(dnaMethylationSamples, regionExpressionSamples, phenotypeSamples,
-		cnvSamples);
-
-	// Filter the samples. By default, there is no filtering applied.
-	var samples = filterSamples(sampleFilter);
-
-	// Sort the samples by the selected variable.
-	var dataToSort;
-	if (!sorter) {
-		sorter = 'region_expression';
-	}
-	if (sorter in cancerTypeDataFiltered) {
-		dataToSort = cancerTypeDataFiltered[sorter];
-		samples = sortSamples(samples, dataToSort);
-	} else if (sorter in cancerTypeDataFiltered.phenotype) {
-		dataToSort = cancerTypeDataFiltered.phenotype[sorter];
-		samples = sortSamples(samples, dataToSort);
-	}
-	cancerTypeDataFiltered.samples_filtered_sorted = samples;
-	console.log(cancerTypeDataFiltered);
 
 	// Calculate the necessary statistics (correlation, t-test, ANOVA) for the sorter. If for
 	// example the samples are sorted by their region expression, then all statistics will be
@@ -1192,6 +1210,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 	// methylation, correlation between expression and numerical clinical parameters, t-test or
 	// ANOVA comparing expression in different groups for categorical clinical parameters.
 	var stats = calculateStatistics(samples, sorter);
+	console.log('stats');
 	console.log(stats);
 
 	// Adjust the p values for multiple hypothesis testing.
@@ -2330,10 +2349,11 @@ var plotSummary = function(sorter, showVariants, plotStart, plotEnd) {
 			});
 			var methylationSummary = summary(groupValues, true);
 			groupData.push(groupValues);
-			groupsLineData[group].push({x: probeLocation, y:methylationSummary.median});
+			groupsLineData[group].push({x: probeLocation + xAdj[groupNames.indexOf(group)],
+				y:methylationSummary.median});
 			if (methylationSummary.median !== null) {
 				svg.append('line')
-					.attr('x1', x(probeLocation) - 4  + xAdj[groupNames.indexOf(group)])
+					.attr('x1', x(probeLocation) - 4 + xAdj[groupNames.indexOf(group)])
 					.attr('x2', x(probeLocation) + 4 + xAdj[groupNames.indexOf(group)])
 					.attr('y1', y(methylationSummary.median))
 					.attr('y2', y(methylationSummary.median))
