@@ -209,6 +209,7 @@ var calculateStatistics = function(samples, sorter) {
 
 	// DNA methylation data.
 	stats.dna_methylation_data = {};
+	//console.log('************* METHYLATION DATA');
 	$.each(cancerTypeDataFiltered.dna_methylation_data, function(key, value) {
 		dataValues = [];
 		$.each(samples, function(index, sample) {
@@ -244,12 +245,14 @@ var calculateStatistics = function(samples, sorter) {
 					});
 					valuesGroups.push(groupValues);
 				}
+				//console.log(valuesGroups);
 				stats.dna_methylation_data[key] = {'p': anova(valuesGroups)};
 			} else {
 				stats.dna_methylation_data[key] = null;
 			}
 		}
 	});
+	//console.log('************* METHYLATION DATA FINISHED');
 
 	// Phenotype data.
 	stats.phenotype = {};

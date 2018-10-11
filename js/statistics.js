@@ -80,9 +80,13 @@ var anova = function(x) {
 var beta = function(x, y) {
 	// Calculate the beta function using Sterling's approximation. See
 	// https://en.wikipedia.org/wiki/Beta_function#Approximation for more information.
-	var nominator = Math.pow(x, (x - 0.5)) * Math.pow(y, (y - 0.5));
-	var denominator = Math.pow(x + y, x + y - 0.5);
-	return Math.sqrt(2 * Math.PI) * nominator / denominator;
+	math.config({number: 'BigNumber'});
+	var parser = math.parser();
+	parser.eval('x = ' + x);
+	parser.eval('y = ' + y);
+	var result = parser.eval('sqrt(2 * pi) * (x ^ (x - 0.5) * y ^ (y - 0.5)) / ((x + y) ^ (x + y - 0.5))');
+	result = +math.format(result, {notation: 'auto'});
+	return result;
 };
 
 var countNull = function(x) {
@@ -110,9 +114,14 @@ var degreesOfFreedom = function(x, y) {
 var fDistribution = function(f, df1, df2) {
 	// Calculate the probability density function for a given F statistic and degrees of freedom.
 	// See https://en.wikipedia.org/wiki/F-distribution#Definition for more information.
-	var result = Math.sqrt((Math.pow(df1 * f, df1) * Math.pow(df2, df2)) /
-			(Math.pow(df1 * f + df2, df1 + df2))) /
-		(f * beta(df1 / 2, df2 / 2));
+	math.config({number: 'BigNumber'});
+	var parser = math.parser();
+	parser.eval('f = ' + f);
+	parser.eval('df1 = ' + df1);
+	parser.eval('df2 = ' + df2);
+	parser.eval('b = ' + beta(df1 / 2, df2 / 2));
+	var result = parser.eval('1 / b * (df1 / df2) ^ (df1 / 2) * f ^ (df1 / 2 - 1) * (1 + df1 / df2 * f) ^ (-(df1 + df2) / 2)');
+	result = +math.format(result, {notation: 'auto'});
 	return result;
 };
 
