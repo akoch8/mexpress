@@ -41,9 +41,9 @@ var cpgColor = '#7fa99b';
 var probeLineColor = '#dcdcdc';
 var histogramColor = '#e4f1fe';
 
-// Categorical colors source: Prism color scheme @ https://carto.com/carto-colors/
-var categoricalColors = ['#5f4690', '#1d6996', '#38a6a5', '#0f8554', '#73af48', '#edad08',
-	'#e17c05', '#cc503e', '#94346e', '#6f4070', '#994e95', '#666666'];
+// Categorical colors source: ColorBrewer 2.0 http://colorbrewer2.org/#type=qualitative&scheme=Paired&n=12
+var categoricalColors = ['#6a3d9a', '#a6cee3', '#1f78b4', '#b2df8a', '#33a02c', '#fb9a99',
+	'#e31a1c', '#fdbf6f', '#ff7f00', '#cab2d6', '#ffff99', '#b15928', '#666666'];
 var stageColors = ['#fbe6c5', '#f7d9bc', '#f4cdb4', '#f1c1ac', '#edb4a3', '#eaa89b', '#e79c93',
 	'#e48f8a', '#e08382', '#dd777a', '#d66d73', '#ca656f', '#bf5d6a', '#b45665', '#a84e61',
 	'#9d465c', '#923f57', '#863753', '#7b2f4e', '#70284a'];
