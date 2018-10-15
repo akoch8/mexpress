@@ -2526,6 +2526,26 @@ var resetClinicalParameters = function() {
 	});
 };
 
+var setToolbar = function(type) {
+	if (type === 'detail') {
+		$('.toolbar').find('li').each(function() {
+			if ($(this).hasClass('toolbar-detail')) {
+				$(this).css('display', 'inline-block');
+			} else if ($(this).hasClass('toolbar-summary')) {
+				$(this).css('display', 'none');
+			}
+		});
+	} else if (type === 'summary') {
+		$('.toolbar').find('li').each(function() {
+			if ($(this).hasClass('toolbar-summary')) {
+				$(this).css('display', 'inline-block');
+			} else if ($(this).hasClass('toolbar-detail')) {
+				$(this).css('display', 'none');
+			}
+		});
+	}	
+};
+
 var showDataTypeInformation = function(dataType) {
 	var dataInformation = {
 		'gene expression data': 'data/' + cancerTypeAnnotation.short_name + '/htseq_fpkm-uq.tsv.json',

@@ -83,6 +83,7 @@ $(function() {
 			$('.toolbar--check-variants').prop('checked', false);
 			$('#sample-sorter').text('');
 			$('#sample-filter').text('');
+			setToolbar('detail');
 			var nameInput = cleanString($('#name-input').val());
 			var cancerTypeInput = $('.select-cancer-type .selected').find('.short-name').text();
 			cancerTypeAnnotation = cancerTypes[cancerTypeInput];
@@ -214,13 +215,7 @@ $(function() {
 	});
 	$('.button--reset-plot').on('click', function() {
 		$('.plot-loader').show();
-		$('.toolbar').find('li').each(function() {
-			if ($(this).hasClass('toolbar-detail')) {
-				$(this).show();
-			} else if ($(this).hasClass('toolbar-summary')) {
-				$(this).hide();
-			}
-		});
+		setToolbar('detail');
 		setTimeout(function() {
 			updateDropdowns(cancerTypeAnnotation.default);
 			$('.toolbar--check-variants').prop('checked', false);
@@ -238,13 +233,7 @@ $(function() {
 		var showVariants = $('.toolbar--check-variants').prop('checked');
 		var plotStart = cancerTypeDataFiltered.plot_data.start;
 		var plotEnd = cancerTypeDataFiltered.plot_data.end;
-		$('.toolbar').find('li').each(function() {
-			if ($(this).hasClass('toolbar-detail')) {
-				$(this).hide();
-			} else if ($(this).hasClass('toolbar-summary')) {
-				$(this).css('display', 'inline-block');
-			}
-		});
+		setToolbar('summary');
 		setTimeout(function() {
 			plotSummary(sampleSorter, showVariants, plotStart, plotEnd);
 		}, 100);
@@ -258,13 +247,7 @@ $(function() {
 		var showVariants = $('.toolbar--check-variants').prop('checked');
 		var plotStart = cancerTypeDataFiltered.plot_data.start;
 		var plotEnd = cancerTypeDataFiltered.plot_data.end;
-		$('.toolbar').find('li').each(function() {
-			if ($(this).hasClass('toolbar-detail')) {
-				$(this).show();
-			} else if ($(this).hasClass('toolbar-summary')) {
-				$(this).hide();
-			}
-		});
+		setToolbar('detail');
 		setTimeout(function() {
 			plot(sampleSorter, sampleFilter, showVariants, plotStart, plotEnd);
 		}, 100);
