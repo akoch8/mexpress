@@ -1458,25 +1458,28 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 	drawCoordinates(y, false);
 
 	// Draw the individual CpGs and the CpG islands.
-	// Adapt the opacity of the CpG lines to the length of the gene. Otherwise the CpG plot is just
-	// one big block of green for extremely long genes. Since the longest genes in the human genome
-	// appear to be around 2.3 megabases long, we chose 2,500,000 as the denominator in the
-	// calculation below (basically to normalise the gene length to a value between 0 and 1).
+	// Adapt the opacity of the CpG lines to the length of the plot window. Otherwise the CpG plot
+	// is just one big block of green for long genes (and large plot windows). For really long
+	// genes (length > 100kb), we will simply not draw the individual CpGs. They become one big
+	// green blob anyway.
+	var plotWindowLength = Math.abs(cancerTypeDataFiltered.plot_data.start -
+		cancerTypeDataFiltered.plot_data.end);
 	var cpgOpacity = 1;
-	cpgOpacity = 1 - Math.abs(cancerTypeDataFiltered.region_annotation.start -
-		cancerTypeDataFiltered.region_annotation.end) / 2500000;
-	$.each(cancerTypeDataFiltered.region_annotation.cpg_locations, function(index, value) {
-		if (value > cancerTypeDataFiltered.plot_data.start && value < cancerTypeDataFiltered.plot_data.end) {
-			svg.append('line')
-				.attr('x1', xPosition)
-				.attr('x2', xPosition + cpgWidth)
-				.attr('y1', y(value))
-				.attr('y2', y(value))
-				.style('stroke', cpgColor)
-				.style('stroke-opacity', cpgOpacity)
-				.attr('stroke-width', 1);
-		}
-	});
+	if (plotWindowLength < 100000) {
+		cpgOpacity = 1 - plotWindowLength / 100000;
+		$.each(cancerTypeDataFiltered.region_annotation.cpg_locations, function(index, value) {
+			if (value > cancerTypeDataFiltered.plot_data.start && value < cancerTypeDataFiltered.plot_data.end) {
+				svg.append('line')
+					.attr('x1', xPosition)
+					.attr('x2', xPosition + cpgWidth)
+					.attr('y1', y(value))
+					.attr('y2', y(value))
+					.style('stroke', cpgColor)
+					.style('stroke-opacity', cpgOpacity)
+					.attr('stroke-width', 1);
+			}
+		});
+	}
 
 	xPosition += cpgWidth + genomicFeatureSmallMargin;
 	$.each(cancerTypeDataFiltered.cpgi_annotation, function(key, value) {
