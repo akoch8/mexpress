@@ -601,7 +601,22 @@ var drawDataTrack = function(data, sortedSamples, color, xPosition, yPosition, v
 			dataValues.push(null);
 		}
 	});
-	if (parameterIsNumerical(dataValues)) {
+
+	// If all the values are null, we can just draw a single rectangle instead of an separate
+	// missing value rectangle for each sample. This will reduce the number of DOM elements, which
+	// in turn will help reduce the "lagginess" that can appear when a lot of data has to be
+	// plotted.
+	var allNull = dataValues.every(function(x) {
+		return x === null;
+	});
+	if (allNull) {
+		svg.append('rect')
+			.attr('fill', missingValueColor)
+			.attr('x', xPosition)
+			.attr('y', yPosition)
+			.attr('width', sortedSamples.length * sampleWidth)
+			.attr('height', dataTrackHeight);
+	} else if (parameterIsNumerical(dataValues)) {
 		dataValues = dataValues.map(makeNumeric);
 		var factor = maximum(dataValues) / dataTrackHeight;
 		if (factor === 0) {
