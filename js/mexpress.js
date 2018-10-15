@@ -302,6 +302,9 @@ $(function() {
 		}
 	});
 	$(document).on('click', '.summary-values li', function() {
+		// Indicate which summary value has been selected.
+		$('.summary-values').find('li').removeClass('selected');
+		$(this).addClass('selected');
 		var clickedValue = $(this).attr('data-value');
 		$('.select-filter__content').find('input[type=text]').val(clickedValue);
 
@@ -319,6 +322,16 @@ $(function() {
 			d3.select('.' + lineClass).style('stroke-opacity', 0);
 		}
 	}, '.summary-values li');
+	$(document).on({
+		mouseenter: function() {
+			var categoryClass = $(this).attr('data-value').replace(/ /g, '_') + '-bar';
+			d3.selectAll('.' + categoryClass).style('fill', histogramColorFocus);
+		},
+		mouseleave: function() {
+			var categoryClass = $(this).attr('data-value').replace(/ /g, '_') + '-bar';
+			d3.selectAll('.' + categoryClass).style('fill', histogramColor);
+		}
+	}, '.filter-categories li');
 	$(document).on('click', '.parameters-options li', function() {
 		// Indicate which clinical parameters have been selected.
 		$(this).toggleClass('selected');

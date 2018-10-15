@@ -209,7 +209,6 @@ var calculateStatistics = function(samples, sorter) {
 
 	// DNA methylation data.
 	stats.dna_methylation_data = {};
-	//console.log('************* METHYLATION DATA');
 	$.each(cancerTypeDataFiltered.dna_methylation_data, function(key, value) {
 		dataValues = [];
 		$.each(samples, function(index, sample) {
@@ -245,14 +244,12 @@ var calculateStatistics = function(samples, sorter) {
 					});
 					valuesGroups.push(groupValues);
 				}
-				//console.log(valuesGroups);
 				stats.dna_methylation_data[key] = {'p': anova(valuesGroups)};
 			} else {
 				stats.dna_methylation_data[key] = null;
 			}
 		}
 	});
-	//console.log('************* METHYLATION DATA FINISHED');
 
 	// Phenotype data.
 	stats.phenotype = {};
@@ -526,13 +523,16 @@ var drawBarPlot = function(data, element) {
 		.append('g')
 			.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 	$.each(uniqueDataValues, function(index, value) {
+		value = value ? value : 'null';
 		barPlotSvg.append('rect')
-			.attr('fill', histogramColor)
+			.attr('class', value.replace(/ /g, '_') + '-bar')
 			.attr('x', 0)
 			.attr('y', y(index))
 			.attr('width', x(dataTable[value]))
-			.attr('height', dataTrackHeight);
+			.attr('height', dataTrackHeight)
+			.attr('fill', histogramColor);
 		barPlotSvg.append('text')
+			.attr('class', value.replace(/ /g, '_') + '-bar')
 			.attr('x', -5)
 			.attr('y', y(index) + dataTrackHeight / 2)
 			.attr('font-size', '11px')
@@ -831,7 +831,7 @@ var drawHistogram = function(data, element) {
 			.attr('y1', 0)
 			.attr('y2', 90)
 			.attr('class', lineClass + '-line')
-			.style('stroke', '#ff6666')
+			.style('stroke', histogramColorFocus)
 			.style('stroke-opacity', 0)
 			.attr('stroke-width', 2);
 	});
@@ -1643,12 +1643,16 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 	xPosition += marginBetweenMainParts * 5;
 	var yPosition = -topMargin;
 	$.each(categoricalClinicalParameters, function(index, value) {
+		parameterText = value.replace(/_/g, ' ');
+		if (parameterText.length > 40) {
+			parameterText = parameterText.substr(0, 37) + '...';
+		}
 		svg.append('text')
 			.attr('x', xPosition - marginBetweenMainParts / 2)
 			.attr('y', yPosition + dataTrackHeight / 2)
 			.attr('text-anchor', 'end')
 			.attr('alignment-baseline', 'middle')
-			.text(value.replace(/_/g, ' '));
+			.text(parameterText);
 		var categories = Object.values(cancerTypeDataFiltered.phenotype[value]).filter(uniqueValues);
 		categories.sort(sortAlphabetically);
 		var re = new RegExp('^(clinical|pathologic)_|tumor_stage_*|clinical_stage_');

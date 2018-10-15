@@ -40,6 +40,7 @@ var otherTranscriptColor = '#928a97';
 var cpgColor = '#7fa99b';
 var probeLineColor = '#dcdcdc';
 var histogramColor = '#e4f1fe';
+var histogramColorFocus = '#ff6666';
 
 // Categorical colors source: ColorBrewer 2.0 http://colorbrewer2.org/#type=qualitative&scheme=Paired&n=12
 var categoricalColors = ['#6a3d9a', '#a6cee3', '#1f78b4', '#b2df8a', '#33a02c', '#fb9a99',
