@@ -326,7 +326,25 @@ var calculateStatistics = function(samples, sorter) {
 						stats.phenotype[key] = null;
 					}
 				} else {
-					stats.phenotype[key] = null;
+					// Sorter = categorical & data = categorical
+					// => chi square test
+					var counts = [];
+					for (i = 0; i < sorterCategories.length; i++) {
+						var row = [];
+						for (j = 0; j < dataCategories.length; j++) {
+							var count = 0;
+							$.each(samples, function(index, sample) {
+								var sorterValue = cancerTypeDataFiltered.phenotype[sorter][sample];
+								var dataValue = value[sample];
+								if (sorterValue === sorterCategories[i] && dataValue === dataCategories[j]) {
+									count++;
+								}
+							});
+							row.push(count);
+						}
+						counts.push(row);
+					}
+					stats.phenotype[key] = {'p': chiSquare(counts)};
 				}
 			}
 		}

@@ -89,6 +89,54 @@ var beta = function(x, y) {
 	return result;
 };
 
+var chiSquare = function(x) {
+	var i, j;
+	var nRow = x.length;
+	var nCol = x[0].length;
+
+	if (nRow <= 1 || nCol <= 1) {
+		return null;
+	}
+
+	// Calculate the degrees of freedom.
+	var df = (nRow - 1) * (nCol - 1);
+
+	// Calculate the test statistic. For each "cell" in the table x, we have to calculate this
+	// formula: (observed - expected)^2/expected
+	var rowSums = x.map(function(a) {
+		return a.reduce(function(b, c) {
+			return b + c;
+		});
+	});
+	var colSums = [];
+	for (j = 0; j < nCol; j++) {
+		var colSum = 0;
+		for (i = 0; i < nRow; i++) {
+			colSum += x[i][j];
+		}
+		colSums.push(colSum);
+	}
+	var total = rowSums.reduce(function(a, b) {
+		return a + b;
+	});
+	var testStatistics = [];
+	for (i = 0; i < nRow; i++) {
+		for (j = 0; j < nCol; j++) {
+			var observed = x[i][j];
+			var expected = colSums[j] * rowSums[i] / total;
+			var stat = Math.pow(observed - expected, 2) / expected;
+			testStatistics.push(stat);
+		}
+	}
+	var testStatistic = testStatistics.reduce(function(a, b) {
+		return a + b;
+	});
+	var p = incompleteGamma(df / 2, testStatistic / 2);
+	p = p / math.gamma(df / 2);
+	p = 1 - p;
+	return p;
+};
+
 var countNull = function(x) {
 	var nullCount = 0;
 	for (var i = 0; i < x.length; i++) {
@@ -123,6 +171,22 @@ var fDistribution = function(f, df1, df2) {
 	var result = parser.eval('1 / b * (df1 / df2) ^ (df1 / 2) * f ^ (df1 / 2 - 1) * (1 + df1 / df2 * f) ^ (-(df1 + df2) / 2)');
 	result = +math.format(result, {notation: 'auto'});
 	return result;
+};
+
+var incompleteGamma = function(df, x) {
+	// The code for this function was adapted from the C code on this page:
+	// https://www.codeproject.com/Articles/432194/How-to-Calculate-the-Chi-Squared-P-Value
+	var c = 1 / df * Math.pow(x, df) * Math.exp(-x);
+	var sum = 1;
+	var nom = 1;
+	var denom = 1;
+	for (var i = 0; i < 200; i++) {
+		nom *= x;
+		df++;
+		denom *= df;
+		sum += nom / denom;
+	}
+	return sum * c;
 };
 
 var isNumber = function(x) {
@@ -375,7 +439,7 @@ var tDistribution = function(df, t) {
 	// - a t value
 	// - the t distribution.
 	// The p value is calculated using a numerical approximation:
-	// Abramowitz, M and Stegun, I. A. (1970), Handbook of Mathematical
+	// Abramowitz, M and Stegun, I A (1970), Handbook of Mathematical
 	// Functions With Formulas, Graphs, and Mathematical Tables, NBS Applied
 	// Mathematics Series 55, National Bureau of Standards, Washington, DC.
 	// p 932: function 26.2.19
