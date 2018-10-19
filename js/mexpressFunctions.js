@@ -2577,7 +2577,8 @@ var showDataTypeInformation = function(dataType) {
 		'survival data': 'data/' + cancerTypeAnnotation.short_name + '/survival.tsv.json',
 		'methylation 450 data': 'data/' + cancerTypeAnnotation.short_name + '/HumanMethylation450.json',
 		'genomic variants': 'data/' + cancerTypeAnnotation.short_name + '/mutect2_snv.tsv.json',
-		'statistics': 'data/statistics.json'
+		'statistics': 'data/statistics.json',
+		'genomic annotation': 'data/genomicAnnotation.json'
 	};
 	var infoWindow = $('.data-type-information').find('.data-type-information__content');
 	infoWindow.empty();
