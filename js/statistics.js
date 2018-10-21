@@ -5,13 +5,13 @@ var anova = function(x) {
 
 	// The input object 'x' should be an array (groups/samples) of arrays (data points).
 	if (!Array.isArray(x)) {
-		return false;
+		return NaN;
 	}
 	var subArrayTest = x.map(function(x) {
 		return Array.isArray(x);
 	});
 	if (!subArrayTest.every(function(x) { return x; })) {
-		return false;
+		return NaN;
 	}
 
 	// Filter out missing values.
@@ -19,6 +19,14 @@ var anova = function(x) {
 		x[i] = x[i].filter(function(a) {
 			return a !== null && a !== undefined && !isNaN(a);
 		});
+	}
+
+	// Check if there are enough groups with enough samples to continue with the ANOVA.
+	x = x.filter(function(a) {
+		return a.length >= 3;
+	});
+	if (x.length < 2) {
+		return NaN;
 	}
 
 	// m = the number of samples
@@ -95,7 +103,7 @@ var chiSquare = function(x) {
 	var nCol = x[0].length;
 
 	if (nRow <= 1 || nCol <= 1) {
-		return null;
+		return NaN;
 	}
 
 	// Calculate the degrees of freedom.
@@ -340,7 +348,7 @@ var pearsonCorrelation = function(x, y) {
 
 	// Check if the arrays have the same length.
 	if (x.length !== y.length) {
-		return 'failed';
+		return NaN;
 	}
 
 	// Check if there are any missing values and remove them from both arrays if there are.
@@ -381,7 +389,7 @@ var pearsonCorrelation = function(x, y) {
 		var p = tDistribution(df, t);
 		return { r: r, p: p };
 	} else {
-		return null;
+		return NaN;
 	}	
 };
 
