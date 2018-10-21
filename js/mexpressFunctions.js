@@ -94,12 +94,18 @@ var addStatistic = function(statistic, x, y) {
 				} else if (statistic.p < 0.05) {
 					statText += '*';
 				}
+			} else {
+				statText = 'NaN';
 			}
 		} else {
-			if (statistic.p < 0.001) {
-				statText = 'p = ' + statistic.p.toExponential(3);
+			if (!isNaN(statistic.p)) {
+				if (statistic.p < 0.001) {
+					statText = 'p = ' + statistic.p.toExponential(3);
+				} else {
+					statText = 'p = ' + statistic.p.toFixed(3);
+				}
 			} else {
-				statText = 'p = ' + statistic.p.toFixed(3);
+				statText = 'NaN';
 			}
 		}
 		svg.append('text')
