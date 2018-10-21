@@ -670,7 +670,7 @@ var drawDataTrack = function(data, sortedSamples, color, xPosition, yPosition, v
 		if (re.test(variable)) {
 			categoryColors = dataValues.map(function(x) {
 				if (x) {
-					if (variable.endsWith('simplified')) {
+					if (allCategories.length <= stageColorsSimplified.length) {
 						return stageColorsSimplified[allCategories.indexOf(x)];
 					} else {
 						return stageColors[allCategories.indexOf(x)];
@@ -1702,7 +1702,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 		if (re.test(value)) {
 			categoryColors = categories.map(function(x) {
 				if (x) {
-					if (value.endsWith('simplified')) {
+					if (categories.length <= stageColorsSimplified.length) {
 						return stageColorsSimplified[categories.indexOf(x)];
 					} else {
 						return stageColors[categories.indexOf(x)];
@@ -2358,7 +2358,12 @@ var plotSummary = function(sorter, showVariants, plotStart, plotEnd) {
 	if (re.test(sorter)) {
 		groupColors = groupNames.map(function(x) {
 			if (x !== 'null') {
-				if (sorter.endsWith('simplified')) {
+				/*if (sorter.endsWith('simplified')) {
+					return stageColorsSimplified[groupNames.indexOf(x)];
+				} else {
+					return stageColors[groupNames.indexOf(x)];
+				}*/
+				if (groupNames.length <= stageColorsSimplified.length) {
 					return stageColorsSimplified[groupNames.indexOf(x)];
 				} else {
 					return stageColors[groupNames.indexOf(x)];
