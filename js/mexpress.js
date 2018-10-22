@@ -133,13 +133,13 @@ $(function() {
 	$('.button--cancel').on('click', function() {
 		if ($(this).closest('.overlay').hasClass('select-filter')) {
 			$('.toolbar--select-filter')[0].selectedIndex = 0;
-			$(this).closest('.overlay').fadeOut(200, clearFilterSelection);
+			$(this).closest('.overlay').slideUp(200, clearFilterSelection);
 		} else if ($(this).closest('.overlay').hasClass('data-type-information')) {
-			$(this).closest('.overlay').fadeOut(200);
+			$(this).closest('.overlay').slideUp(200);
 			$('.toolbar--select-data-type')[0].selectedIndex = 0;
 		} else if ($(this).closest('.overlay').hasClass('select-parameters')) {
 			resetClinicalParameters();
-			$(this).closest('.overlay').fadeOut(200);
+			$(this).closest('.overlay').slideUp(200);
 		}
 	});
 	$('.button--filter').on('click', function() {

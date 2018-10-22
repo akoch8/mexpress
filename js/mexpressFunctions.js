@@ -2601,7 +2601,7 @@ var showDataTypeInformation = function(dataType) {
 			infoWindow.append('<p><strong>' + key + ':</strong> ' + value + '</p>');
 		});
 	});
-	$('.data-type-information').fadeIn(200);
+	$('.data-type-information').slideDown(200);
 };
 
 var showFilterOptions = function(sampleFilter) {
@@ -2668,12 +2668,12 @@ var showFilterOptions = function(sampleFilter) {
 						'<li data-value="ne">&ne;&emsp;not equal to</li>';
 	}
 	$('.filter-options').append(filterOptions);
-	filterWindow.fadeIn(200);
+	filterWindow.slideDown(200);
 };
 
 var showParameterSelection = function() {
 	var selectionWindow = $('.select-parameters');
-	selectionWindow.fadeIn(200);
+	selectionWindow.slideDown(200);
 };
 
 var sortAlphabetically = function(a,b) {
