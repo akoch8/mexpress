@@ -247,7 +247,7 @@ main {
 .toolbar {
 	background: #34495e;
 	color: #fcfcfc;
-	margin: 2em;
+	margin: 0 2rem;
 	padding: 1em 1em 0 1em;
 	position: relative;
 }
@@ -283,7 +283,7 @@ li.toolbar-summary {
 
 .plot-window {
 	background: #fff;
-	margin: 2em;
+	margin: 0 2rem;
 	min-height: 50vh;
 	overflow-x: scroll;
 	position: relative;
