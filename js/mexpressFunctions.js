@@ -1144,8 +1144,14 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 		dataTrackHeight + dataTrackSeparator; // Add an extra track for the copy number data.
 	var legendWidth = 0;
 	$.each(categoricalClinicalParameters, function(index, value) {
-		var categoryData = Object.values(cancerTypeDataFiltered.phenotype[value]);
-		var categories = categoryData.filter(uniqueValues);
+		var categoryData = cancerTypeDataFiltered.phenotype[value];
+		var categoryDataValues = [];
+		$.each(Object.keys(categoryData), function(index, sample) {
+			if (cancerTypeDataFiltered.samples_filtered_sorted.indexOf(sample) > -1) {
+				categoryDataValues.push(value[sample]);
+			}
+		});
+		var categories = categoryDataValues.filter(uniqueValues);
 		var categoryWidth = 0;
 		$.each(categories, function(i, v) {
 			v = v ? v : 'null';
