@@ -25,7 +25,7 @@ var addCloseButton = function(x, y, svgClass) {
 		.attr('stroke-width', 1)
 		.attr('stroke-linecap', 'round')
 		.attr('stroke-linejoin', 'round')
-		.attr('stroke', textColor)
+		.attr('stroke', textColorBright)
 		.attr('class', svgClass);
 	svg.append('line')
 		.attr('x1', x - buttonSize / 2)
@@ -35,7 +35,7 @@ var addCloseButton = function(x, y, svgClass) {
 		.attr('stroke-width', 1)
 		.attr('stroke-linecap', 'round')
 		.attr('stroke-linejoin', 'round')
-		.attr('stroke', textColor)
+		.attr('stroke', textColorBright)
 		.attr('class', svgClass);
 	svg.append('circle')
 		.attr('cx', x)
@@ -54,16 +54,17 @@ var addCloseButton = function(x, y, svgClass) {
 
 var addProbeAnnotation = function(probeId, annotation, xPosition, yPosition) {
 	svg.append('rect')
-		.attr('fill', missingValueColor)
+		.attr('fill', regionColor)
 		.attr('x', xPosition - 5)
 		.attr('y', yPosition)
 		.attr('width', 160 - marginBetweenMainParts)
-		.attr('height', 11 * Object.keys(annotation).length + 10)
+		.attr('height', 12 * (Object.keys(annotation).length + 1))
 		.attr('class', 'probe-annotation');
 	var counter = 1;
 	svg.append('text')
 			.attr('x', xPosition)
-			.attr('y', yPosition + counter * 10) // the font size is 9px
+			.attr('y', yPosition + counter * 11) // the font size is 9px
+			.attr('fill', textColorBright)
 			.attr('text-anchor', 'start')
 			.attr('alignment-baseline', 'baseline')
 			.attr('class', 'probe-annotation')
@@ -73,7 +74,8 @@ var addProbeAnnotation = function(probeId, annotation, xPosition, yPosition) {
 		counter += 1;
 		svg.append('text')
 			.attr('x', xPosition)
-			.attr('y', yPosition + counter * 10) // the font size is 9px
+			.attr('y', yPosition + counter * 11) // the font size is 9px
+			.attr('fill', textColorBright)
 			.attr('text-anchor', 'start')
 			.attr('alignment-baseline', 'baseline')
 			.attr('class', 'probe-annotation')
@@ -126,11 +128,11 @@ var addVariantAnnotation = function(annotation, xPosition, yPosition) {
 		maxTextWidth = textWidth > maxTextWidth ? textWidth : maxTextWidth;
 	});
 	svg.append('rect')
-		.attr('fill', missingValueColor)
+		.attr('fill', regionColor)
 		.attr('x', xPosition + 5)
 		.attr('y', yPosition)
 		.attr('width', maxTextWidth + 2 * 5) // 2 * 5 = margin around text
-		.attr('height', 11 * annotation.length)
+		.attr('height', 12 * annotation.length)
 		.attr('class', 'variant-annotation');
 	var counter = 0;
 	addCloseButton(xPosition + maxTextWidth + 5, yPosition + 8, 'variant-annotation');
@@ -145,7 +147,8 @@ var addVariantAnnotation = function(annotation, xPosition, yPosition) {
 		}
 		svg.append('text')
 			.attr('x', xPosition + 10)
-			.attr('y', yPosition + counter * 10) // the font size is 9px
+			.attr('y', yPosition + counter * 11) // the font size is 9px
+			.attr('fill', textColorBright)
 			.attr('text-anchor', 'start')
 			.attr('alignment-baseline', 'baseline')
 			.attr('class', 'variant-annotation')
@@ -807,7 +810,7 @@ var drawDataTrackVariants = function(data, sortedSamples, variantPosition, xPosi
 					} else {
 						$('.highlighted').removeClass('highlighted');
 						var annotation = $(this).attr('id');
-						var xPosition = Number($(this).attr('cx'));
+						var xPosition = Number($(this).attr('cx')) + 10;
 						var yPosition = Number($(this).attr('cy'));
 						$(this).addClass('highlighted');
 						addVariantAnnotation(variantAnnotation, xPosition, yPosition);
@@ -1277,7 +1280,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 	$('.nr_samples').text(samples.length);
 
 	// Build the SVG.
-	var margin = {top: 20 + topMargin, left: 40, bottom: 100, right: 200};
+	var margin = {top: 20 + topMargin, left: 40, bottom: 200, right: 200};
 	var x = d3.scaleLinear().domain([0, width]).range([0, width]);
 	var y = d3.scaleLinear().domain([cancerTypeDataFiltered.plot_data.start, cancerTypeDataFiltered.plot_data.end])
 		.range([0, locationLinkedTracksHeight]);
@@ -1903,11 +1906,12 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 					$('.' + probeId).css({'stroke': probeLineColor});
 				}
 			})
-			.on('mouseup', function() {
+			.on('mouseup', function(event) {
 				var probeId = $(this).attr('id');
 				var probeAnnotation = cancerTypeDataFiltered.probe_annotation_450[probeId];
-				var xPositionAnnotation = xPosition + samples.length * sampleWidth +
-					marginBetweenMainParts;
+				var xPositionAnnotation = d3.event.clientX -
+					$('.svg-container').find('svg')[0].getBoundingClientRect().x -
+					margin.left + 20;
 				$('.probe-annotation').remove();
 				if ($('.' + probeId).hasClass('highlighted')) {
 					$('.' + probeId).removeClass('highlighted');
