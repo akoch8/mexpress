@@ -27,6 +27,7 @@ var marginBetweenMainParts = 15;
 var sampleWidth = 1;
 var legendRectHeight = 10;
 var legendRectWidth = 10;
+var legendCircleR = 3;
 
 // Define the colors.
 var textColor = '#2c2c2c';

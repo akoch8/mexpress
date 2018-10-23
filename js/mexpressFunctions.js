@@ -1767,12 +1767,11 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 		$.each(variantCategories, function(index, value) {
 			value = value ? value : 'null';
 			var textWidth = calculateTextWidth(value.replace(/_/g, ' '), '9px arial');
-			svg.append('rect')
-				.attr('fill', variantColors[index])
-				.attr('x', xPosition + xPositionLegend)
-				.attr('y', yPosition + Math.floor(dataTrackHeight / 2) - legendRectHeight / 2)
-				.attr('width', legendRectWidth)
-				.attr('height', legendRectHeight);
+			svg.append('circle')
+				.attr('cx', xPosition + xPositionLegend + legendRectWidth / 2)
+				.attr('cy', yPosition + Math.floor(dataTrackHeight / 2))
+				.attr('r', legendCircleR)
+				.attr('fill', variantColors[index]);
 			svg.append('text')
 				.attr('x', xPosition + legendRectWidth + 5 + xPositionLegend)
 				.attr('y', yPosition + dataTrackHeight / 2)
