@@ -1,6 +1,6 @@
 aside {
 	background: #34495e;
-	height: 100vh;
+	min-height: 100%;
 	left: 0;
 	position: fixed;
 	top: 0;
@@ -17,7 +17,7 @@ aside header {
 
 .user-input {
 	color: #fcfcfc;
-	margin: 1.5rem 1rem;
+	margin: 1rem;
 }
 
 .user-input section {
@@ -112,7 +112,35 @@ input[type="text"]:focus {
 	font-style: italic;
 }
 
-.user-input svg {
+.toggle-sidebar {
+	left: 300px;
+	position: fixed;
+	top: 0;
+}
+
+.show-sidebar, .hide-sidebar {
+	background: #455b7d;
+	color: #fcfcfc;
+	display: inline-block;
+	padding: 0.2em 0;
+	text-align: center;
+	width: 2rem;
+}
+
+.show-sidebar {
+	display: none;
+}
+
+.show-sidebar:hover, .hide-sidebar:hover {
+	cursor: pointer;
+}
+
+.toggle-sidebar svg {
+	margin-right: 0.25em;
+	vertical-align: middle;
+}
+
+.scroll-button svg {
 	display: block;
 	margin: 0 auto;
 	stroke: #e4f1fe;
@@ -241,7 +269,9 @@ input[type="text"]:focus {
 }
 
 main {
+	min-width: 900px;
 	padding-left: 300px;
+	position: relative;
 }
 
 .toolbar {

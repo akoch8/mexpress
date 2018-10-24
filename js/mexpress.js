@@ -29,6 +29,22 @@ $(function() {
 		list.scrollTop(scrollPosition + 200);
 	});
 
+	// Show/hide the sidebar.
+	$('.hide-sidebar').on('click', function() {
+		$('aside').animate({'margin-left': '-300px'});
+		$('main').animate({'padding-left': '0'});
+		$('.toggle-sidebar').animate({'left': '0'});
+		$(this).hide();
+		$('.show-sidebar').css({'display': 'inline-block'});
+	});
+	$('.show-sidebar').on('click', function() {
+		$('aside').animate({'margin-left': '0'});
+		$('main').animate({'padding-left': '300px'});
+		$('.toggle-sidebar').animate({'left': '300px'});
+		$(this).hide();
+		$('.hide-sidebar').css({'display': 'inline-block'});
+	});
+
 	// Autocomplete the gene or miRNA name the user is typing.
 	var options, a;
 	$(function(){

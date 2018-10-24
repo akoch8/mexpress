@@ -102,6 +102,7 @@ nav a:hover {
 
 footer {
 	border-top: 1px solid #dcdcdc;
+	color: #666;
 	margin: 2rem;
 }
 
@@ -110,3 +111,22 @@ footer p {
 	overflow-wrap: break-word;
 	padding: 0 1rem;
 }
+
+@media only screen and (max-width: 768px){
+	body {
+		font: 12px/1.5 'Lato', sans-serif;
+	}
+	
+	h1 {
+		font-size: 2rem;
+	}
+
+	h2 {
+		font-size: 1.2rem;
+	}
+
+	h3 {
+		font-size: 1rem;
+	}
+}
+
