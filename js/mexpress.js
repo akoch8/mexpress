@@ -121,7 +121,7 @@ $(function() {
 			plot(sampleSorter, sampleFilter, showVariants, plotStart, plotEnd);
 		}, 100);
 	});
-	$('.toolbar--select-filter').change(function() {
+	/*$('.toolbar--select-filter').change(function() {
 		var sampleFilter = $(this).val();
 		var sampleSorter = $('#sample-sorter').text();
 		sampleSorter = sampleSorter === '' ? 'region_expression' : sampleSorter;
@@ -137,6 +137,13 @@ $(function() {
 		} else {
 			showFilterOptions(sampleFilter);
 		}
+	});*/
+	$('.button--select-filter').on('click', function() {
+		showFilterWindow();
+	});
+	$('.toolbar--select-filter').change(function() {
+		var sampleFilter = $(this).val();
+		showFilterOptions(sampleFilter);
 	});
 	$('.toolbar--select-data-type').change(function() {
 		var dataType = $(this).val();

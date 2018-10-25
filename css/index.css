@@ -119,7 +119,7 @@ input[type="text"]:focus {
 }
 
 .show-sidebar, .hide-sidebar {
-	background: #455b7d;
+	background: #34495e;
 	color: #fcfcfc;
 	display: inline-block;
 	padding: 0.2em 0;
@@ -350,6 +350,7 @@ li.toolbar-summary {
 }
 
 .select-filter select {
+	margin: 0 0.5em;
 	padding: 0 0.5em 0.5em 0.5em;
 	vertical-align: text-top;
 }

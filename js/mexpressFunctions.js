@@ -462,13 +462,27 @@ var cleanString = function(s) {
 	return s;
 };
 
-var clearFilterSelection = function() {
+/*var clearFilterSelection = function() {
 	var filterParent = $('.select-filter');
 	filterParent.find('.sample-filter').text('');
 	filterParent.find('.filter-categories').remove();
 	filterParent.find('input[type=text]').remove();
 	filterParent.find('.data-summary').empty();
 	$('.filter-options').empty();
+	$('.button--filter').addClass('button--inactive');
+	//$('.toolbar--select-filter')[0].selectedIndex = 0;
+};*/
+
+var clearFilterSelection = function() {
+	var filterParent = $('.select-filter');
+	$('.filter-options-container').empty().text(' . . . ');
+	$('.filter-value-container').empty().text(' . . . ');
+	filterParent.find('input[type=text]').remove();
+	filterParent.find('.data-summary').empty();
+	$('.filter-options').remove();
+
+	// CONTINUE HERE
+
 	$('.button--filter').addClass('button--inactive');
 	//$('.toolbar--select-filter')[0].selectedIndex = 0;
 };
@@ -2613,7 +2627,7 @@ var showDataTypeInformation = function(dataType) {
 	$('.data-type-information').slideDown(200);
 };
 
-var showFilterOptions = function(sampleFilter) {
+/*var showFilterOptions = function(sampleFilter) {
 	var filterWindow = $('.select-filter');
 	var dataToFilter;
 	if (sampleFilter in cancerTypeDataFiltered) {
@@ -2677,6 +2691,26 @@ var showFilterOptions = function(sampleFilter) {
 						'<li data-value="ne">&ne;&emsp;not equal to</li>';
 	}
 	$('.filter-options').append(filterOptions);
+	filterWindow.slideDown(200);
+};*/
+
+var showFilterOptions = function(sampleFilter) {
+	if (sampleFilter === '') {
+		//
+	} else {
+		if (sampleFilter in cancerTypeDataFiltered) {
+			dataToFilter = cancerTypeDataFiltered[sampleFilter];
+		} else if (sampleFilter in cancerTypeDataFiltered.phenotype) {
+			dataToFilter = cancerTypeDataFiltered.phenotype[sampleFilter];
+		} else {
+			console.log('ERROR: cannot find "' + sampleFilter + '" in the data object keys.');
+			return false;
+		}
+	}
+};
+
+var showFilterWindow = function() {
+	var filterWindow = $('.select-filter');
 	filterWindow.slideDown(200);
 };
 
