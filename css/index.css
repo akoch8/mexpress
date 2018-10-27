@@ -331,6 +331,7 @@ li.toolbar-summary {
 .overlay {
 	background: #fff;
 	background: rgba(255,255,255,0.8);
+	border-top: 1px solid #4e6487;
 	bottom: 0;
 	color: #fcfcfc;
 	left: 0;
@@ -373,6 +374,27 @@ li.toolbar-summary {
 	font-style: italic;
 	margin-top: 2em;
 	padding-top: 0.5em;
+}
+
+.active-filters {
+	display: inline-block;
+}
+
+.active-filters li {
+	border: 1px solid #4e6487;
+	display: inline-block;
+	margin: 0.5em;
+	padding: 0.25em 0.5em;
+}
+
+.active-filters svg {
+	margin: 0 0.5em;
+	vertical-align: text-top;
+}
+
+.active-filters svg:hover {
+	cursor: pointer;
+	stroke: #ff6666;
 }
 
 .filter-list {

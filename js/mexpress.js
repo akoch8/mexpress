@@ -167,7 +167,8 @@ $(function() {
 	});
 	$('.button--filter').on('click', function() {
 		if (!$(this).hasClass('button--inactive')) {
-			var sampleFilter = $('.sample-filter').text().replace(/ /g, '_') + '__' +
+			var sampleFilterText = $('.toolbar--select-filter').find(':selected').val();
+			var sampleFilter = sampleFilterText.replace(/ /g, '_') + '__' +
 				$('.filter-options .selected').attr('data-value') + '__';
 			if ($('.select-filter input[type=text]').length) {
 				sampleFilter += $('.select-filter input[type=text]').val();
@@ -177,9 +178,29 @@ $(function() {
 				});
 				sampleFilter = sampleFilter.slice(0, -1); // Remove the trailing + character.
 			}
-
+			
 			// Store the query on which the samples are filtered in the DOM.
-			$('#sample-filter').text(sampleFilter);
+			var existingFilters = $('#sample-filter').text();
+			var newFilters = '';
+			if (existingFilters === '') {
+				newFilters = sampleFilter;
+				$('#sample-filter').text(newFilters);
+			} else {
+				newFilters = existingFilters + '___' + sampleFilter;
+				$('#sample-filter').text(newFilters);
+			}
+			$('.active-filters--none').hide();
+			var sampleFilterClean = sampleFilter.replace(/__lt__/g, ' less than ')
+				.replace(/__le__/g, ' less than or equal to ')
+				.replace(/__eq__/g, ' equal to ')
+				.replace(/__ne__/g, ' not equal to ')
+				.replace(/__ge__/g, ' greather than or equal to ')
+				.replace(/__gt__/g, ' greater than ');
+			sampleFilterClean = sampleFilterClean.replace(/_/g, ' ');
+			sampleFilterClean = sampleFilterClean.replace(/\+/g, ' + ');
+			$('.active-filters').append('<li data-value="' + sampleFilter + '">' +
+				sampleFilterClean +
+				'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg></li>');
 			var sampleSorter = $('#sample-sorter').text();
 			sampleSorter = sampleSorter === '' ? 'region_expression' : sampleSorter;
 			var showVariants = $('.toolbar--check-variants').prop('checked');
@@ -188,11 +209,47 @@ $(function() {
 			$(this).closest('.overlay').fadeOut(200, function() {
 				$('.plot-loader').show();
 				setTimeout(function() {
+					$('.toolbar--select-filter option').first().prop('selected', true);
 					clearFilterSelection();
-					plot(sampleSorter, sampleFilter, showVariants, plotStart, plotEnd);
+					plot(sampleSorter, newFilters, showVariants, plotStart, plotEnd);
 				}, 100);
 			});
 		}
+	});
+	$(document).on('click', '.active-filters svg', function() {
+		// Remove the filter linked to the SVG trashcan the user clicked on and redraw the plot
+		// with the new set of filters.
+		var filterToRemove = $(this).closest('li').attr('data-value');
+
+		// We have to store the overlay element in a variable, because we will remove the list
+		// element related to the clicked SVG, thereby also removing the element $(this) refers to,
+		// making it impossible to find the relevant overlay in the DOM starting from $(this).
+		var overlay = $(this).closest('.overlay');
+		$(this).closest('li').remove();
+		if ($('.active-filters li').length === 1) {
+			$('.active-filters--none').show();
+		}
+		var allFilters = $('#sample-filter').text().split('___');
+		var newFilters = '';
+		if (allFilters.length > 1) {
+			newFilters = allFilters.filter(function(x) {
+				return x !== filterToRemove;
+			}).join('___');
+		}
+		$('#sample-filter').text(newFilters);
+		var sampleSorter = $('#sample-sorter').text();
+		sampleSorter = sampleSorter === '' ? 'region_expression' : sampleSorter;
+		var showVariants = $('.toolbar--check-variants').prop('checked');
+		var plotStart = cancerTypeDataFiltered.plot_data.start;
+		var plotEnd = cancerTypeDataFiltered.plot_data.end;
+		overlay.fadeOut(200, function() {
+			$('.plot-loader').show();
+			setTimeout(function() {
+				$('.toolbar--select-filter option').first().prop('selected', true);
+				clearFilterSelection();
+				plot(sampleSorter, newFilters, showVariants, plotStart, plotEnd);
+			}, 100);
+		});
 	});
 	$('.button--reset').on('click', resetClinicalParameters);
 	$('.button--select').on('click', function() {
@@ -245,6 +302,8 @@ $(function() {
 			$('#sample-sorter').text('');
 			$('#sample-filter').text('');
 			$('#clinical-parameters').text('default');
+			$('.active-filters--none').show();
+			$('.active-filters li').not(':eq(0)').remove();
 			cancerTypeDataFiltered = $.extend(true, {}, cancerTypeData);
 			plot('region_expression', null, false);
 		}, 100);

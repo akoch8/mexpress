@@ -480,11 +480,7 @@ var clearFilterSelection = function() {
 	filterParent.find('input[type=text]').remove();
 	filterParent.find('.data-summary').empty();
 	$('.filter-options').remove();
-
-	// CONTINUE HERE
-
 	$('.button--filter').addClass('button--inactive');
-	//$('.toolbar--select-filter')[0].selectedIndex = 0;
 };
 
 var cleanUpImages = function(file) {
@@ -893,67 +889,72 @@ var drawHistogram = function(data, element) {
 	});
 };
 
-var filterSamples = function(sampleFilter) {
-	if (sampleFilter === null) {
+var filterSamples = function(sampleFilter, allSamples) {
+	if (sampleFilter === null || sampleFilter === '') {
 		return allSamples;
 	} else {
-		sampleFilter = sampleFilter.split('__');
-		var parameterToFilter = sampleFilter[0];
-		var filterCommand = sampleFilter[1];
-		var filterValues = sampleFilter[2].split('+');
-		var dataToFilter;
-		if (parameterToFilter in cancerTypeDataFiltered) {
-			dataToFilter = cancerTypeDataFiltered[parameterToFilter];
-		} else if (parameterToFilter in cancerTypeDataFiltered.phenotype) {
-			dataToFilter = cancerTypeDataFiltered.phenotype[parameterToFilter];
-		} else {
-			console.log('ERROR: cannot find "' + parameterToFilter + '" in the data object keys.');
-			return false;
-		}
-		var filteredSamples = allSamples.filter(function(sample) {
-			var filterResult = 0;
-			$.each(filterValues, function(index, value) {
-				if (value !== 'null') {
-					if (isNumber(value)) {
-						if (filterCommand === 'lt') {
-							filterResult += dataToFilter[sample] < +value;
-						} else if (filterCommand === 'le') {
-							filterResult += dataToFilter[sample] <= +value;
-						} else if (filterCommand === 'eq') {
-							filterResult += dataToFilter[sample] == +value;
-						} else if (filterCommand === 'ne') {
-							filterResult += dataToFilter[sample] != +value;
-						} else if (filterCommand === 'ge') {
-							filterResult += dataToFilter[sample] >= +value;
-						} else if (filterCommand === 'gt') {
-							filterResult += dataToFilter[sample] > +value;
-						}
-					} else {
-						if (filterCommand === 'eq') {
-							filterResult += dataToFilter[sample] == value;
-						} else if (filterCommand === 'ne') {
-							filterResult += dataToFilter[sample] != value;
-						}
-					}
-				} else if (value === 'null') {
-					if (filterCommand === 'eq') {
-						filterResult += dataToFilter[sample] === null ||
-							dataToFilter[sample] === undefined;
-					} else if (filterCommand === 'ne') {
-						filterResult += dataToFilter[sample] !== null &&
-							dataToFilter[sample] !== undefined;
-					}
-				}
-			});
-			if (filterCommand === 'ne') {
-				// The 'not equal to' case is special, because it represents a logical 'AND',
-				// meaning that all checks need to be true before we can add a sample to our list
-				// of filtered samples.
-				return filterResult === filterValues.length;
+		sampleFilters = sampleFilter.split('___');
+		var filteredSamples = allSamples;
+		$.each(sampleFilters, function(index, value) {
+			console.log('> sampleFilter ' + index + ' = ' + value);
+			var filter = value.split('__');
+			var parameterToFilter = filter[0];
+			var filterCommand = filter[1];
+			var filterValues = filter[2].split('+');
+			var dataToFilter;
+			if (parameterToFilter in cancerTypeDataFiltered) {
+				dataToFilter = cancerTypeDataFiltered[parameterToFilter];
+			} else if (parameterToFilter in cancerTypeDataFiltered.phenotype) {
+				dataToFilter = cancerTypeDataFiltered.phenotype[parameterToFilter];
 			} else {
-				return filterResult;
+				console.log('ERROR: cannot find "' + parameterToFilter + '" in the data object keys.');
+				return false;
 			}
-			return filterResult;
+			filteredSamples = filteredSamples.filter(function(sample) {
+				var filterResult = 0;
+				$.each(filterValues, function(index, value) {
+					if (value !== 'null') {
+						if (isNumber(value)) {
+							if (filterCommand === 'lt') {
+								filterResult += dataToFilter[sample] < +value;
+							} else if (filterCommand === 'le') {
+								filterResult += dataToFilter[sample] <= +value;
+							} else if (filterCommand === 'eq') {
+								filterResult += dataToFilter[sample] == +value;
+							} else if (filterCommand === 'ne') {
+								filterResult += dataToFilter[sample] != +value;
+							} else if (filterCommand === 'ge') {
+								filterResult += dataToFilter[sample] >= +value;
+							} else if (filterCommand === 'gt') {
+								filterResult += dataToFilter[sample] > +value;
+							}
+						} else {
+							if (filterCommand === 'eq') {
+								filterResult += dataToFilter[sample] == value;
+							} else if (filterCommand === 'ne') {
+								filterResult += dataToFilter[sample] != value;
+							}
+						}
+					} else if (value === 'null') {
+						if (filterCommand === 'eq') {
+							filterResult += dataToFilter[sample] === null ||
+								dataToFilter[sample] === undefined;
+						} else if (filterCommand === 'ne') {
+							filterResult += dataToFilter[sample] !== null &&
+								dataToFilter[sample] !== undefined;
+						}
+					}
+				});
+				if (filterCommand === 'ne') {
+					// The 'not equal to' case is special, because it represents a logical 'AND',
+					// meaning that all checks need to be true before we can add a sample to our list
+					// of filtered samples.
+					return filterResult === filterValues.length;
+				} else {
+					return filterResult;
+				}
+				return filterResult;
+			});
 		});
 		return filteredSamples;
 	}
@@ -989,10 +990,6 @@ var loadData = function(name, cancer) {
 		$('.button__text').css('visibility', 'visible');
 		cancerTypeData = $.parseJSON(reply);
 		if (cancerTypeData.success) {
-			cancerTypeDataFiltered = $.extend(true, {}, cancerTypeData);
-			addToolbar();
-			addClinicalParameters();
-
 			// By default, the samples are not filtered and are sorted by the expression of the
 			// selected main region.
 			plot('region_expression', null, false);
@@ -1027,6 +1024,12 @@ var parameterIsNumerical = function(x) {
 var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 	$('.svg-container > svg').remove();
 
+	// Make a hard copy of the cancerTypeData object. We want to avoid toucing the original data as
+	// much as possible and will almost exclusively work with the copy.
+	cancerTypeDataFiltered = $.extend(true, {}, cancerTypeData);
+	addToolbar();
+	addClinicalParameters();
+
 	// The plot consists of three main parts:
 	// 1. genomic annotation data (miRNAs, genes, transcripts, CpG islands)
 	// 2. location-linked data (DNA methylation and variants)
@@ -1056,11 +1059,12 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 	// Create an array that holds all the samples for which there is any type of data. This array
 	// will be used to sort the samples by whichever variable the user chooses. It will also be
 	// used to filter the data (e.g. to show only primary tumor samples).
-	allSamples = merge(dnaMethylationSamples, regionExpressionSamples, phenotypeSamples,
+	var allSamples = merge(dnaMethylationSamples, regionExpressionSamples, phenotypeSamples,
 		cnvSamples);
 
 	// Filter the samples. By default, there is no filtering applied.
-	var samples = filterSamples(sampleFilter);
+	console.log('sampleFilters = ' + sampleFilter);
+	var samples = filterSamples(sampleFilter, allSamples);
 	var removedSamples = allSamples.filter(function(x) {
 		return samples.indexOf(x) === -1;
 	});
@@ -2695,8 +2699,9 @@ var showDataTypeInformation = function(dataType) {
 };*/
 
 var showFilterOptions = function(sampleFilter) {
+	var filterWindow = $('.select-filter');
 	if (sampleFilter === '') {
-		//
+		clearFilterSelection();
 	} else {
 		if (sampleFilter in cancerTypeDataFiltered) {
 			dataToFilter = cancerTypeDataFiltered[sampleFilter];
@@ -2704,9 +2709,66 @@ var showFilterOptions = function(sampleFilter) {
 			dataToFilter = cancerTypeDataFiltered.phenotype[sampleFilter];
 		} else {
 			console.log('ERROR: cannot find "' + sampleFilter + '" in the data object keys.');
+			$('.toolbar--select-filter option').first().prop('selected', true);
+			clearFilterSelection();
 			return false;
 		}
 	}
+	clearFilterSelection();
+	var filterOptions;
+	var dataValues = Object.values(dataToFilter);
+	if (parameterIsNumerical(dataValues)) {
+		// Add a summary of the data and plot the data distribution so the user can more easily
+		// select an appropriate filter value.
+		var dataSummary;
+		if (sampleFilter === 'cnv') {
+			// We don't want to add the quantiles for the copy number data.
+			dataSummary = summary(dataValues, false);
+		} else {
+			dataSummary = summary(dataValues, true);
+		}
+		var dataSummaryText = 'Data summary: <ul class="summary-values filter-list">';
+		$.each(dataSummary, function(key, value) {
+			var summaryVariable = key.replace(/ /g, '-');
+			summaryVariable = summaryVariable.replace(/%/, '');
+			if (key === 'null') {
+				var nrSamples = $('.nr_samples').text();
+				var nullCount = nrSamples - dataValues.length + value;
+				dataSummaryText += '<li data-summary-variable="null" data-value="null">null&emsp;' +
+					nullCount + '/' + nrSamples + '</li>';
+			} else {
+				dataSummaryText += '<li data-summary-variable="' + summaryVariable +
+					'" data-value="' + value + '">' + key + '&emsp;' +
+					(Math.round(value * 1000) / 1000) + '</li>';
+			}
+		});
+		dataSummaryText += '</ul> Data histogram:';
+		filterWindow.find('.data-summary').append(dataSummaryText);
+		drawHistogram(dataValues, '.select-filter .data-summary');
+		$('.filter-value-container').empty().append('<input type="text">');
+		filterOptions = '<ul class="filter-options filter-list">' +
+						'<li data-value="lt">&lt;&emsp;less than</li>' +
+						'<li data-value="le">&le;&emsp;less than or equal to</li>' +
+						'<li data-value="eq">=&emsp;equal to</li>' +
+						'<li data-value="ne">&ne;&emsp;not equal to</li>' +
+						'<li data-value="ge">&ge;&emsp;greater than or equal to</li>' +
+						'<li data-value="gt">&gt;&emsp;greater than</li>' +
+						'</ul>';
+
+	} else {
+		filterWindow.find('.data-summary').append('Data bar plot:');
+		drawBarPlot(dataValues, '.select-filter .data-summary');
+		$('.filter-value-container').empty().append('<ul class="filter-categories filter-list"></ul>');
+		var categories = dataValues.filter(uniqueValues).sort(sortAlphabetically);
+		$.each(categories, function(index, value) {
+			$('.filter-categories').append('<li data-value="' + value + '">' + value + '</li>');
+		});
+		filterOptions = '<ul class="filter-options filter-list">' +
+						'<li data-value="eq">=&emsp;equal to</li>' +
+						'<li data-value="ne">&ne;&emsp;not equal to</li>' +
+						'</ul>';
+	}
+	$('.filter-options-container').empty().append(filterOptions);
 };
 
 var showFilterWindow = function() {
