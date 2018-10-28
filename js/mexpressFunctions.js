@@ -632,7 +632,7 @@ var drawCoordinates = function(axis, horizontal, height) {
 	}
 };
 
-var drawDataTrack = function(data, sortedSamples, color, xPosition, yPosition, variable) {
+var drawDataTrack = function(data, sortedSamples, allSamples, color, xPosition, yPosition, variable) {
 	var dataValues = [];
 	$.each(sortedSamples, function(index, sample) {
 		if (sample in data) {
@@ -679,12 +679,30 @@ var drawDataTrack = function(data, sortedSamples, color, xPosition, yPosition, v
 				.attr('height', rectHeight);
 		});
 	} else {
-		var allCategories = Object.values(data).filter(uniqueValues);
+		// We want to map each categorical variable value to a specific color. When the user
+		// filters the data, these color assignments should remain the same (e.g. if gender "male"
+		// is blue in the default plot, it should remain blue after the user filters out female
+		// patients).
+		var unfilteredData;
+		if (variable in cancerTypeData) {
+			unfilteredData = cancerTypeData[variable];
+		} else if (variable in cancerTypeData.phenotype) {
+			unfilteredData = cancerTypeData.phenotype[variable];
+		}
+		var unfilteredDataValues = [];
+		$.each(allSamples, function(index, sample) {
+			if (sample in unfilteredData) {
+				unfilteredDataValues.push(unfilteredData[sample]);
+			} else {
+				unfilteredDataValues.push(null);
+			}
+		});
+		var allCategories = Object.values(unfilteredData).filter(uniqueValues);
 		allCategories.sort(sortAlphabetically);
 		var re = new RegExp('^(clinical|pathologic)_|tumor_stage_*|clinical_stage_');
 		var categoryColors;
 		if (re.test(variable)) {
-			categoryColors = dataValues.map(function(x) {
+			categoryColors = allCategories.map(function(x) {
 				if (x) {
 					if (allCategories.length <= stageColorsSimplified.length) {
 						return stageColorsSimplified[allCategories.indexOf(x)];
@@ -696,7 +714,7 @@ var drawDataTrack = function(data, sortedSamples, color, xPosition, yPosition, v
 				}
 			});
 		} else {
-			categoryColors = dataValues.map(function(x) {
+			categoryColors = allCategories.map(function(x) {
 				if (x) {
 					return categoricalColors[allCategories.indexOf(x)];
 				} else {
@@ -705,8 +723,9 @@ var drawDataTrack = function(data, sortedSamples, color, xPosition, yPosition, v
 			});
 		}
 		$.each(dataValues, function(index, value) {
+			var colorIndex = allCategories.indexOf(value);
 			svg.append('rect')
-				.attr('fill', categoryColors[index])
+				.attr('fill', categoryColors[colorIndex])
 				.attr('x', xPosition + sampleWidth * index)
 				.attr('y', yPosition)
 				.attr('width', sampleWidth)
@@ -1874,7 +1893,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 		yPosition = -topMargin + legendHeight + marginBetweenMainParts +
 					 index * (dataTrackHeight + dataTrackSeparator);
 		var phenotypeData = cancerTypeDataFiltered.phenotype[parameter];
-		drawDataTrack(phenotypeData, samples, regionColor, xPosition, yPosition, parameter);
+		drawDataTrack(phenotypeData, samples, allSamples, regionColor, xPosition, yPosition, parameter);
 	});
 
 	// Draw the expression data. This includes the gene/miRNA expression and copy number variation
@@ -1882,7 +1901,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 	// 1. Gene/miRNA expression
 	yPosition += dataTrackHeight + marginBetweenMainParts;
 	var regionExpressionDataValues = cancerTypeDataFiltered.region_expression;
-	drawDataTrack(regionExpressionDataValues, samples, regionColor, xPosition, yPosition,
+	drawDataTrack(regionExpressionDataValues, samples, allSamples, regionColor, xPosition, yPosition,
 		cancerTypeDataFiltered.region_annotation.name + ' expression');
 
 	// 2. Copy number variation
@@ -1908,7 +1927,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 						index * (dataTrackHeight + dataTrackSeparator) +
 						nrVariants * (dataTrackHeightVariants + dataTrackSeparator);
 		var methylationValues = cancerTypeDataFiltered.dna_methylation_data[value];
-		drawDataTrack(methylationValues, samples, otherRegionColor, xPosition, yPosition);
+		drawDataTrack(methylationValues, samples, allSamples, otherRegionColor, xPosition, yPosition);
 
 		// Draw a transparent rectangle on top of the DNA methylation track that shows the probe
 		// annotation when clicked by a user.
@@ -2387,11 +2406,6 @@ var plotSummary = function(sorter, showVariants, plotStart, plotEnd) {
 	if (re.test(sorter)) {
 		groupColors = groupNames.map(function(x) {
 			if (x !== 'null') {
-				/*if (sorter.endsWith('simplified')) {
-					return stageColorsSimplified[groupNames.indexOf(x)];
-				} else {
-					return stageColors[groupNames.indexOf(x)];
-				}*/
 				if (groupNames.length <= stageColorsSimplified.length) {
 					return stageColorsSimplified[groupNames.indexOf(x)];
 				} else {
