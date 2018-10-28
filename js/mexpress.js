@@ -121,23 +121,6 @@ $(function() {
 			plot(sampleSorter, sampleFilter, showVariants, plotStart, plotEnd);
 		}, 100);
 	});
-	/*$('.toolbar--select-filter').change(function() {
-		var sampleFilter = $(this).val();
-		var sampleSorter = $('#sample-sorter').text();
-		sampleSorter = sampleSorter === '' ? 'region_expression' : sampleSorter;
-		var showVariants = $('.toolbar--check-variants').prop('checked');
-		var plotStart = cancerTypeDataFiltered.plot_data.start;
-		var plotEnd = cancerTypeDataFiltered.plot_data.end;
-		if (sampleFilter === 'no filter') {
-			$('#sample-filter').text('');
-			$('.plot-loader').show();
-			setTimeout(function() {
-				plot(sampleSorter, null, showVariants, plotStart, plotEnd);
-			}, 100);
-		} else {
-			showFilterOptions(sampleFilter);
-		}
-	});*/
 	$('.button--select-filter').on('click', function() {
 		showFilterWindow();
 	});

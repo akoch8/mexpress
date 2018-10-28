@@ -185,6 +185,9 @@ var addToolbar = function() {
 		$('.toolbar--select-sorter').append('<option value="' + value + '" data-type="clinical">' +
 			parameterText + '</option>');
 	});
+	var sampleSorter = $('#sample-sorter').text();
+	sampleSorter = sampleSorter === '' ? 'region_expression' : sampleSorter;
+	$('.toolbar--select-sorter option[value="' + sampleSorter + '"]').prop('selected', true);
 	$('.toolbar__cover').fadeOut(500);
 };
 
@@ -1063,7 +1066,6 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 		cnvSamples);
 
 	// Filter the samples. By default, there is no filtering applied.
-	console.log('sampleFilters = ' + sampleFilter);
 	var samples = filterSamples(sampleFilter, allSamples);
 	var removedSamples = allSamples.filter(function(x) {
 		return samples.indexOf(x) === -1;
