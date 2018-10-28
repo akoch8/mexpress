@@ -331,12 +331,12 @@ li.toolbar-summary {
 .overlay {
 	background: #fff;
 	background: rgba(255,255,255,0.8);
-	border-top: 1px solid #4e6487;
+	border-top: 4px solid #4e6487;
 	bottom: 0;
 	color: #fcfcfc;
 	left: 0;
 	overflow-y: scroll;
-	padding: 2em;
+	padding: 1em;
 	position: absolute;
 	right: 0;
 	top: 0;
@@ -447,13 +447,13 @@ li.toolbar-summary {
 	color: #fbe8d3;
 }
 
-.message__close-x {
+.message__close-x, .overlay__close-x {
 	position: absolute;
 	right: 0.5em;
 	top: 0.5em;
 }
 
-.message__close-x:hover {
+.message__close-x:hover, .overlay__close-x:hover {
 	cursor: pointer;
 }
 
