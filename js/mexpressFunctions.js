@@ -552,16 +552,17 @@ var drawBarPlot = function(data, element) {
 		.append('g')
 			.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 	$.each(uniqueDataValues, function(index, value) {
-		value = value ? value : 'null';
+		var valueClass = value ? value : 'null';
+		valueClass = valueClass.replace(/ /g, '_').replace(/\//g, '-');
 		barPlotSvg.append('rect')
-			.attr('class', value.replace(/ /g, '_') + '-bar')
+			.attr('class', valueClass + '-bar')
 			.attr('x', 0)
 			.attr('y', y(index))
 			.attr('width', x(dataTable[value]))
 			.attr('height', dataTrackHeight)
 			.attr('fill', histogramColor);
 		barPlotSvg.append('text')
-			.attr('class', value.replace(/ /g, '_') + '-bar')
+			.attr('class', valueClass + '-bar')
 			.attr('x', -5)
 			.attr('y', y(index) + dataTrackHeight / 2)
 			.attr('font-size', '11px')
