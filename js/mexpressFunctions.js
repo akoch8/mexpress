@@ -1743,37 +1743,50 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 			.attr('text-anchor', 'end')
 			.attr('alignment-baseline', 'middle')
 			.text(parameterText);
-		var categories = Object.values(cancerTypeDataFiltered.phenotype[value]).filter(uniqueValues);
-		categories.sort(sortAlphabetically);
+
+		// We want to map each categorical variable value to a specific color. When the user
+		// filters the data, these color assignments should remain the same (e.g. if gender "male"
+		// is blue in the default plot, it should remain blue after the user filters out female
+		// patients).
+		var allCategories = Object.values(cancerTypeData.phenotype[value]).filter(uniqueValues);
+		allCategories.sort(sortAlphabetically);
+		console.log(value + ', allCategories:');
+		console.log(allCategories);
 		var re = new RegExp('^(clinical|pathologic)_|tumor_stage_*|clinical_stage_');
 		var categoryColors;
 		if (re.test(value)) {
-			categoryColors = categories.map(function(x) {
+			categoryColors = allCategories.map(function(x) {
 				if (x) {
-					if (categories.length <= stageColorsSimplified.length) {
-						return stageColorsSimplified[categories.indexOf(x)];
+					if (allCategories.length <= stageColorsSimplified.length) {
+						return stageColorsSimplified[allCategories.indexOf(x)];
 					} else {
-						return stageColors[categories.indexOf(x)];
+						return stageColors[allCategories.indexOf(x)];
 					}
 				} else {
 					return missingValueColor;
 				}
 			});
 		} else {
-			categoryColors = categories.map(function(x) {
+			categoryColors = allCategories.map(function(x) {
 				if (x) {
-					return categoricalColors[categories.indexOf(x)];
+					return categoricalColors[allCategories.indexOf(x)];
 				} else {
 					return missingValueColor;
 				}
 			});
 		}
+		console.log('categoryColors:');
+		console.log(categoryColors);
+		var categories = Object.values(cancerTypeDataFiltered.phenotype[value]).filter(uniqueValues);
+		categories.sort(sortAlphabetically);
 		var xPositionLegend = 0;
 		$.each(categories, function(i, v) {
-			v = v ? v : 'null';
-			var textWidth = calculateTextWidth(v.replace(/_/g, ' '), '9px arial');
+			var vText = v ? v : 'null';
+			vText = vText.replace(/_/g, ' ');
+			var textWidth = calculateTextWidth(vText, '9px arial');
+			var colorIndex = allCategories.indexOf(v);
 			svg.append('rect')
-				.attr('fill', categoryColors[i])
+				.attr('fill', categoryColors[colorIndex])
 				.attr('x', xPosition + xPositionLegend)
 				.attr('y', yPosition + Math.floor(dataTrackHeight / 2) - legendRectHeight / 2)
 				.attr('width', legendRectWidth)
@@ -1783,7 +1796,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 				.attr('y', yPosition + dataTrackHeight / 2)
 				.attr('text-anchor', 'start')
 				.attr('alignment-baseline', 'middle')
-				.text(v.replace(/_/g, ' '));
+				.text(vText);
 			xPositionLegend += textWidth + 2 * legendRectWidth + 5;
 		});
 		yPosition += dataTrackHeight + dataTrackSeparator;
