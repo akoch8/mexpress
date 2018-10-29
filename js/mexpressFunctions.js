@@ -465,17 +465,6 @@ var cleanString = function(s) {
 	return s;
 };
 
-/*var clearFilterSelection = function() {
-	var filterParent = $('.select-filter');
-	filterParent.find('.sample-filter').text('');
-	filterParent.find('.filter-categories').remove();
-	filterParent.find('input[type=text]').remove();
-	filterParent.find('.data-summary').empty();
-	$('.filter-options').empty();
-	$('.button--filter').addClass('button--inactive');
-	//$('.toolbar--select-filter')[0].selectedIndex = 0;
-};*/
-
 var clearFilterSelection = function() {
 	var filterParent = $('.select-filter');
 	$('.filter-options-container').empty().text(' . . . ');
@@ -918,7 +907,6 @@ var filterSamples = function(sampleFilter, allSamples) {
 		sampleFilters = sampleFilter.split('___');
 		var filteredSamples = allSamples;
 		$.each(sampleFilters, function(index, value) {
-			console.log('> sampleFilter ' + index + ' = ' + value);
 			var filter = value.split('__');
 			var parameterToFilter = filter[0];
 			var filterCommand = filter[1];
@@ -1750,8 +1738,6 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 		// patients).
 		var allCategories = Object.values(cancerTypeData.phenotype[value]).filter(uniqueValues);
 		allCategories.sort(sortAlphabetically);
-		console.log(value + ', allCategories:');
-		console.log(allCategories);
 		var re = new RegExp('^(clinical|pathologic)_|tumor_stage_*|clinical_stage_');
 		var categoryColors;
 		if (re.test(value)) {
@@ -1775,8 +1761,6 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 				}
 			});
 		}
-		console.log('categoryColors:');
-		console.log(categoryColors);
 		var categories = Object.values(cancerTypeDataFiltered.phenotype[value]).filter(uniqueValues);
 		categories.sort(sortAlphabetically);
 		var xPositionLegend = 0;
@@ -2659,73 +2643,6 @@ var showDataTypeInformation = function(dataType) {
 	});
 	$('.data-type-information').slideDown(200);
 };
-
-/*var showFilterOptions = function(sampleFilter) {
-	var filterWindow = $('.select-filter');
-	var dataToFilter;
-	if (sampleFilter in cancerTypeDataFiltered) {
-		dataToFilter = cancerTypeDataFiltered[sampleFilter];
-	} else if (sampleFilter in cancerTypeDataFiltered.phenotype) {
-		dataToFilter = cancerTypeDataFiltered.phenotype[sampleFilter];
-	} else {
-		console.log('ERROR: cannot find "' + sampleFilter + '" in the data object keys.');
-		return false;
-	}
-	clearFilterSelection();
-	$('.sample-filter').text(sampleFilter.replace(/_/g, ' '));
-	var filterOptions;
-	var dataValues = Object.values(dataToFilter);
-	filterWindow.find('.data-summary').append('<h2>' + sampleFilter.replace(/_/g, ' ') + '</h2>');
-	if (parameterIsNumerical(dataValues)) {
-		// Add a summary of the data and plot the data distribution so the user can more easily
-		// select an appropriate filter value.
-		var dataSummary;
-		if (sampleFilter === 'cnv') {
-			// We don't want to add the quantiles for the copy number data.
-			dataSummary = summary(dataValues, false);
-		} else {
-			dataSummary = summary(dataValues, true);
-		}
-		var dataSummaryText = 'Data summary: <ul class="summary-values filter-list">';
-		$.each(dataSummary, function(key, value) {
-			var summaryVariable = key.replace(/ /g, '-');
-			summaryVariable = summaryVariable.replace(/%/, '');
-			if (key === 'null') {
-				var nrSamples = $('.nr_samples').text();
-				var nullCount = nrSamples - dataValues.length + value;
-				dataSummaryText += '<li data-summary-variable="null" data-value="null">null&emsp;' +
-					nullCount + '/' + nrSamples + '</li>';
-			} else {
-				dataSummaryText += '<li data-summary-variable="' + summaryVariable +
-					'" data-value="' + value + '">' + key + '&emsp;' +
-					(Math.round(value * 1000) / 1000) + '</li>';
-			}
-		});
-		dataSummaryText += '</ul> Data histogram:';
-		filterWindow.find('.data-summary').append(dataSummaryText);
-		drawHistogram(dataValues, '.select-filter .data-summary');
-		$('<input type="text">').insertAfter('.filter-options');
-		filterOptions = '<li data-value="le">&lt;&emsp;less than</li>' +
-						'<li data-value="le">&le;&emsp;less than or equal to</li>' +
-						'<li data-value="eq">=&emsp;equal to</li>' +
-						'<li data-value="ne">&ne;&emsp;not equal to</li>' +
-						'<li data-value="ge">&ge;&emsp;greater than or equal to</li>' +
-						'<li data-value="gt">&gt;&emsp;greater than</li>';
-	} else {
-		filterWindow.find('.data-summary').append('Data bar plot:');
-		drawBarPlot(dataValues, '.select-filter .data-summary');
-		$('.filter-categories').remove();
-		$('<ul class="filter-categories filter-list"></ul>').insertAfter('.filter-options');
-		var categories = dataValues.filter(uniqueValues).sort(sortAlphabetically);
-		$.each(categories, function(index, value) {
-			$('.filter-categories').append('<li data-value="' + value + '">' + value + '</li>');
-		});
-		filterOptions = '<li data-value="eq">=&emsp;equal to</li>' +
-						'<li data-value="ne">&ne;&emsp;not equal to</li>';
-	}
-	$('.filter-options').append(filterOptions);
-	filterWindow.slideDown(200);
-};*/
 
 var showFilterOptions = function(sampleFilter) {
 	var filterWindow = $('.select-filter');
