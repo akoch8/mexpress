@@ -96,6 +96,8 @@ $(function() {
 			$('.button--plot').addClass('button--inactive');
 			$('.message').hide().find('p').remove();
 			clearFilterSelection();
+			$('.active-filters--none').show();
+			$('.active-filters li').not(':eq(0)').remove();
 			$('.toolbar--check-variants').prop('checked', false);
 			$('#sample-sorter').text('');
 			$('#sample-filter').text('');
