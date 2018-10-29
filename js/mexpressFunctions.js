@@ -884,19 +884,21 @@ var drawHistogram = function(data, element) {
 	// Add vertical lines for the summary values. We will hide them by setting the opacity to 0, so
 	// that they can be shown when the user hovers the related value in the data summary list.
 	$.each(dataSummary, function(key, value) {
-		var xPositionLine =  (value - dataSummary.minimum) /
-			((dataSummary.maximum - dataSummary.minimum) / 10);
-		var lineClass = key.replace(/%/, '');
-		lineClass = lineClass.replace(/ /g, '-');
-		histogramSvg.append('line')
-			.attr('x1', x(xPositionLine))
-			.attr('x2', x(xPositionLine))
-			.attr('y1', 0)
-			.attr('y2', 90)
-			.attr('class', lineClass + '-line')
-			.style('stroke', histogramColorFocus)
-			.style('stroke-opacity', 0)
-			.attr('stroke-width', 2);
+		if (key !== 'null') {
+			var xPositionLine =  (value - dataSummary.minimum) /
+				((dataSummary.maximum - dataSummary.minimum) / 10);
+			var lineClass = key.replace(/%/, '');
+			lineClass = lineClass.replace(/ /g, '-');
+			histogramSvg.append('line')
+				.attr('x1', x(xPositionLine))
+				.attr('x2', x(xPositionLine))
+				.attr('y1', 0)
+				.attr('y2', 90)
+				.attr('class', lineClass + '-line')
+				.style('stroke', histogramColorFocus)
+				.style('stroke-opacity', 0)
+				.attr('stroke-width', 2);
+		}
 	});
 };
 
