@@ -485,3 +485,22 @@ li.toolbar-summary {
 	margin: 0 0.5em;
 	vertical-align: text-top;
 }
+
+/* Restyling of the intro.js elements. */
+
+/*.introjs-fixParent {
+	z-index: 1!important;
+}*/
+
+.introjs-tooltip {
+	border-radius: 0;
+	box-shadow: 0 1px 30px rgba(0,0,0,.3)
+}
+
+.introjs-overlay {
+	display: none;
+}
+
+.introjs-helperLayer {
+	display: none;
+}

@@ -487,4 +487,116 @@ $(function() {
 		}
 		$('.toolbar--select-download option[value=empty]').prop('selected', true);
 	});
+
+	// Show the step-by-step guide.
+	$('#start-guide').on('click', function(event) {
+		event.preventDefault();
+		var guide = introJs();
+		guide.setOptions({
+			overlayOpacity: 0,
+			showStepNumbers: false,
+			skipLabel: 'Exit the guide',
+			steps: [
+				{
+					// step 1
+					element: 'header h1',
+					intro: 'Welcome to MEXPRESS! This introduction will guide us through an example anaysis. Click on "Next &rarr;" or hit the right arrow key on your keyboard to go to the next step.',
+					position: 'right'
+				},
+				{
+					// step 2
+					element: '#name-input',
+					intro: 'First, we type in the name of the gene or miRNA that we are interested in.',
+					position: 'right'
+				},
+				{
+					// step 3
+					element: '.select-cancer-type li:first-of-type',
+					intro: 'And now we select a cancer type from this list.',
+					position: 'right'
+				},
+				{
+					// step 4
+					element: '.button--plot',
+					intro: 'Now that we have entered a gene name and selected a cancer type, all that\'s left to do is click the plot button!',
+					position: 'top'
+				},
+				{
+					// step 5
+					element: '.plot-window > .svg-container',
+					intro: 'After a few seconds (depending on the amount of data that need to be analyzed and plotted), our figure will appear in this window. The <a href="about.html" target="_blank">about</a> page contains more information on how to interpret this figure.',
+					position: 'top'
+				},
+				{
+					// step 6
+					element: '.toolbar',
+					intro: 'The blue toolbar above contains the different tools we need to reorder or filter the samples, to add or remove certain data types, create a summary figure of the DNA methylation data or to download the figure or the underlying data.',
+					position: 'bottom'
+				},
+				{
+					// step 7
+					element: '.button--select-filter',
+					intro: 'Let\'s say we would like to remove the samples for which there is no <em>CDO1</em> expression. We click the "Filter" button...',
+					position: 'bottom'
+				},
+				{
+					// step 8
+					element: '.toolbar--select-filter',
+					intro: 'We select "expression" in this drop-down list...',
+					position: 'top'
+				},
+				{
+					// step 9
+					element: '.filter-options-container',
+					intro: 'We select "not equal to"...',
+					position: 'top'
+				},
+				{
+					// step 10
+					element: '.select-filter__content.data-summary',
+					intro: 'And we select the "null" value (because we don\'t want the expression to be null!)...',
+					position: 'top'
+				},
+				{
+					// step 11
+					element: '.button--filter',
+					intro: 'Now we can just read our filter: "Select the samples where the expression is not equal to null.", which is exactly what we wanted! All that\'s left to do is click the filter button.',
+					position: 'top'
+				},
+				{
+					// step 12
+					element: '.toolbar',
+					intro: 'Now we\'re back at our figure from which all the samples without <em>CDO1</em> expression have been removed! The figure clearly tells us that there is a negative correlation between <em>CDO1</em> expression and DNA methylation around the promoter and that the expression is higher in normal samples compared to primary tumor samples.',
+					position: 'bottom'
+				},
+				{
+					// step 13
+					element: '.toolbar',
+					intro: 'This was just a simple example of what you can do with MEXPRESS. The <a href="about.html" target="_blank">about</a> page contains a detailed description of all the functionality. Please <a href="contact.html" target="_blank">get in touch</a> if you have any questions or comments!',
+					position: 'bottom'
+				}
+			]
+		});
+		guide.onchange(function() {
+			var currentStep = this._currentStep;
+			if (currentStep === 2) {
+				$('#name-input').focus();
+				$('#name-input').val('CDO1');
+			} else if (currentStep === 3) {
+				$('.select-cancer-type li:eq(1)').click();
+			} else if (currentStep === 4) {
+				$('.button--plot').click();
+			} else if (currentStep === 7) {
+				$('.button--select-filter').click();
+			} else if (currentStep === 8) {
+				$('.toolbar--select-filter option:eq(1)').prop('selected', true).change();
+			} else if (currentStep === 9) {
+				$('.filter-options li[data-value="ne"]').click();
+			} else if (currentStep === 10) {
+				$('.summary-values li[data-summary-variable="null"]').click();
+			} else if (currentStep === 11) {
+				$('.button--filter').click();
+			}
+		}).start();
+	});
 });
