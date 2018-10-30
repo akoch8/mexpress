@@ -491,6 +491,11 @@ $(function() {
 	// Show the step-by-step guide.
 	$('#start-guide').on('click', function(event) {
 		event.preventDefault();
+
+		// Make sure the sidebar is visible.
+		if ($('.show-sidebar').css('display') === 'inline-block') {
+			$('.show-sidebar').click();
+		}
 		var guide = introJs();
 		guide.setOptions({
 			overlayOpacity: 0,
