@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<meta name="description" content="MEXPRESS - Visualization and integration of TCGA data.">
+	<meta name="description" content="MEXPRESS - Visualization and integration of TCGA data">
 	<title>MEXPRESS</title>
 	<link href="https://fonts.googleapis.com/css?family=Lato:400,400i,700" rel="stylesheet">
 	<link href="https://fonts.googleapis.com/css?family=Montserrat:700" rel="stylesheet">
@@ -23,15 +23,27 @@
 	<aside>
 		<header>
 			<h1>MEXPRESS</h1>
-			<h3>visualizing DNA methylation, expression and clinical data</h3>
+			<h3>visualize DNA methylation, expression and clinical data</h3>
 		</header>
 		<div class="user-input">
+			<section>
+				<!--<p>
+					<a href="" id="start-guide">step-by-step example</a>
+				</p>-->
+				<div class="button button--small button--secondary" id="start-guide">
+					<div class="button__text">step-by-step example</div>
+				</div>
+			</section>
 			<section class="select-gene">
-				<p><strong>Enter a gene or miRNA name</strong></p>
+				<p>
+					<strong>Enter a gene or miRNA name</strong>
+				</p>
 				<input type="text" id="name-input" autofocus>
 			</section>
 			<section class='select-cancer-type'>
-				<p><strong>Select a cancer type</strong></p>
+				<p>
+					<strong>And select a cancer type</strong>
+				</p>
 				<ul>
 					<li>
 						<div class="short-name">LOADING...</div>
@@ -67,7 +79,6 @@
 		<nav>
 			<ul>
 				<li><a href="index.html">home</a></li>
-				<li><a href="" id="start-guide">step-by-step example</a></li>
 				<li><a href="about.html">about</a></li>
 				<li><a href="https://bmcgenomics.biomedcentral.com/articles/10.1186/s12864-015-1847-z" target="_blank">publication</a></li>
 				<li><a href="https://github.com/akoch8/mexpress" target="_blank">code</a></li>

@@ -17,11 +17,11 @@ aside header {
 
 .user-input {
 	color: #fcfcfc;
-	margin: 1rem;
+	margin: 2rem 1rem;
 }
 
 .user-input section {
-	padding: 1em 0;
+	padding: 0.25em 0;
 }
 
 input[type="text"] {
@@ -484,6 +484,10 @@ li.toolbar-summary {
 	border: 1px solid #4e6487;
 	margin: 0 0.5em;
 	vertical-align: text-top;
+}
+
+#start-guide {
+	margin-bottom: 2rem;
 }
 
 /* Restyling of the intro.js elements. */
