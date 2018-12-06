@@ -120,6 +120,44 @@ var addStatistic = function(statistic, x, y) {
 	}	
 };
 
+var addToolbar = function() {
+	// Reset the toolbar.
+	$('.toolbar .data-summary').empty()
+		.append('<p><strong>' + cancerTypeDataFiltered.region_annotation.name + '</strong> &mdash; ' +
+			cancerTypeAnnotation.full_name + '</p>')
+		.append('<p>Showing data for <span class="nr_samples"></span> samples.</p>');
+	$('.toolbar--select-sorter option:not(:first)').remove();
+	$('.toolbar--select-data-type option[value=cnv]').attr('disabled', false);
+
+	// Add the available variables to the 'sorter' select dropdown. Here, the user can choose to
+	// reorder the samples by any of the available variables.
+	if (Object.keys(cancerTypeDataFiltered.cnv).length) {
+		$('.toolbar--select-sorter').append('<option value="cnv">copy number</option>');
+	} else {
+		$('.toolbar--select-data-type option[value=cnv]').attr('disabled', true);
+	}
+	var clinicalParameters = $('#clinical-parameters').text();
+	if (clinicalParameters === undefined || clinicalParameters === 'default') {
+		clinicalParameters = cancerTypeAnnotation.default;
+	} else if (clinicalParameters === '') {
+		clinicalParameters = [];
+	} else {
+		clinicalParameters = clinicalParameters.split('+');
+	}
+	$.each(clinicalParameters, function(index, value) {
+		var parameterText = value.replace(/_/g, ' ');
+		if (parameterText.length > 40) {
+			parameterText = parameterText.substr(0, 37) + '...';
+		}
+		$('.toolbar--select-sorter').append('<option value="' + value + '" data-type="clinical">' +
+			parameterText + '</option>');
+	});
+	var sampleSorter = $('#sample-sorter').text();
+	sampleSorter = sampleSorter === '' ? 'region_expression' : sampleSorter;
+	$('.toolbar--select-sorter option[value="' + sampleSorter + '"]').prop('selected', true);
+	$('.toolbar__cover').fadeOut(500);
+};
+
 var addVariantAnnotation = function(annotation, xPosition, yPosition) {
 	annotation = annotation.split('__');
 	var maxTextWidth = 0;
@@ -154,41 +192,6 @@ var addVariantAnnotation = function(annotation, xPosition, yPosition) {
 			.attr('class', 'variant-annotation')
 			.text(annotationText);
 	});
-};
-
-var addToolbar = function() {
-	// Reset the toolbar.
-	$('.toolbar .data-summary').empty()
-		.append('<p><strong>' + cancerTypeDataFiltered.region_annotation.name + '</strong> &mdash; ' +
-			cancerTypeAnnotation.full_name + '</p>')
-		.append('<p>Showing data for <span class="nr_samples"></span> samples.</p>');
-	$('.toolbar--select-sorter option:not(:first)').remove();
-	$('.toolbar--select-filter option:not(:first)').remove();
-	$('.toolbar--select-data-type option[value=cnv]').attr('disabled', false);
-
-	// Add the available variables to the 'sorter' select dropdown. Here, the user can choose to
-	// reorder the samples by any of the available variables.
-	$('.toolbar--select-filter').append('<option value="region_expression">expression</option>');
-	if (Object.keys(cancerTypeDataFiltered.cnv).length) {
-		$('.toolbar--select-filter').append('<option value="cnv">copy number</option>');
-		$('.toolbar--select-sorter').append('<option value="cnv">copy number</option>');
-	} else {
-		$('.toolbar--select-data-type option[value=cnv]').attr('disabled', true);
-	}
-	$.each(cancerTypeAnnotation.default.sort(sortAlphabetically), function(index, value) {
-		var parameterText = value.replace(/_/g, ' ');
-		if (parameterText.length > 40) {
-			parameterText = parameterText.substr(0, 37) + '...';
-		}
-		$('.toolbar--select-filter').append('<option value="' + value + '" data-type="clinical">' +
-			parameterText + '</option>');
-		$('.toolbar--select-sorter').append('<option value="' + value + '" data-type="clinical">' +
-			parameterText + '</option>');
-	});
-	var sampleSorter = $('#sample-sorter').text();
-	sampleSorter = sampleSorter === '' ? 'region_expression' : sampleSorter;
-	$('.toolbar--select-sorter option[value="' + sampleSorter + '"]').prop('selected', true);
-	$('.toolbar__cover').fadeOut(500);
 };
 
 var calculateStatistics = function(samples, sorter) {
@@ -1151,7 +1154,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 	// Count the number of phenotype parameters that need to be plotted. We need to count the
 	// default parameters in the cancerTypeAnnotation object, not all the parameters in the data
 	// object.
-	clinicalParameters = $('#clinical-parameters').text();
+	var clinicalParameters = $('#clinical-parameters').text();
 	var nrClinicalParameters = 0;
 	if (clinicalParameters === undefined || clinicalParameters === 'default') {
 		clinicalParameters = cancerTypeAnnotation.default;
@@ -2807,12 +2810,9 @@ var updateDropdowns = function(parameters) {
 		if (parameterText.length > 40) {
 			parameterText = parameterText.substr(0, 37) + '...';
 		}
-		$('.toolbar--select-filter').append('<option value="' + value +
-			'" data-type="clinical">' + parameterText + '</option>');
 		$('.toolbar--select-sorter').append('<option value="' + value +
 			'" data-type="clinical">' + parameterText + '</option>');
 	});
-	$('.toolbar--select-filter').find('option[value="no filter"]').prop('selected', true);
 	$('.toolbar--select-sorter').find('option[value="region_expression"]').prop('selected', true);
 };
 
