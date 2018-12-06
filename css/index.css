@@ -24,6 +24,12 @@ aside header {
 	padding: 0.25em 0;
 }
 
+.user-input section:first-of-type {
+	border-bottom: 1px solid #4e6487;
+	padding-bottom: 1rem;
+	margin-bottom: 0.5rem;
+}
+
 input[type="text"] {
 	background: #fcfcfc;
 	border: 1px solid #34495e;
@@ -32,7 +38,6 @@ input[type="text"] {
 	font-family: 'Lato', sans-serif;
 	font-size: 1rem;
 	margin: 1rem 0;
-	outline: none;
 	padding: 0.5em;
 	width: 100%;
 }
@@ -41,6 +46,7 @@ input[type="text"]:focus {
 	background: #fff;
 	/*border: 1px solid #f85f73;*/
 	border: 1px solid #ff6666;
+	outline: none;
 }
 
 .autocomplete-suggestions {
@@ -457,6 +463,11 @@ li.toolbar-summary {
 	top: 0.5em;
 }
 
+.overlay__close-x svg {
+	height: 22px;
+	width: 22px;
+}
+
 .message__close-x:hover, .overlay__close-x:hover {
 	cursor: pointer;
 }
@@ -488,10 +499,6 @@ li.toolbar-summary {
 	border: 1px solid #4e6487;
 	margin: 0 0.5em;
 	vertical-align: text-top;
-}
-
-#start-guide {
-	margin-bottom: 2rem;
 }
 
 /* Restyling of the intro.js elements. */
