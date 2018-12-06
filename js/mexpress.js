@@ -135,6 +135,8 @@ $(function() {
 		}
 	});
 	$('.toolbar--select-sorter').change(function() {
+		// Close any potentially open window and show the parameter selection window.
+		$('.plot-window').find('.overlay').hide();
 		$('.plot-loader').show();
 		var sampleSorter = $(this).val();
 
@@ -164,6 +166,8 @@ $(function() {
 		showFilterOptions(sampleFilter);
 	});
 	$('.toolbar--select-data-type').change(function() {
+		// Close any potentially open window and show the parameter selection window.
+		$('.plot-window').find('.overlay').hide();
 		var dataType = $(this).val();
 		if (dataType === 'no data type selected') {
 			$('.data-type-information').hide();
@@ -299,6 +303,8 @@ $(function() {
 		});
 	});
 	$('.toolbar--check-variants').change(function() {
+		// Close any potentially open window and show the parameter selection window.
+		$('.plot-window').find('.overlay').hide();
 		$('.plot-loader').show();
 		var showVariants = this.checked;
 		var sampleSorter = $('#sample-sorter').text();
@@ -312,6 +318,8 @@ $(function() {
 		}, 100);
 	});
 	$('.button--reset-plot').on('click', function() {
+		// Close any potentially open window and show the parameter selection window.
+		$('.plot-window').find('.overlay').hide();
 		$('.plot-loader').show();
 		setToolbar('detail');
 		setTimeout(function() {
@@ -327,6 +335,8 @@ $(function() {
 		}, 100);
 	});
 	$('.button--plot-summary').on('click', function() {
+		// Close any potentially open window and show the parameter selection window.
+		$('.plot-window').find('.overlay').hide();
 		$('.plot-loader').show();
 		var sampleSorter = $('#sample-sorter').text();
 		sampleSorter = sampleSorter === '' ? 'region_expression' : sampleSorter;
