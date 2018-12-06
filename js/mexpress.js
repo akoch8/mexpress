@@ -554,7 +554,7 @@ $(function() {
 				},
 				{
 					// step 5
-					element: '.plot-window > .svg-container',
+					element: '.plot-window',
 					intro: 'After a few seconds (depending on the amount of data that need to be analyzed and plotted), our figure will appear in this window. The <a href="about.html" target="_blank">about</a> page contains more information on how to interpret this figure.',
 					position: 'top'
 				},
