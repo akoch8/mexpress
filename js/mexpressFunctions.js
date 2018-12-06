@@ -63,7 +63,7 @@ var addProbeAnnotation = function(probeId, annotation, xPosition, yPosition) {
 	var counter = 1;
 	svg.append('text')
 			.attr('x', xPosition)
-			.attr('y', yPosition + counter * 11) // the font size is 9px
+			.attr('y', yPosition + counter * 12) // the font size is 10px
 			.attr('fill', textColorBright)
 			.attr('text-anchor', 'start')
 			.attr('alignment-baseline', 'baseline')
@@ -74,7 +74,7 @@ var addProbeAnnotation = function(probeId, annotation, xPosition, yPosition) {
 		counter += 1;
 		svg.append('text')
 			.attr('x', xPosition)
-			.attr('y', yPosition + counter * 11) // the font size is 9px
+			.attr('y', yPosition + counter * 12) // the font size is 10px
 			.attr('fill', textColorBright)
 			.attr('text-anchor', 'start')
 			.attr('alignment-baseline', 'baseline')
@@ -124,7 +124,7 @@ var addVariantAnnotation = function(annotation, xPosition, yPosition) {
 	annotation = annotation.split('__');
 	var maxTextWidth = 0;
 	$.each(annotation, function(index, value) {
-		var textWidth = calculateTextWidth(value, '9px arial');
+		var textWidth = calculateTextWidth(value, '10px arial');
 		maxTextWidth = textWidth > maxTextWidth ? textWidth : maxTextWidth;
 	});
 	svg.append('rect')
@@ -147,7 +147,7 @@ var addVariantAnnotation = function(annotation, xPosition, yPosition) {
 		}
 		svg.append('text')
 			.attr('x', xPosition + 10)
-			.attr('y', yPosition + counter * 11) // the font size is 9px
+			.attr('y', yPosition + counter * 12) // the font size is 10px
 			.attr('fill', textColorBright)
 			.attr('text-anchor', 'start')
 			.attr('alignment-baseline', 'baseline')
@@ -1193,7 +1193,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 		var categoryWidth = 0;
 		$.each(categories, function(i, v) {
 			v = v ? v : 'null';
-			var textWidth = calculateTextWidth(v.replace(/_/g, ' '), '9px arial');
+			var textWidth = calculateTextWidth(v.replace(/_/g, ' '), '10px arial');
 			categoryWidth += textWidth + 2 * legendRectWidth + 5;
 		});
 		if (categoryWidth > legendWidth) {
@@ -1207,7 +1207,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 		var variantCategoriesWidth = 0;
 		$.each(variantCategories, function(i, v) {
 			v = v ? v : 'null';
-			var textWidth = calculateTextWidth(v.replace(/_/g, ' '), '9px arial');
+			var textWidth = calculateTextWidth(v.replace(/_/g, ' '), '10px arial');
 			variantCategoriesWidth += textWidth + 2 * legendRectWidth + 5;
 		});
 		if (variantCategoriesWidth > legendWidth) {
@@ -1218,7 +1218,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 		'0: diploid normal', '+1: low-level amplification', '+2: high-level amplification'];
 	var snvCategoriesWidth = 0;
 	$.each(snvCategories, function(i, v) {
-		var textWidth = calculateTextWidth(v.replace(/_/g, ' '), '9px arial');
+		var textWidth = calculateTextWidth(v.replace(/_/g, ' '), '10px arial');
 		snvCategoriesWidth += textWidth + 5 * sampleWidth + 5;
 	});
 	if (snvCategoriesWidth > legendWidth) {
@@ -1324,7 +1324,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 	$('.nr_samples').text(samples.length);
 
 	// Build the SVG.
-	var margin = {top: 20 + topMargin, left: 40, bottom: 200, right: 200};
+	var margin = {top: 20 + topMargin, left: 50, bottom: 200, right: 200};
 	var x = d3.scaleLinear().domain([0, width]).range([0, width]);
 	var y = d3.scaleLinear().domain([cancerTypeDataFiltered.plot_data.start, cancerTypeDataFiltered.plot_data.end])
 		.range([0, locationLinkedTracksHeight]);
@@ -1334,7 +1334,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 			.attr('height', locationLinkedTracksHeight + margin.top + margin.bottom)
 			.attr('text-rendering', 'geometricPrecision')
 			.attr('font-family', 'arial')
-			.attr('font-size', '9px')
+			.attr('font-size', '10px')
 			.attr('fill', textColor)
 			.on('mousedown', function() {
 				function mousemove(el, y) {
@@ -1778,7 +1778,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 		$.each(categories, function(i, v) {
 			var vText = v ? v : 'null';
 			vText = vText.replace(/_/g, ' ');
-			var textWidth = calculateTextWidth(vText, '9px arial');
+			var textWidth = calculateTextWidth(vText, '10px arial');
 			var colorIndex = allCategories.indexOf(v);
 			svg.append('rect')
 				.attr('fill', categoryColors[colorIndex])
@@ -1813,7 +1813,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 		});
 		$.each(variantCategories, function(index, value) {
 			value = value ? value : 'null';
-			var textWidth = calculateTextWidth(value.replace(/_/g, ' '), '9px arial');
+			var textWidth = calculateTextWidth(value.replace(/_/g, ' '), '10px arial');
 			svg.append('circle')
 				.attr('cx', xPosition + xPositionLegend + legendRectWidth / 2)
 				.attr('cy', yPosition + Math.floor(dataTrackHeight / 2))
@@ -1839,7 +1839,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 	var xPositionLegend = 0;
 	$.each(snvCategories, function(i, v) {
 		v = v ? v : 'null';
-		var textWidth = calculateTextWidth(v, '9px arial');
+		var textWidth = calculateTextWidth(v, '10px arial');
 		var cnvFactor = 4 / dataTrackHeight; // The copy number values range from -2 to 2.
 		var rectHeight, rectCol, yPositionRect;
 		yPositionRect = yPosition;
@@ -1884,7 +1884,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 		xPositionLegend = 0;
 		$.each(statsLegend, function(i, v) {
 			var statsTextColor = v === 'p >= 0.05' ? textColorLight : textColor;
-			var textWidth = calculateTextWidth(v, '9px arial');
+			var textWidth = calculateTextWidth(v, '10px arial');
 			svg.append('text')
 				.attr('fill', statsTextColor)
 				.attr('x', xPosition + xPositionLegend)
@@ -2150,7 +2150,7 @@ var plotSummary = function(sorter, showVariants, plotStart, plotEnd) {
 			.attr('height', height + margin.top + margin.bottom)
 			.attr('text-rendering', 'geometricPrecision')
 			.attr('font-family', 'arial')
-			.attr('font-size', '9px')
+			.attr('font-size', '10px')
 			.attr('fill', textColor)
 		.append('g')
 			.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
@@ -2195,7 +2195,7 @@ var plotSummary = function(sorter, showVariants, plotStart, plotEnd) {
 	d3.selectAll('.axis path')
 		.attr('stroke', textColor);
 	d3.selectAll('.axis text')
-		.attr('font-size', '9px')
+		.attr('font-size', '10px')
 		.attr('font-family', 'arial')
 		.attr('fill', textColor);
 	d3.selectAll('.axis line')
@@ -2556,7 +2556,7 @@ var plotSummary = function(sorter, showVariants, plotStart, plotEnd) {
 		.text('groups');
 	$.each(groupNames, function(index, value) {
 		value = value ? value : 'null';
-		var textWidth = calculateTextWidth(value, '9px arial');
+		var textWidth = calculateTextWidth(value, '10px arial');
 		svg.append('rect')
 			.attr('fill', groupColors[index])
 			.attr('x', xPositionLegend)
@@ -2584,7 +2584,7 @@ var plotSummary = function(sorter, showVariants, plotStart, plotEnd) {
 		xPositionLegend = 0;
 		$.each(statsLegend, function(i, v) {
 			var statsTextColor = v === 'p >= 0.05' ? textColorLight : textColor;
-			var textWidth = calculateTextWidth(v, '9px arial');
+			var textWidth = calculateTextWidth(v, '10px arial');
 			svg.append('text')
 				.attr('fill', statsTextColor)
 				.attr('x', xPositionLegend)
