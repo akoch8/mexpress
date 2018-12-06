@@ -326,7 +326,7 @@ $(function() {
 
 		// Check if the user already filled in or selected a filter value.
 		var textInput = $(this).closest('.select-filter__content').find('input[type=text]').val();
-		if (textInput || $('filter-categories').find('.selected').length > 0) {
+		if (textInput || $('.filter-categories').find('.selected').length > 0) {
 			$('.button--filter').removeClass('button--inactive');
 		}
 	});
