@@ -55,7 +55,6 @@ $(function() {
 	// Autocomplete the gene or miRNA name the user is typing.
 	var options, a;
 	$(function(){
-
 		options = {
 			serviceUrl: 'php/autocomplete.php',
 			minChars: 1,
@@ -85,6 +84,26 @@ $(function() {
 			$('.button--plot').removeClass('button--inactive');
 		} else {
 			$('.button--plot').addClass('button--inactive');
+		}
+	});
+	$('#cancer-type').on('input', function() {
+		// Filter the list of cancer types based on what the user types into the cancer type text
+		// input box.
+		var input = $(this).val().toLowerCase();
+		if (input) {
+			$(this).siblings('ul').find('li').each(function() {
+				var shortName = $(this).find('.short-name').text().toLowerCase();
+				var longName = $(this).find('.long-name').text().toLowerCase();
+				if (shortName.indexOf(input) === -1 && longName.indexOf(input) === -1) {
+					$(this).slideUp(200);
+				} else {
+					$(this).slideDown(200);
+				}
+			});
+		} else {
+			$(this).siblings('ul').find('li').each(function() {
+				$(this).slideDown(200);
+			});
 		}
 	});
 	$(document).on('keydown', function(e) {

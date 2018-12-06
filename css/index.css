@@ -39,14 +39,34 @@ input[type="text"] {
 	font-size: 1rem;
 	margin: 1rem 0;
 	padding: 0.5em;
+	transition: background 0.2s;
 	width: 100%;
+}
+
+::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+	color: #4e6487;
+	font-style: italic;
+	opacity: 1; /* Firefox */
+}
+
+:-ms-input-placeholder { /* Internet Explorer 10-11 */
+	color: #4e6487;
+	font-style: italic;
+}
+
+::-ms-input-placeholder { /* Microsoft Edge */
+	color: #4e6487;
+	font-style: italic;
 }
 
 input[type="text"]:focus {
 	background: #fff;
-	/*border: 1px solid #f85f73;*/
 	border: 1px solid #ff6666;
 	outline: none;
+}
+
+input[type="text"].no-margin {
+	margin: 0;
 }
 
 .autocomplete-suggestions {
@@ -71,6 +91,10 @@ input[type="text"]:focus {
 .autocomplete-suggestion strong {
 	color: #ff6666;
 	font-weight: 400;
+}
+
+.select-cancer-type p {
+	margin: 0;
 }
 
 .select-cancer-type ul {
@@ -147,7 +171,7 @@ input[type="text"]:focus {
 }
 
 .scroll-button {
-	padding: 2px 0;
+	padding: 5px 0;
 }
 
 .scroll-button:hover {
