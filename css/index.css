@@ -140,6 +140,14 @@ input[type="text"]:focus {
 	vertical-align: middle;
 }
 
+.scroll-button {
+	padding: 2px 0;
+}
+
+.scroll-button:hover {
+	cursor: pointer;
+}
+
 .scroll-button svg {
 	display: block;
 	margin: 0 auto;
@@ -215,10 +223,6 @@ input[type="text"]:focus {
 
 .button--inactive:active {
 	background: #4e6487;
-}
-
-.scroll-button:hover {
-	cursor: pointer;
 }
 
 .loader {

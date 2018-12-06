@@ -22,11 +22,18 @@ $(function() {
 	// Autofocus on the gene name text input box.
 	$('#name-input').focus();
 
-	// Scroll down the cancer type list when a user clicks on the scroll button.
+	// Scroll up or down the cancer type list when a user clicks on the scroll button.
 	$('.scroll-button').on('click', function() {
 		var list = $('.select-cancer-type').find('ul');
 		var scrollPosition = list.scrollTop();
-		list.scrollTop(scrollPosition + 200);
+		var scrollDirection = $(this).attr('class').replace(/scroll-button /, '');
+		if (scrollDirection === 'scroll-up') {
+			//list.scrollTop(scrollPosition - 200);
+			list.animate({scrollTop: scrollPosition - 200});
+		} else {
+			//list.scrollTop(scrollPosition + 200);
+			list.animate({scrollTop: scrollPosition + 200});
+		}
 	});
 
 	// Show/hide the sidebar.
