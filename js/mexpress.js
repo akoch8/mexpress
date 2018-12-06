@@ -91,7 +91,7 @@ $(function() {
 	});
 	$('.button--plot').on('click', function(e) {
 		if (!$(this).hasClass('button--inactive')) {
-			$('.button__text').css('visibility', 'hidden');
+			$(this).find('.button__text').css('visibility', 'hidden');
 			$(this).find('.loader').show();
 			$('.button--plot').addClass('button--inactive');
 			$('.message').hide().find('p').remove();
