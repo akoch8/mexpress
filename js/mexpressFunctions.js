@@ -994,6 +994,10 @@ var getVariantCategories = function(data) {
 	return categories;
 };
 
+var hideWindow = function(elementClass) {
+	$(elementClass).slideUp(200);
+};
+
 var isRegion = function(type) {
 	return function(x) {
 		return x.region_type === type;
@@ -2728,14 +2732,8 @@ var showFilterOptions = function(sampleFilter) {
 	$('.filter-options-container').empty().append(filterOptions);
 };
 
-var showFilterWindow = function() {
-	var filterWindow = $('.select-filter');
-	filterWindow.slideDown(200);
-};
-
-var showParameterSelection = function() {
-	var selectionWindow = $('.select-parameters');
-	selectionWindow.slideDown(200);
+var showWindow = function(elementClass) {
+	$(elementClass).slideDown(200);
 };
 
 var sortAlphabetically = function(a,b) {

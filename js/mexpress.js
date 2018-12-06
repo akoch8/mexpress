@@ -150,7 +150,14 @@ $(function() {
 		}, 100);
 	});
 	$('.button--select-filter').on('click', function() {
-		showFilterWindow();
+		var displayValue = $('.select-filter').css('display');
+		if (displayValue === 'none') {
+			// Close any potentially open window and show the parameter selection window.
+			$('.plot-window').find('.overlay').slideUp(200);
+			showWindow('.select-filter');
+		} else {
+			hideWindow('.select-filter');
+		}
 	});
 	$('.toolbar--select-filter').change(function() {
 		var sampleFilter = $(this).val();
@@ -418,7 +425,14 @@ $(function() {
 		$(this).closest('.message').hide().find('p').remove();
 	});
 	$('.button--select-parameters').on('click', function() {
-		showParameterSelection();
+		var displayValue = $('.select-parameters').css('display');
+		if (displayValue === 'none') {
+			// Close any potentially open window and show the parameter selection window.
+			$('.plot-window').find('.overlay').slideUp(200);
+			showWindow('.select-parameters');
+		} else {
+			hideWindow('.select-parameters');
+		}
 	});
 	$('.toolbar--select-download').change(function() {
 		var format = $(this).val();
