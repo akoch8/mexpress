@@ -175,7 +175,15 @@ var addToolbar = function() {
 	} else {
 		$('.toolbar--select-data-type option[value=cnv]').attr('disabled', true);
 	}
-	$.each(cancerTypeAnnotation.default.sort(sortAlphabetically), function(index, value) {
+	var clinicalParameters = $('#clinical-parameters').text();
+	if (clinicalParameters === undefined || clinicalParameters === 'default') {
+		clinicalParameters = cancerTypeAnnotation.default;
+	} else if (clinicalParameters === '') {
+		clinicalParameters = [];
+	} else {
+		clinicalParameters = clinicalParameters.split('+');
+	}
+	$.each(clinicalParameters, function(index, value) {
 		var parameterText = value.replace(/_/g, ' ');
 		if (parameterText.length > 40) {
 			parameterText = parameterText.substr(0, 37) + '...';
@@ -1151,7 +1159,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 	// Count the number of phenotype parameters that need to be plotted. We need to count the
 	// default parameters in the cancerTypeAnnotation object, not all the parameters in the data
 	// object.
-	clinicalParameters = $('#clinical-parameters').text();
+	var clinicalParameters = $('#clinical-parameters').text();
 	var nrClinicalParameters = 0;
 	if (clinicalParameters === undefined || clinicalParameters === 'default') {
 		clinicalParameters = cancerTypeAnnotation.default;
