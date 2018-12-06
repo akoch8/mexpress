@@ -597,7 +597,7 @@ $(function() {
 				{
 					// step 12
 					element: '.toolbar',
-					intro: 'We\'re back at our figure from which all the samples with missing <em>CDO1</em> expression values have been removed. The figure clearly tells us that there is a negative correlation between <em>CDO1</em> expression and DNA methylation around the promoter and that the expression is higher in normal samples compared to primary tumor samples.',
+					intro: 'We\'re back at our figure from which all the samples with missing <em>CDO1</em> expression values have been removed. The figure tells us that there is a negative correlation between <em>CDO1</em> expression and DNA methylation around the promoter and that the expression is higher in normal samples compared to primary tumor samples.',
 					position: 'bottom'
 				},
 				{
