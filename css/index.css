@@ -210,7 +210,7 @@ input[type="text"]:focus {
 }
 
 .button--inactive:hover {
-	cursor: default;
+	cursor: not-allowed;
 }
 
 .button--inactive:active {
