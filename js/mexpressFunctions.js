@@ -1182,7 +1182,8 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 		return !parameterIsNumerical(Object.values(cancerTypeDataFiltered.phenotype[a]));
 	});
 	var legendHeight = 0;
-	legendHeight = categoricalClinicalParameters.length * (dataTrackHeight + dataTrackSeparator) +
+	legendHeight = dataTrackHeight + // Space for the legend title.
+		categoricalClinicalParameters.length * (dataTrackHeight + dataTrackSeparator) +
 		dataTrackHeight + dataTrackSeparator; // Add an extra track for the copy number data.
 	var legendWidth = 0;
 	$.each(categoricalClinicalParameters, function(index, value) {
@@ -1283,7 +1284,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 	// axis represent genomic coordinates and we don't have to worry about mapping the phenotype
 	// and expression tracks to a genomic location.
 	var topMargin = legendHeight +
-					marginBetweenMainParts + // Margin between the legend and the data tracks.
+					marginBetweenMainParts * 3 + // Margin between the legend and the data tracks.
 					clinicalParametersHeight +
 					marginBetweenMainParts + // Margin between the phenotype and expression data.
 					dataTrackHeight + // Extra space for the gene/miRNA expression data.
@@ -1678,6 +1679,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 		.attr('x', xPosition)
 		.attr('y', y(mainRegionStart) - 5)
 		.attr('font-weight', 700)
+		.attr('font-size', '12px')
 		.attr('fill', regionColor)
 		.attr('text-anchor', 'start')
 		.attr('alignment-baseline', 'baseline')
@@ -1735,6 +1737,15 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 	// Draw the legend.
 	xPosition += marginBetweenMainParts * 5;
 	var yPosition = -topMargin;
+	svg.append('text')
+		.attr('x', xPosition)
+		.attr('y', yPosition)
+		.attr('font-weight', '700')
+		.attr('font-size', '12px')
+		.attr('text-anchor', 'start')
+		.attr('alignment-baseline', 'bottom')
+		.text('Legend');
+	yPosition += dataTrackHeight;
 	$.each(categoricalClinicalParameters, function(index, value) {
 		parameterText = value.replace(/_/g, ' ');
 		if (parameterText.length > 40) {
@@ -1900,9 +1911,17 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 		});
 	}
 
+	// Draw a horizontal line under the legend to separate it better from the actual data.
+	svg.append('line')
+		.attr('x1', -margin.left)
+		.attr('y1', Math.round(yPosition + dataTrackHeight + marginBetweenMainParts))
+		.attr('x2', width + margin.right)
+		.attr('y2', Math.round(yPosition + dataTrackHeight + marginBetweenMainParts))
+		.attr('stroke', textColorLight);
+
 	// Draw the phenotype data.
 	$.each(clinicalParameters, function(index, parameter) {
-		yPosition = -topMargin + legendHeight + marginBetweenMainParts +
+		yPosition = -topMargin + legendHeight + marginBetweenMainParts * 3 +
 					 index * (dataTrackHeight + dataTrackSeparator);
 		var phenotypeData = cancerTypeDataFiltered.phenotype[parameter];
 		drawDataTrack(phenotypeData, samples, allSamples, regionColor, xPosition, yPosition, parameter);
@@ -2005,7 +2024,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 		var statText, statTextColor;
 		$.each(clinicalParameters, function(index, value) {
 			var statData = stats.phenotype[value];
-			yPositionStat = -topMargin + legendHeight + marginBetweenMainParts +
+			yPositionStat = -topMargin + legendHeight + marginBetweenMainParts * 3 +
 							dataTrackCount * (dataTrackHeight + dataTrackSeparator);
 			addStatistic(statData, xPositionStat, yPositionStat);
 			dataTrackCount += 1;
