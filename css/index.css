@@ -353,6 +353,58 @@ li.toolbar-summary {
 	position: relative;
 }
 
+.intro-svg {
+	display: none;
+}
+
+.intro-svg--legend {
+	height: 160px;
+	left: 185px;
+	position: absolute;
+	top: 5px;
+	width: 0;
+}
+
+.intro-svg--clinical-variables {
+	height: 150px;
+	left: 185px;
+	position: absolute;
+	top: 205px;
+	width: 0;
+}
+
+.intro-svg--expression {
+	height: 15px;
+	left: 185px;
+	position: absolute;
+	top: 360px;
+	width: 0;
+}
+
+.intro-svg--methylation {
+	height: 200px;
+	left: 185px;
+	position: absolute;
+	top: 415px;
+	width: 0;
+}
+
+.intro-svg--genome {
+	height: 340px;
+	left: 100px;
+	position: absolute;
+	top: 420px;
+	width: 0;
+}
+
+.intro-svg--statistics {
+	height: 400px;
+	position: absolute;
+	right: 380px;
+	top: 205px;
+	width: 0;
+}
+
 .png-conversion {
 	background: #4e6487;
 	color: #fff;

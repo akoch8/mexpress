@@ -1917,6 +1917,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 		.attr('y1', Math.round(yPosition + dataTrackHeight + marginBetweenMainParts))
 		.attr('x2', width + margin.right)
 		.attr('y2', Math.round(yPosition + dataTrackHeight + marginBetweenMainParts))
+		.attr('class', 'legend-separator')
 		.attr('stroke', textColorLight);
 
 	// Draw the phenotype data.
