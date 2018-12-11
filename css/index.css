@@ -357,6 +357,13 @@ li.toolbar-summary {
 	display: none;
 }
 
+/*
+ The location of the intro.js elements that describe the different parts of the figure have been
+ carefully measured out for the specific gene and cancer type used in the step-by-step example.
+ This was the quickest way to show intro.js elements for dynamically added DOM elements. The
+ figure doesn't exist in the DOM when starting the step-by-step example, so intro.js doesn't know
+ where to put its elements that should be attached to different parts of the figure.
+ */
 .intro-svg--legend {
 	height: 160px;
 	left: 185px;
