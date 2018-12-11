@@ -52,12 +52,14 @@
 						<polyline points="17 18 12 13 7 18"></polyline>
 					</svg>
 				</div>
-				<input type="text" id="cancer-type" class="no-margin" placeholder="cancer type">
-				<ul>
-					<li>
-						<div class="short-name">LOADING...</div>
-					</li>
-				</ul>
+				<div class="list-border">
+					<input type="text" id="cancer-type" class="no-margin" placeholder="cancer type">
+					<ul>
+						<li>
+							<div class="short-name">LOADING...</div>
+						</li>
+					</ul>
+				</div>
 				<div class="scroll-button scroll-down">
 					<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevrons-down">
 						<polyline points="7 13 12 18 17 13"></polyline>
@@ -237,7 +239,6 @@
 						<line x1="6" y1="6" x2="18" y2="18"></line>
 					</svg>
 				</div>
-				<h2>Filter the samples</h2>
 				<div class="select-filter__content">
 					Active filters:
 					<ul class="active-filters">
@@ -253,8 +254,9 @@
 					is
 					<span class="filter-options-container"> . . . </span>
 					<span class="filter-value-container"> . . . </span>
+					<span class="data-summary"></span>
 				</div>
-				<div class="select-filter__content data-summary"></div>
+				<!--<div class="select-filter__content data-summary"></div>-->
 				<div class="select-filter__content">
 					<div class="button button--filter button--small button--inactive">
 						<div class="button__text">filter</div>

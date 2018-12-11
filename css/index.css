@@ -102,6 +102,10 @@ input[type="text"].no-margin {
 	overflow-y: scroll;
 }
 
+.list-border {
+	border: 2px solid #4e6487;
+}
+
 .select-cancer-type li {
 	border-bottom: 1px solid #4e6487;
 	color: #e4f1fe;
@@ -452,7 +456,6 @@ li.toolbar-summary {
 .select-filter input[type="text"] {
 	display: inline-block;
 	margin: 0;
-	margin-left: 1em;
 	padding: 0.25em;
 	width: auto;
 }
@@ -467,6 +470,20 @@ li.toolbar-summary {
 	font-style: italic;
 	margin-top: 2em;
 	padding-top: 0.5em;
+}
+
+.select-filter__content > span {
+	position: relative;
+}
+
+.filter-tip {
+	color: #e4f1fe;
+	font-size: 0.9rem;
+	font-style: italic;
+	left: 1rem;
+	position: absolute;
+	top: -1.5rem;
+	width: 100%;
 }
 
 .active-filters {
@@ -579,7 +596,7 @@ li.toolbar-summary {
 }
 
 .data-summary svg {
-	border: 1px solid #4e6487;
+	border: 2px solid #4e6487;
 	margin: 0 0.5em;
 	vertical-align: text-top;
 }

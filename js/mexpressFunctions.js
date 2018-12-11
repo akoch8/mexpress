@@ -2794,7 +2794,9 @@ var showFilterOptions = function(sampleFilter) {
 		} else {
 			dataSummary = summary(dataValues, true);
 		}
-		var dataSummaryText = 'Data summary: <ul class="summary-values filter-list">';
+		var dataSummaryText = '<span class="filter-tip">Select a value</span>' +
+			'<ul class="summary-values filter-list list-border">' +
+			'<input type="text">';
 		$.each(dataSummary, function(key, value) {
 			var summaryVariable = key.replace(/ /g, '-');
 			summaryVariable = summaryVariable.replace(/%/, '');
@@ -2809,11 +2811,12 @@ var showFilterOptions = function(sampleFilter) {
 					(Math.round(value * 1000) / 1000) + '</li>';
 			}
 		});
-		dataSummaryText += '</ul> Data histogram:';
+		dataSummaryText += '</ul>';
 		filterWindow.find('.data-summary').append(dataSummaryText);
 		drawHistogram(dataValues, '.select-filter .data-summary');
-		$('.filter-value-container').empty().append('<input type="text">');
-		filterOptions = '<ul class="filter-options filter-list">' +
+		$('.filter-value-container').empty();
+		filterOptions = '<span class="filter-tip">Select an operator</span>' +
+						'<ul class="filter-options filter-list list-border">' +
 						'<li data-value="lt">&lt;&emsp;less than</li>' +
 						'<li data-value="le">&le;&emsp;less than or equal to</li>' +
 						'<li data-value="eq">=&emsp;equal to</li>' +
@@ -2823,14 +2826,16 @@ var showFilterOptions = function(sampleFilter) {
 						'</ul>';
 
 	} else {
-		filterWindow.find('.data-summary').append('Data bar plot:');
+		//filterWindow.find('.data-summary').append('Data bar plot:');
 		drawBarPlot(dataValues, '.select-filter .data-summary');
-		$('.filter-value-container').empty().append('<ul class="filter-categories filter-list"></ul>');
+		$('.filter-value-container').empty()
+			.append('<span class="filter-tip">Select a value</span><ul class="filter-categories filter-list list-border"></ul>');
 		var categories = dataValues.filter(uniqueValues).sort(sortAlphabetically);
 		$.each(categories, function(index, value) {
 			$('.filter-categories').append('<li data-value="' + value + '">' + value + '</li>');
 		});
-		filterOptions = '<ul class="filter-options filter-list">' +
+		filterOptions = '<span class="filter-tip">Select an operator</span>' +
+						'<ul class="filter-options filter-list list-border">' +
 						'<li data-value="eq">=&emsp;equal to</li>' +
 						'<li data-value="ne">&ne;&emsp;not equal to</li>' +
 						'</ul>';
