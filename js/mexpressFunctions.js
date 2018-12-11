@@ -1208,7 +1208,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 		var categoryDataValues = [];
 		$.each(Object.keys(categoryData), function(index, sample) {
 			if (cancerTypeDataFiltered.samples_filtered_sorted.indexOf(sample) > -1) {
-				categoryDataValues.push(value[sample]);
+				categoryDataValues.push(categoryData[sample]);
 			}
 		});
 		var categories = categoryDataValues.filter(uniqueValues);
