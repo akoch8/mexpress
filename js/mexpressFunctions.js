@@ -58,7 +58,7 @@ var addProbeAnnotation = function(probeId, annotation, xPosition, yPosition) {
 		.attr('x', xPosition - 5)
 		.attr('y', yPosition)
 		.attr('width', 160 - marginBetweenMainParts)
-		.attr('height', 13 * (Object.keys(annotation).length + 1))
+		.attr('height', 13 * (Object.keys(annotation).length + 2))
 		.attr('class', 'probe-annotation');
 	var counter = 1;
 	svg.append('text')
@@ -81,6 +81,23 @@ var addProbeAnnotation = function(probeId, annotation, xPosition, yPosition) {
 			.attr('class', 'probe-annotation')
 			.text(key.replace(/_/g, ' ') + ': ' + value);
 	});
+	counter += 1;
+	var probeStrand = annotation.strand === '+' ? 1 : -1;
+	svg.append('a')
+		.attr('xlink:href', 'https://rest.ensembl.org/sequence/region/human/' +
+			annotation.chr + ':' + (annotation.cpg_location - 50) + '..' +
+			(annotation.cpg_location + 50) + ':' + probeStrand +
+			'?content-type=text/plain;coord_system_version=GRCh38')
+		.attr('target', '_blank')
+	.append('text')
+		.attr('x', xPosition)
+		.attr('y', yPosition + counter * 12) // the font size is 10px
+		.attr('fill', textColorBright)
+		.attr('text-decoration', 'underline')
+		.attr('text-anchor', 'start')
+		.attr('alignment-baseline', 'baseline')
+		.attr('class', 'probe-annotation')
+		.text('link to surrounding sequence');
 };
 
 var addStatistic = function(statistic, x, y) {
