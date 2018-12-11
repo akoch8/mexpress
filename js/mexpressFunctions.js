@@ -58,7 +58,7 @@ var addProbeAnnotation = function(probeId, annotation, xPosition, yPosition) {
 		.attr('x', xPosition - 5)
 		.attr('y', yPosition)
 		.attr('width', 160 - marginBetweenMainParts)
-		.attr('height', 12 * (Object.keys(annotation).length + 1))
+		.attr('height', 13 * (Object.keys(annotation).length + 1))
 		.attr('class', 'probe-annotation');
 	var counter = 1;
 	svg.append('text')
@@ -132,7 +132,7 @@ var addVariantAnnotation = function(annotation, xPosition, yPosition) {
 		.attr('x', xPosition + 5)
 		.attr('y', yPosition)
 		.attr('width', maxTextWidth + 2 * 5) // 2 * 5 = margin around text
-		.attr('height', 12 * annotation.length)
+		.attr('height', 13 * annotation.length)
 		.attr('class', 'variant-annotation');
 	var counter = 0;
 	addCloseButton(xPosition + maxTextWidth + 5, yPosition + 8, 'variant-annotation');
