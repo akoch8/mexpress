@@ -97,7 +97,7 @@ var addProbeAnnotation = function(probeId, annotation, xPosition, yPosition) {
 		.attr('text-anchor', 'start')
 		.attr('alignment-baseline', 'baseline')
 		.attr('class', 'probe-annotation')
-		.text('link to surrounding sequence');
+		.text('link to sequence around CpG');
 };
 
 var addStatistic = function(statistic, x, y) {
