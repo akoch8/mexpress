@@ -1572,7 +1572,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 		.attr('y1', locationLinkedTracksHeight + dataTrackHeight * genomeLegendDistanceFactor)
 		.attr('y2', locationLinkedTracksHeight + dataTrackHeight * genomeLegendDistanceFactor)
 		.style('stroke', cpgColor)
-		.attr('stroke-width', 1);
+		.attr('stroke-width', sampleWidth);
 	svg.append('text')
 		.attr('x', xPosition + cpgWidth + genomicFeatureLargeMargin)
 		.attr('y', locationLinkedTracksHeight + dataTrackHeight * genomeLegendDistanceFactor)
@@ -1587,7 +1587,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 		.attr('y1', locationLinkedTracksHeight + dataTrackHeight * genomeLegendDistanceFactor)
 		.attr('y2', locationLinkedTracksHeight + dataTrackHeight * genomeLegendDistanceFactor)
 		.style('stroke', cpgColor)
-		.attr('stroke-width', 4);
+		.attr('stroke-width', cpgIslandWidth);
 	svg.append('text')
 		.attr('x', xPosition + cpgWidth + genomicFeatureLargeMargin)
 		.attr('y', locationLinkedTracksHeight + dataTrackHeight * genomeLegendDistanceFactor)
@@ -1602,7 +1602,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 		.attr('y1', locationLinkedTracksHeight + dataTrackHeight * genomeLegendDistanceFactor)
 		.attr('y2', locationLinkedTracksHeight + dataTrackHeight * genomeLegendDistanceFactor)
 		.style('stroke', regionColor)
-		.attr('stroke-width', 4);
+		.attr('stroke-width', regionWidth);
 	svg.append('text')
 		.attr('x', xPosition + cpgWidth + genomicFeatureLargeMargin)
 		.attr('y', locationLinkedTracksHeight + dataTrackHeight * genomeLegendDistanceFactor)
@@ -1617,7 +1617,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 		.attr('y1', locationLinkedTracksHeight + dataTrackHeight * genomeLegendDistanceFactor)
 		.attr('y2', locationLinkedTracksHeight + dataTrackHeight * genomeLegendDistanceFactor)
 		.style('stroke', transcriptColor)
-		.attr('stroke-width', 2);
+		.attr('stroke-width', transcriptWidth);
 	svg.append('text')
 		.attr('x', xPosition + cpgWidth + genomicFeatureLargeMargin)
 		.attr('y', locationLinkedTracksHeight + dataTrackHeight * genomeLegendDistanceFactor)
@@ -2248,8 +2248,8 @@ var plotSummary = function(sorter, showVariants, plotStart, plotEnd) {
 	// Build the SVG.
 	var height = 200;
 	var width = 800;
-	var margin = {top: 100,
-				  left: 100,
+	var margin = {top: 120,
+				  left: 140,
 				  bottom: 40 + genomicCoordinatesHeight + genomicFeaturesHeight + genomicFeatureLargeMargin,
 				  right: 100};
 	var x = d3.scaleLinear().domain([plotStart, plotEnd]).range([0, width]);
@@ -2320,26 +2320,93 @@ var plotSummary = function(sorter, showVariants, plotStart, plotEnd) {
 		.text('beta value');
 
 	// Draw the individual CpGs and the CpG islands.
-	// Adapt the opacity of the CpG lines to the length of the gene. Otherwise the CpG plot is just
-	// one big block of green for extremely long genes. Since the longest genes in the human genome
-	// appear to be around 2.3 megabases long, we chose 2,500,000 as the denominator in the
-	// calculation below (basically to normalise the gene length to a value between 0 and 1).
+	// Adapt the opacity of the CpG lines to the length of the plot window. Otherwise the CpG plot
+	// is just one big block of green for long genes (and large plot windows). For really long
+	// genes (length > 200kb), we will simply not draw the individual CpGs. They become one big
+	// green blob anyway.
+	// Start by adding a small legend below the genome annotation that explains the different
+	// parts.
+	var yPositionLegend = height + margin.bottom - 2 * genomicFeatureLargeMargin -
+		2 * genomicCoordinatesHeight - cpgHeight;
+	var xPosition = -margin.left + genomicFeatureLargeMargin * 2;
+	svg.append('line')
+		.attr('x1', xPosition)
+		.attr('x2', xPosition + cpgWidth)
+		.attr('y1', yPositionLegend)
+		.attr('y2', yPositionLegend)
+		.style('stroke', cpgColor)
+		.attr('stroke-width', sampleWidth);
+	svg.append('text')
+		.attr('x', xPosition + cpgWidth + genomicFeatureLargeMargin)
+		.attr('y', yPositionLegend)
+		.attr('fill', textColor)
+		.attr('text-anchor', 'start')
+		.attr('alignment-baseline', 'middle')
+		.text('CpG dinucleotide');
+	yPositionLegend -= dataTrackHeight;
+	svg.append('line')
+		.attr('x1', xPosition)
+		.attr('x2', xPosition + cpgWidth)
+		.attr('y1', yPositionLegend)
+		.attr('y2', yPositionLegend)
+		.style('stroke', cpgColor)
+		.attr('stroke-width', cpgIslandHeight);
+	svg.append('text')
+		.attr('x', xPosition + cpgWidth + genomicFeatureLargeMargin)
+		.attr('y', yPositionLegend)
+		.attr('fill', textColor)
+		.attr('text-anchor', 'start')
+		.attr('alignment-baseline', 'middle')
+		.text('CpG island');
+	yPositionLegend -= dataTrackHeight;
+	svg.append('line')
+		.attr('x1', xPosition)
+		.attr('x2', xPosition + cpgWidth)
+		.attr('y1', yPositionLegend)
+		.attr('y2', yPositionLegend)
+		.style('stroke', regionColor)
+		.attr('stroke-width', regionHeight);
+	svg.append('text')
+		.attr('x', xPosition + cpgWidth + genomicFeatureLargeMargin)
+		.attr('y', yPositionLegend)
+		.attr('fill', textColor)
+		.attr('text-anchor', 'start')
+		.attr('alignment-baseline', 'middle')
+		.text(cancerTypeDataFiltered.region_annotation.region_type);
+	yPositionLegend -= dataTrackHeight;
+	svg.append('line')
+		.attr('x1', xPosition)
+		.attr('x2', xPosition + cpgWidth)
+		.attr('y1', yPositionLegend)
+		.attr('y2', yPositionLegend)
+		.style('stroke', transcriptColor)
+		.attr('stroke-width', transcriptHeight);
+	svg.append('text')
+		.attr('x', xPosition + cpgWidth + genomicFeatureLargeMargin)
+		.attr('y', yPositionLegend)
+		.attr('fill', textColor)
+		.attr('text-anchor', 'start')
+		.attr('alignment-baseline', 'middle')
+		.text('transcript');
 	var yPosition = height + margin.bottom - 2 * genomicFeatureLargeMargin - 2 * genomicCoordinatesHeight;
+	var plotWindowLength = Math.abs(cancerTypeDataFiltered.plot_data.start -
+		cancerTypeDataFiltered.plot_data.end);
 	var cpgOpacity = 1;
-	cpgOpacity = 1 - Math.abs(cancerTypeDataFiltered.region_annotation.start -
-		cancerTypeDataFiltered.region_annotation.end) / 2500000;
-	$.each(cancerTypeDataFiltered.region_annotation.cpg_locations, function(index, value) {
-		if (value > cancerTypeDataFiltered.plot_data.start && value < cancerTypeDataFiltered.plot_data.end) {
-			svg.append('line')
-				.attr('x1', x(value))
-				.attr('x2', x(value))
-				.attr('y1', yPosition)
-				.attr('y2', yPosition - cpgHeight)
-				.style('stroke', cpgColor)
-				.style('stroke-opacity', cpgOpacity)
-				.attr('stroke-width', 1);
-		}
-	});
+	if (plotWindowLength < 200000) {
+		cpgOpacity = 1 - plotWindowLength / 200000;
+		$.each(cancerTypeDataFiltered.region_annotation.cpg_locations, function(index, value) {
+			if (value > cancerTypeDataFiltered.plot_data.start && value < cancerTypeDataFiltered.plot_data.end) {
+				svg.append('line')
+					.attr('x1', x(value))
+					.attr('x2', x(value))
+					.attr('y1', yPosition)
+					.attr('y2', yPosition - cpgHeight)
+					.style('stroke', cpgColor)
+					.style('stroke-opacity', cpgOpacity)
+					.attr('stroke-width', 1);
+			}
+		});
+	}
 	yPosition -= cpgHeight + genomicFeatureSmallMargin;
 	$.each(cancerTypeDataFiltered.cpgi_annotation, function(key, value) {
 		var regionStart, regionEnd;
@@ -2657,7 +2724,16 @@ var plotSummary = function(sorter, showVariants, plotStart, plotEnd) {
 
 	// Draw the legend.
 	var xPositionLegend = 0;
-	yPosition = -margin.top + dataTrackHeight;
+	yPosition = -margin.top + dataTrackHeight * 2;
+	svg.append('text')
+		.attr('x', xPositionLegend)
+		.attr('y', yPosition)
+		.attr('font-weight', '700')
+		.attr('font-size', '12px')
+		.attr('text-anchor', 'start')
+		.attr('alignment-baseline', 'bottom')
+		.text('Legend');
+	yPosition += dataTrackHeight;
 	svg.append('text')
 		.attr('x', -marginBetweenMainParts / 2)
 		.attr('y', yPosition + dataTrackHeight / 2)
@@ -2705,6 +2781,15 @@ var plotSummary = function(sorter, showVariants, plotStart, plotEnd) {
 			xPositionLegend += textWidth + 5 * sampleWidth + 5;
 		});
 	}
+
+	// Draw a horizontal line under the legend to separate it better from the actual data.
+	svg.append('line')
+		.attr('x1', -margin.left)
+		.attr('y1', Math.round(yPosition + dataTrackHeight + marginBetweenMainParts))
+		.attr('x2', width + margin.right)
+		.attr('y2', Math.round(yPosition + dataTrackHeight + marginBetweenMainParts))
+		.attr('class', 'legend-separator')
+		.attr('stroke', textColorLight);
 	$('.plot-loader').hide();
 };
 
