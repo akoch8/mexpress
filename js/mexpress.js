@@ -572,7 +572,7 @@ $(function() {
 				},
 				{
 					element: '.plot-window',
-					intro: 'After a few seconds (depending on the amount of data that need to be analyzed and plotted), our figure will appear in this window.',
+					intro: 'After a few seconds (depending on the amount of data that need to be analyzed and plotted), our figure will appear in this window. When it does, we will go through it in detail.',
 					position: 'top'
 				},
 				{
@@ -631,14 +631,14 @@ $(function() {
 					position: 'top'
 				},
 				{
-					element: '.select-filter__content.data-summary',
+					element: '.select-filter .data-summary',
 					intro: 'And we select the "null" value (because we don\'t want the expression to be null!)...',
 					position: 'top'
 				},
 				{
 					element: '.button--filter',
 					intro: 'Now we can just read our filter: "Select the samples where the expression is not equal to null.", which is exactly what we wanted! All that\'s left to do is click the filter button.',
-					position: 'top'
+					position: 'left'
 				},
 				{
 					element: '.toolbar',

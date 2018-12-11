@@ -483,7 +483,7 @@ li.toolbar-summary {
 	left: 1rem;
 	position: absolute;
 	top: -1.5rem;
-	width: 100%;
+	width: 200%;
 }
 
 .active-filters {
