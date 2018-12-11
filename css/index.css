@@ -32,7 +32,8 @@ aside header {
 
 input[type="text"] {
 	background: #f8f8f8;
-	border: 1px solid #34495e;
+	border: none;
+	border: 1px solid #4e6487;
 	box-shadow: none;
 	display: block;
 	font-family: 'Lato', sans-serif;
