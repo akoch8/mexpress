@@ -1536,13 +1536,83 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 	// Draw the individual CpGs and the CpG islands.
 	// Adapt the opacity of the CpG lines to the length of the plot window. Otherwise the CpG plot
 	// is just one big block of green for long genes (and large plot windows). For really long
-	// genes (length > 100kb), we will simply not draw the individual CpGs. They become one big
+	// genes (length > 200kb), we will simply not draw the individual CpGs. They become one big
 	// green blob anyway.
+	// Start by adding a small legend below the genome annotation that explains the different
+	// parts.
+	var genomeLegendDistanceFactor = 3;
+	svg.append('line')
+		.attr('x1', xPosition)
+		.attr('y1', locationLinkedTracksHeight + dataTrackHeight * genomeLegendDistanceFactor)
+		.attr('x2', xPosition + 100)
+		.attr('y2', locationLinkedTracksHeight + dataTrackHeight * genomeLegendDistanceFactor)
+		.attr('class', 'legend-separator')
+		.attr('stroke', textColorLight);
+	genomeLegendDistanceFactor += 2;
+	svg.append('line')
+		.attr('x1', xPosition)
+		.attr('x2', xPosition + cpgWidth)
+		.attr('y1', locationLinkedTracksHeight + dataTrackHeight * genomeLegendDistanceFactor)
+		.attr('y2', locationLinkedTracksHeight + dataTrackHeight * genomeLegendDistanceFactor)
+		.style('stroke', cpgColor)
+		.attr('stroke-width', 1);
+	svg.append('text')
+		.attr('x', xPosition + cpgWidth + genomicFeatureLargeMargin)
+		.attr('y', locationLinkedTracksHeight + dataTrackHeight * genomeLegendDistanceFactor)
+		.attr('fill', textColor)
+		.attr('text-anchor', 'start')
+		.attr('alignment-baseline', 'middle')
+		.text('CpG dinucleotide');
+	genomeLegendDistanceFactor += 1;
+	svg.append('line')
+		.attr('x1', xPosition)
+		.attr('x2', xPosition + cpgWidth)
+		.attr('y1', locationLinkedTracksHeight + dataTrackHeight * genomeLegendDistanceFactor)
+		.attr('y2', locationLinkedTracksHeight + dataTrackHeight * genomeLegendDistanceFactor)
+		.style('stroke', cpgColor)
+		.attr('stroke-width', 4);
+	svg.append('text')
+		.attr('x', xPosition + cpgWidth + genomicFeatureLargeMargin)
+		.attr('y', locationLinkedTracksHeight + dataTrackHeight * genomeLegendDistanceFactor)
+		.attr('fill', textColor)
+		.attr('text-anchor', 'start')
+		.attr('alignment-baseline', 'middle')
+		.text('CpG island');
+	genomeLegendDistanceFactor += 1;
+	svg.append('line')
+		.attr('x1', xPosition)
+		.attr('x2', xPosition + cpgWidth)
+		.attr('y1', locationLinkedTracksHeight + dataTrackHeight * genomeLegendDistanceFactor)
+		.attr('y2', locationLinkedTracksHeight + dataTrackHeight * genomeLegendDistanceFactor)
+		.style('stroke', regionColor)
+		.attr('stroke-width', 4);
+	svg.append('text')
+		.attr('x', xPosition + cpgWidth + genomicFeatureLargeMargin)
+		.attr('y', locationLinkedTracksHeight + dataTrackHeight * genomeLegendDistanceFactor)
+		.attr('fill', textColor)
+		.attr('text-anchor', 'start')
+		.attr('alignment-baseline', 'middle')
+		.text(cancerTypeDataFiltered.region_annotation.region_type);
+	genomeLegendDistanceFactor += 1;
+	svg.append('line')
+		.attr('x1', xPosition)
+		.attr('x2', xPosition + cpgWidth)
+		.attr('y1', locationLinkedTracksHeight + dataTrackHeight * genomeLegendDistanceFactor)
+		.attr('y2', locationLinkedTracksHeight + dataTrackHeight * genomeLegendDistanceFactor)
+		.style('stroke', transcriptColor)
+		.attr('stroke-width', 2);
+	svg.append('text')
+		.attr('x', xPosition + cpgWidth + genomicFeatureLargeMargin)
+		.attr('y', locationLinkedTracksHeight + dataTrackHeight * genomeLegendDistanceFactor)
+		.attr('fill', textColor)
+		.attr('text-anchor', 'start')
+		.attr('alignment-baseline', 'middle')
+		.text('transcript');
 	var plotWindowLength = Math.abs(cancerTypeDataFiltered.plot_data.start -
 		cancerTypeDataFiltered.plot_data.end);
 	var cpgOpacity = 1;
-	if (plotWindowLength < 100000) {
-		cpgOpacity = 1 - plotWindowLength / 100000;
+	if (plotWindowLength < 200000) {
+		cpgOpacity = 1 - plotWindowLength / 200000;
 		$.each(cancerTypeDataFiltered.region_annotation.cpg_locations, function(index, value) {
 			if (value > cancerTypeDataFiltered.plot_data.start && value < cancerTypeDataFiltered.plot_data.end) {
 				svg.append('line')
@@ -1556,7 +1626,6 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 			}
 		});
 	}
-
 	xPosition += cpgWidth + genomicFeatureSmallMargin;
 	$.each(cancerTypeDataFiltered.cpgi_annotation, function(key, value) {
 		var regionStart, regionEnd;
