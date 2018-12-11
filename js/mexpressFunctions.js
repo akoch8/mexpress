@@ -1358,6 +1358,15 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 			.attr('font-family', 'arial')
 			.attr('font-size', '10px')
 			.attr('fill', textColor)
+			.on('mousemove', function() {
+				var xPosition = d3.mouse(this)[0] - margin.left;
+				var yPosition = d3.mouse(this)[1] - margin.top;
+				if (xPosition > 0 && xPosition < genomicFeaturesWidth && yPosition > 0 && yPosition < locationLinkedTracksHeight) {
+					$('svg').css('cursor', 'crosshair');
+				} else {
+					$('svg').css('cursor', 'default');
+				}
+			})
 			.on('mousedown', function() {
 				function mousemove(el, y) {
 					$('.zoom-rect').remove();
@@ -1412,6 +1421,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 						var showVariants = $('.toolbar--check-variants').prop('checked');
 						$('.plot-loader.overlay').fadeOut(200, function() {
 							$('.plot-loader').show();
+							$('.button--zoom-out').removeClass('button--inactive');
 							setTimeout(function() {
 								plot(sampleSorter, sampleFilter, showVariants, newStart, newEnd);
 							}, 100);

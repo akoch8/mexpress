@@ -336,9 +336,11 @@ main {
 }
 
 .toolbar li {
+	border: 1px solid #4e6487;
 	display: inline-block;
 	margin-bottom: 1em;
 	margin-right: 2em;
+	padding: 0.25em 0.5em 0.5em 0.5em;
 }
 
 .toolbar select, .toolbar input[type="checkbox"] {

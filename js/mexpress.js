@@ -334,6 +334,20 @@ $(function() {
 			plot('region_expression', null, false);
 		}, 100);
 	});
+	$('.button--zoom-out').on('click', function() {
+		// Close any potentially open window and show the parameter selection window.
+		$('.plot-window').find('.overlay').hide();
+		$('.plot-loader').show();
+		$('.button--zoom-out').addClass('button--inactive');
+		var showVariants = this.checked;
+		var sampleSorter = $('#sample-sorter').text();
+		sampleSorter = sampleSorter === '' ? 'region_expression' : sampleSorter;
+		var sampleFilter = $('#sample-filter').text();
+		sampleFilter = sampleFilter === '' ? null : sampleFilter;
+		setTimeout(function() {
+			plot(sampleSorter, sampleFilter, showVariants);
+		}, 100);
+	});
 	$('.button--plot-summary').on('click', function() {
 		// Close any potentially open window and show the parameter selection window.
 		$('.plot-window').find('.overlay').hide();
@@ -602,7 +616,7 @@ $(function() {
 				},
 				{
 					element: '.intro-svg--genome',
-					intro: 'And here we see the gene together with its transcripts, as well as any CpG islands and all the individual CpG dinucleotides.',
+					intro: 'And here we see the gene together with its transcripts, as well as any CpG islands and all the individual CpG dinucleotides. You can zoom in by clicking and dragging a rectangle over this area of the figure.',
 					position: 'right'
 				},
 				{
