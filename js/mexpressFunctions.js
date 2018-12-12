@@ -1362,9 +1362,9 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 				var xPosition = d3.mouse(this)[0] - margin.left;
 				var yPosition = d3.mouse(this)[1] - margin.top;
 				if (xPosition > 0 && xPosition < genomicFeaturesWidth && yPosition > 0 && yPosition < locationLinkedTracksHeight) {
-					$('svg').css('cursor', 'crosshair');
+					$(this).css('cursor', 'crosshair');
 				} else {
-					$('svg').css('cursor', 'default');
+					$(this).css('cursor', 'default');
 				}
 			})
 			.on('mousedown', function() {
