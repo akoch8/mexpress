@@ -339,7 +339,7 @@ $(function() {
 		$('.plot-window').find('.overlay').hide();
 		$('.plot-loader').show();
 		$('.button--zoom-out').addClass('button--inactive');
-		var showVariants = this.checked;
+		var showVariants = $('.toolbar--check-variants').prop('checked');
 		var sampleSorter = $('#sample-sorter').text();
 		sampleSorter = sampleSorter === '' ? 'region_expression' : sampleSorter;
 		var sampleFilter = $('#sample-filter').text();
