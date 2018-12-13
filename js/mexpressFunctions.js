@@ -513,16 +513,22 @@ var cleanUpImages = function(file) {
 	});
 };
 
-var drawArrow = function(y, xPosition, annotation, color) {
+var drawArrow = function(y, xPosition, start, end, annotation, color) {
 	// Add an arrow to indicate whether the region is located on the + or - strand.
+	console.log('window = [' + start + ', ' + end + ']');
+	if (annotation.strand === '+') {
+		console.log('arrow position = ' + annotation.end);
+	} else {
+		console.log('arrow position = ' + annotation.start);
+	}
 	svg.append('path')
-		.attr('d', function(d) {
+		.attr('d', function() {
 			var pathX, pathY;
 			pathX = xPosition;
-			if (annotation.strand === '+') {
+			if (annotation.strand === '+' && annotation.end < end) {
 				pathY = y(annotation.end);
 				return 'M ' + pathX + ' ' + pathY + 'l 0 -10 l -3 0 z';
-			} else if (annotation.strand === '-') {
+			} else if (annotation.strand === '-' && annotation.start > start) {
 				pathY = y(annotation.start);
 				return 'M ' + pathX + ' ' + pathY + 'l 0 10 l -3 0 z';
 			}
@@ -533,7 +539,7 @@ var drawArrow = function(y, xPosition, annotation, color) {
 var drawHorizontalArrow = function(x, yPosition, annotation, color) {
 	// Add an arrow to indicate whether the region is located on the + or - strand.
 	svg.append('path')
-		.attr('d', function(d) {
+		.attr('d', function() {
 			var pathX, pathY;
 			pathY = yPosition;
 			if (annotation.strand === '+') {
@@ -1034,7 +1040,6 @@ var loadData = function(name, cancer) {
 		if (cancerTypeData.success) {
 			// By default, the samples are not filtered and are sorted by the expression of the
 			// selected main region.
-			console.log(cancerTypeData);
 			plot('region_expression', null, false);
 		} else {
 			$('.svg-container > svg').remove();
@@ -1729,7 +1734,8 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 				});
 
 			// Add an arrow to indicate whether the region is located on the + or - strand.
-			drawArrow(y, xPosition, value, otherRegionColor);
+			drawArrow(y, xPosition, cancerTypeDataFiltered.plot_data.start,
+				cancerTypeDataFiltered.plot_data.end, value, otherRegionColor);
 		}
 		xPosition += regionWidth;
 		if (value.region_type === 'gene') {
@@ -1785,7 +1791,9 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 		.attr('alignment-baseline', 'baseline')
 		.text(cancerTypeDataFiltered.region_annotation.name);
 	xPosition += regionWidth;
-	drawArrow(y, xPosition - regionWidth, cancerTypeDataFiltered.region_annotation, regionColor);
+	drawArrow(y, xPosition - regionWidth, cancerTypeDataFiltered.plot_data.start,
+		cancerTypeDataFiltered.plot_data.end, cancerTypeDataFiltered.region_annotation,
+		regionColor);
 	if (cancerTypeDataFiltered.region_annotation.region_type === 'gene') {
 		// Add the transcripts.
 		transcripts = cancerTypeDataFiltered.region_annotation.transcripts;
