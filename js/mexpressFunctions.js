@@ -1074,7 +1074,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 
 	// The plot consists of three main parts:
 	// 1. genomic annotation data (miRNAs, genes, transcripts, CpG islands)
-	// 2. location-linked data (DNA methylation and variants)
+	// 2. location-linked data (DNA methylation and somatic mutations)
 	// 3. sample-linked data (expression, copy number variation, clinical data)
 	// In order to draw an accurate plot we need to count:
 	// - the number of samples
@@ -1258,9 +1258,8 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 	var nrVariantTracks = 0;
 	var variants = showVariants ? variantsByStartValue(cancerTypeDataFiltered.snv) : {};
 	var filteredVariants = variants;
-	//cancerTypeDataFiltered = $.extend(true, {}, cancerTypeData);
 	if (plotStart && plotEnd) {
-		// Filter the DNA methylation probes and genomic variants based on the provided genomic
+		// Filter the DNA methylation probes and somatic mutations based on the provided genomic
 		// window.
 		cancerTypeDataFiltered.plot_data.start = plotStart;
 		cancerTypeDataFiltered.plot_data.end = plotEnd;
@@ -1289,7 +1288,6 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 			}
 		});
 		nrVariantTracks = Object.keys(filteredVariants).length;
-		// This needs to change
 		cancerTypeDataFiltered.snv = filteredVariants;
 	} else {
 		nrDnaMethylationTracks = Object.keys(cancerTypeDataFiltered.dna_methylation_data).length;
@@ -1466,7 +1464,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 		probeLocations.push(yPosition);
 		var nrVariants = 0;
 		if (showVariants) {
-			// We need to leave enough room to plot the genomic variants.
+			// We need to leave enough room to plot the somatic mutations.
 			nrVariants = Object.keys(filteredVariants).filter(function(x) {
 				return x < yPosition;
 			}).length;
@@ -1500,7 +1498,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 		}
 	});
 
-	// Draw the lines that connect the genomic locations of the genomic variants with their
+	// Draw the lines that connect the genomic locations of the somatic mutations with their
 	// corresponding data tracks.
 	var variantCounter = 0;
 	if (showVariants) {
@@ -1534,7 +1532,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 					.attr('stroke', probeLineColor)
 					.attr('stroke-width', 1);
 
-				// Add an extra horizontal line to visually separate the different variants.
+				// Add an extra horizontal line to visually separate the different somatic mutations.
 				svg.append('line')
 					.attr('x1', genomicFeaturesWidth + marginBetweenMainParts * 5)
 					.attr('x2', genomicFeaturesWidth + marginBetweenMainParts * 5 +
@@ -1914,7 +1912,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 			.attr('y', yPosition + dataTrackHeight / 2)
 			.attr('text-anchor', 'end')
 			.attr('alignment-baseline', 'middle')
-			.text('genomic variants');
+			.text('somatic mutations');
 		var variantColors = variantCategories.map(function(x) {
 			if (x) {
 				return categoricalColors[variantCategories.indexOf(x)];
@@ -2046,7 +2044,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 		var probeLocation = cancerTypeDataFiltered.probe_annotation_450[value].cpg_location;
 		var nrVariants = 0;
 		if (showVariants) {
-			// We need to leave enough room to plot the genomic variants.
+			// We need to leave enough room to plot the somatic mutations.
 			nrVariants = Object.keys(filteredVariants).filter(function(x) {
 				return x < probeLocation;
 			}).length;
@@ -2158,7 +2156,7 @@ var plotSummary = function(sorter, showVariants, plotStart, plotEnd) {
 	
 	// The summarized plot consists of three main parts:
 	// 1. genomic annotation data (miRNAs, genes, transcripts, CpG islands)
-	// 2. location-linked data (DNA methylation and variants)
+	// 2. location-linked data (DNA methylation and somatic mutations)
 	// 3. sample-linked data (expression, copy number variation, clinical data)
 	// It differs from the default plot in that the genome is plotted horizontally, instead of
 	// vertically. The DNA methylation data is summarized (median, quantiles, variance...) and
@@ -2843,7 +2841,7 @@ var showDataTypeInformation = function(dataType) {
 		'phenotype data': 'data/' + cancerTypeAnnotation.short_name + '/GDC_phenotype.tsv.json',
 		'survival data': 'data/' + cancerTypeAnnotation.short_name + '/survival.tsv.json',
 		'methylation 450 data': 'data/' + cancerTypeAnnotation.short_name + '/HumanMethylation450.json',
-		'genomic variants': 'data/' + cancerTypeAnnotation.short_name + '/mutect2_snv.tsv.json',
+		'somatic mutations': 'data/' + cancerTypeAnnotation.short_name + '/mutect2_snv.tsv.json',
 		'statistics': 'data/statistics.json',
 		'genomic annotation': 'data/genomicAnnotation.json'
 	};
