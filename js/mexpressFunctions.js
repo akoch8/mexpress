@@ -1793,7 +1793,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 		drawArrow(y, xPosition - regionWidth, cancerTypeDataFiltered.region_annotation,
 			regionColor);
 	} else if (cancerTypeDataFiltered.region_annotation.strand === '-' &&
-		cancerTypeDataFiltered.region_annotation.start < cancerTypeDataFiltered.plot_data.start) {
+		cancerTypeDataFiltered.region_annotation.start > cancerTypeDataFiltered.plot_data.start) {
 		drawArrow(y, xPosition - regionWidth, cancerTypeDataFiltered.region_annotation,
 			regionColor);
 	}
