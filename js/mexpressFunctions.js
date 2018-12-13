@@ -186,7 +186,7 @@ var addToolbar = function() {
 	// Add the available variables to the 'sorter' select dropdown. Here, the user can choose to
 	// reorder the samples by any of the available variables.
 	$('.toolbar--select-filter').append('<option value="region_expression">expression</option>');
-	if (Object.keys(cancerTypeDataFiltered.cnv).length) {
+	if (cancerTypeDataFiltered.cnv) {
 		$('.toolbar--select-filter').append('<option value="cnv">copy number</option>');
 		$('.toolbar--select-sorter').append('<option value="cnv">copy number</option>');
 	} else {
@@ -431,7 +431,7 @@ var calculateStatistics = function(samples, sorter) {
 	}
 
 	// Copy number data.
-	if (sorter !== 'cnv') {
+	if (sorter !== 'cnv' && cancerTypeDataFiltered.cnv) {
 		dataValues = [];
 		$.each(samples, function(index, sample) {
 			var dataValue = cancerTypeDataFiltered.cnv[sample];
@@ -1034,6 +1034,7 @@ var loadData = function(name, cancer) {
 		if (cancerTypeData.success) {
 			// By default, the samples are not filtered and are sorted by the expression of the
 			// selected main region.
+			console.log(cancerTypeData);
 			plot('region_expression', null, false);
 		} else {
 			$('.svg-container > svg').remove();
@@ -1094,7 +1095,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 	var phenotypeVariable = Object.keys(cancerTypeDataFiltered.phenotype)[0];
 	var phenotypeSamples = Object.keys(cancerTypeDataFiltered.phenotype[phenotypeVariable]);
 	var cnvSamples = 0;
-	if (cancerTypeDataFiltered.cnv.length) {
+	if (cancerTypeDataFiltered.cnv) {
 		cnvSamples = Object.keys(cancerTypeDataFiltered.cnv);
 	}
 
@@ -1134,7 +1135,9 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 		});
 		delete cancerTypeDataFiltered.snv[sample];
 		delete cancerTypeDataFiltered.region_expression[sample];
-		delete cancerTypeDataFiltered.cnv[sample];
+		if (cancerTypeDataFiltered.cnv) {
+			delete cancerTypeDataFiltered.cnv[sample];
+		}
 	});
 	console.log('cancerTypeDataFiltered');
 	console.log(cancerTypeDataFiltered);
@@ -1200,8 +1203,11 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 	});
 	var legendHeight = 0;
 	legendHeight = dataTrackHeight + // Space for the legend title.
-		categoricalClinicalParameters.length * (dataTrackHeight + dataTrackSeparator) +
-		dataTrackHeight + dataTrackSeparator; // Add an extra track for the copy number data.
+		categoricalClinicalParameters.length * (dataTrackHeight + dataTrackSeparator);
+	if (cancerTypeDataFiltered.cnv) {
+		// Add an extra track for the copy number data.
+		legendHeight += dataTrackHeight + dataTrackSeparator;
+	}
 	var legendWidth = 0;
 	$.each(categoricalClinicalParameters, function(index, value) {
 		var categoryData = cancerTypeDataFiltered.phenotype[value];
@@ -1236,15 +1242,15 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 			legendWidth = variantCategoriesWidth;
 		}
 	}
-	var snvCategories = ['-2: homozygous deletion', '-1: single copy deletion',
+	var cnvCategories = ['-2: homozygous deletion', '-1: single copy deletion',
 		'0: diploid normal', '+1: low-level amplification', '+2: high-level amplification'];
-	var snvCategoriesWidth = 0;
-	$.each(snvCategories, function(i, v) {
+	var cnvCategoriesWidth = 0;
+	$.each(cnvCategories, function(i, v) {
 		var textWidth = calculateTextWidth(v.replace(/_/g, ' '), '10px arial');
-		snvCategoriesWidth += textWidth + 5 * sampleWidth + 5;
+		cnvCategoriesWidth += textWidth + 5 * sampleWidth + 5;
 	});
-	if (snvCategoriesWidth > legendWidth) {
-		legendWidth = snvCategoriesWidth;
+	if (cnvCategoriesWidth > legendWidth) {
+		legendWidth = cnvCategoriesWidth;
 	}
 	var addStats = true;
 	if (addStats) {
@@ -1938,50 +1944,52 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 		});
 		yPosition += dataTrackHeight + dataTrackSeparator;
 	}
-	svg.append('text')
-		.attr('x', xPosition - marginBetweenMainParts / 2)
-		.attr('y', yPosition + dataTrackHeight / 2)
-		.attr('text-anchor', 'end')
-		.attr('alignment-baseline', 'middle')
-		.text('copy number');
-	var snvCategoryValues = [-2, -1, 0, 1, 2];
 	var xPositionLegend = 0;
-	$.each(snvCategories, function(i, v) {
-		v = v ? v : 'null';
-		var textWidth = calculateTextWidth(v, '10px arial');
-		var cnvFactor = 4 / dataTrackHeight; // The copy number values range from -2 to 2.
-		var rectHeight, rectCol, yPositionRect;
-		yPositionRect = yPosition;
-		rectHeight = Math.abs(snvCategoryValues[i] / cnvFactor);
-		if (snvCategoryValues[i] < 0) {
-			yPositionRect += dataTrackHeight / 2;
-			rectCol = otherRegionColor;
-		} else {
-			yPositionRect += dataTrackHeight / 2 - rectHeight;
-			rectCol = regionColor;
-		}
-		svg.append('line')
-			.attr('x1', xPosition + xPositionLegend - 2)
-			.attr('x2', xPosition + xPositionLegend + 4)
-			.attr('y1', yPosition + dataTrackHeight / 2)
-			.attr('y2', yPosition + dataTrackHeight / 2)
-			.attr('stroke', otherRegionColor)
-			.attr('stroke-width', 1);
-		svg.append('rect')
-			.attr('fill', rectCol)
-			.attr('x', xPosition + xPositionLegend)
-			.attr('y', yPositionRect)
-			.attr('width', sampleWidth * 2)
-			.attr('height', rectHeight);
+	if (cancerTypeDataFiltered.cnv) {
 		svg.append('text')
-			.attr('x', xPosition + sampleWidth + 5 + xPositionLegend)
+			.attr('x', xPosition - marginBetweenMainParts / 2)
 			.attr('y', yPosition + dataTrackHeight / 2)
-			.attr('text-anchor', 'start')
+			.attr('text-anchor', 'end')
 			.attr('alignment-baseline', 'middle')
-			.text(v);
-		xPositionLegend += textWidth + 5 * sampleWidth + 5;
-	});
-	yPosition += dataTrackHeight + dataTrackSeparator;
+			.text('copy number');
+		var cnvCategoryValues = [-2, -1, 0, 1, 2];
+		$.each(cnvCategories, function(i, v) {
+			v = v ? v : 'null';
+			var textWidth = calculateTextWidth(v, '10px arial');
+			var cnvFactor = 4 / dataTrackHeight; // The copy number values range from -2 to 2.
+			var rectHeight, rectCol, yPositionRect;
+			yPositionRect = yPosition;
+			rectHeight = Math.abs(cnvCategoryValues[i] / cnvFactor);
+			if (cnvCategoryValues[i] < 0) {
+				yPositionRect += dataTrackHeight / 2;
+				rectCol = otherRegionColor;
+			} else {
+				yPositionRect += dataTrackHeight / 2 - rectHeight;
+				rectCol = regionColor;
+			}
+			svg.append('line')
+				.attr('x1', xPosition + xPositionLegend - 2)
+				.attr('x2', xPosition + xPositionLegend + 4)
+				.attr('y1', yPosition + dataTrackHeight / 2)
+				.attr('y2', yPosition + dataTrackHeight / 2)
+				.attr('stroke', otherRegionColor)
+				.attr('stroke-width', 1);
+			svg.append('rect')
+				.attr('fill', rectCol)
+				.attr('x', xPosition + xPositionLegend)
+				.attr('y', yPositionRect)
+				.attr('width', sampleWidth * 2)
+				.attr('height', rectHeight);
+			svg.append('text')
+				.attr('x', xPosition + sampleWidth + 5 + xPositionLegend)
+				.attr('y', yPosition + dataTrackHeight / 2)
+				.attr('text-anchor', 'start')
+				.attr('alignment-baseline', 'middle')
+				.text(v);
+			xPositionLegend += textWidth + 5 * sampleWidth + 5;
+		});
+		yPosition += dataTrackHeight + dataTrackSeparator;
+	}
 	if (addStats) {
 		svg.append('text')
 			.attr('x', xPosition - marginBetweenMainParts / 2)
@@ -2031,9 +2039,11 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 		cancerTypeDataFiltered.region_annotation.name + ' expression');
 
 	// 2. Copy number variation
-	yPosition += dataTrackHeight + dataTrackSeparator;
-	var copyNumberDataValues = cancerTypeDataFiltered.cnv;
-	drawDataTrackCopyNumber(copyNumberDataValues, samples, xPosition, yPosition);
+	if (cancerTypeDataFiltered.cnv) {
+		yPosition += dataTrackHeight + dataTrackSeparator;
+		var copyNumberDataValues = cancerTypeDataFiltered.cnv;
+		drawDataTrackCopyNumber(copyNumberDataValues, samples, xPosition, yPosition);
+	}
 
 	// Draw the DNA methylation data.
 	var orderedProbes = Object.keys(cancerTypeDataFiltered.probe_annotation_450).sort(function(a,b) {
