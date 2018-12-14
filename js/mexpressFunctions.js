@@ -2955,7 +2955,7 @@ var showFilterOptions = function(sampleFilter) {
 		//filterWindow.find('.data-summary').append('Data bar plot:');
 		drawBarPlot(dataValues, '.select-filter .data-summary');
 		$('.filter-value-container').empty()
-			.append('<span class="filter-tip">Select a value</span><ul class="filter-categories filter-list list-border"></ul>');
+			.append('<span class="filter-tip">Select values</span><ul class="filter-categories filter-list list-border"></ul>');
 		var categories = dataValues.filter(uniqueValues).sort(sortAlphabetically);
 		$.each(categories, function(index, value) {
 			$('.filter-categories').append('<li data-value="' + value + '">' + value + '</li>');
