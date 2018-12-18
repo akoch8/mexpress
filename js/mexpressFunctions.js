@@ -217,7 +217,7 @@ var addToolbar = function() {
 };
 
 var calculateStatistics = function(samples, sorter) {
-	var stats = {};
+	var result = {};
 	var sorterValues = [];
 	var dataValues;
 	$.each(samples, function(index, sample) {
@@ -245,7 +245,7 @@ var calculateStatistics = function(samples, sorter) {
 	}
 
 	// DNA methylation data.
-	stats.dna_methylation_data = {};
+	result.dna_methylation_data = {};
 	$.each(cancerTypeDataFiltered.dna_methylation_data, function(key, value) {
 		dataValues = [];
 		$.each(samples, function(index, sample) {
@@ -259,7 +259,7 @@ var calculateStatistics = function(samples, sorter) {
 		if (sorterValuesNumeric) {
 			// Sorter = numeric & data = numeric
 			// ==> correlation
-			stats.dna_methylation_data[key] = pearsonCorrelation(sorterValues, dataValues);
+			result.dna_methylation_data[key] = pearsonCorrelation(sorterValues, dataValues);
 		} else {
 			if (sorterCategories.length === 2) {
 				// Sorter = two categories & data = numeric
@@ -270,7 +270,7 @@ var calculateStatistics = function(samples, sorter) {
 				var valuesGroup2 = dataValues.filter(function(x, index) {
 					return sorterValues[index] === sorterCategories[1];
 				});
-				stats.dna_methylation_data[key] = {'p': tTest(valuesGroup1, valuesGroup2)};
+				result.dna_methylation_data[key] = {'p': tTest(valuesGroup1, valuesGroup2)};
 			} else if (sorterCategories.length > 2) {
 				// Sorter = more than two categories & data = numeric
 				// ==> ANOVA
@@ -281,15 +281,15 @@ var calculateStatistics = function(samples, sorter) {
 					});
 					valuesGroups.push(groupValues);
 				}
-				stats.dna_methylation_data[key] = {'p': anova(valuesGroups)};
+				result.dna_methylation_data[key] = {'p': anova(valuesGroups)};
 			} else {
-				stats.dna_methylation_data[key] = null;
+				result.dna_methylation_data[key] = null;
 			}
 		}
 	});
 
 	// Phenotype data.
-	stats.phenotype = {};
+	result.phenotype = {};
 	$.each(cancerTypeDataFiltered.phenotype, function(key, value) {
 		var valuesGroups, valuesGroup1, valuesGroup2, i;
 		if (sorter !== key) {
@@ -307,7 +307,7 @@ var calculateStatistics = function(samples, sorter) {
 				if (sorterValuesNumeric) {
 					// Sorter = numeric & data = numeric
 					// ==> correlation
-					stats.phenotype[key] = pearsonCorrelation(sorterValues, dataValues);
+					result.phenotype[key] = pearsonCorrelation(sorterValues, dataValues);
 				} else if (sorterCategories.length === 2) {
 					// Sorter = two categories & data = numeric
 					// ==> t test
@@ -317,7 +317,7 @@ var calculateStatistics = function(samples, sorter) {
 					valuesGroup2 = dataValues.filter(function(x, index) {
 						return sorterValues[index] === sorterCategories[1];
 					});
-					stats.phenotype[key] = {'p': tTest(valuesGroup1, valuesGroup2)};
+					result.phenotype[key] = {'p': tTest(valuesGroup1, valuesGroup2)};
 				} else if (sorterCategories.length > 2) {
 					// Sorter = more than two categories & data = numeric
 					// ==> ANOVA
@@ -328,9 +328,9 @@ var calculateStatistics = function(samples, sorter) {
 						});
 						valuesGroups.push(groupValues);
 					}
-					stats.phenotype[key] = {'p': anova(valuesGroups)};
+					result.phenotype[key] = {'p': anova(valuesGroups)};
 				} else {
-					stats.phenotype[key] = null;
+					result.phenotype[key] = null;
 				}
 			} else {
 				var dataCategories = Object.values(dataValues).filter(uniqueValues);
@@ -347,7 +347,7 @@ var calculateStatistics = function(samples, sorter) {
 						valuesGroup2 = sorterValues.filter(function(x, index) {
 							return dataValues[index] === dataCategories[1];
 						});
-						stats.phenotype[key] = {'p': tTest(valuesGroup1, valuesGroup2)};
+						result.phenotype[key] = {'p': tTest(valuesGroup1, valuesGroup2)};
 					} else if (dataCategories.length > 2) {
 						// Sorter = numeric & data = more than two categories
 						// ==> ANOVA
@@ -358,9 +358,9 @@ var calculateStatistics = function(samples, sorter) {
 							});
 							valuesGroups.push(groupValues);
 						}
-						stats.phenotype[key] = {'p': anova(valuesGroups)};
+						result.phenotype[key] = {'p': anova(valuesGroups)};
 					} else {
-						stats.phenotype[key] = null;
+						result.phenotype[key] = null;
 					}
 				} else {
 					// Sorter = categorical & data = categorical
@@ -381,7 +381,7 @@ var calculateStatistics = function(samples, sorter) {
 						}
 						counts.push(row);
 					}
-					stats.phenotype[key] = {'p': chiSquare(counts)};
+					result.phenotype[key] = {'p': chiSquare(counts)};
 				}
 			}
 		}
@@ -401,7 +401,7 @@ var calculateStatistics = function(samples, sorter) {
 		if (sorterValuesNumeric) {
 			// Sorter = numeric & data = numeric
 			// ==> correlation
-			stats.region_expression = pearsonCorrelation(sorterValues, dataValues);
+			result.region_expression = pearsonCorrelation(sorterValues, dataValues);
 		} else if (sorterCategories.length === 2) {
 			// Sorter = two categories & data = numeric
 			// ==> t test
@@ -411,7 +411,7 @@ var calculateStatistics = function(samples, sorter) {
 			valuesGroup2 = dataValues.filter(function(x, index) {
 				return sorterValues[index] === sorterCategories[1];
 			});
-			stats.region_expression = {'p': tTest(valuesGroup1, valuesGroup2)};
+			result.region_expression = {'p': tTest(valuesGroup1, valuesGroup2)};
 		} else if (sorterCategories.length > 2) {
 			// Sorter = more than two categories & data = numeric
 			// ==> ANOVA
@@ -422,12 +422,12 @@ var calculateStatistics = function(samples, sorter) {
 				});
 				valuesGroups.push(groupValues);
 			}
-			stats.region_expression = {'p': anova(valuesGroups)};
+			result.region_expression = {'p': anova(valuesGroups)};
 		} else {
-			stats.region_expression = null;
+			result.region_expression = null;
 		}
 	} else {
-		stats.region_expression = null;
+		result.region_expression = null;
 	}
 
 	// Copy number data.
@@ -444,7 +444,7 @@ var calculateStatistics = function(samples, sorter) {
 		if (sorterValuesNumeric) {
 			// Sorter = numeric & data = numeric
 			// ==> correlation
-			stats.cnv = pearsonCorrelation(sorterValues, dataValues);
+			result.cnv = pearsonCorrelation(sorterValues, dataValues);
 		} else if (sorterCategories.length === 2) {
 			// Sorter = two categories & data = numeric
 			// ==> t test
@@ -454,7 +454,7 @@ var calculateStatistics = function(samples, sorter) {
 			valuesGroup2 = dataValues.filter(function(x, index) {
 				return sorterValues[index] === sorterCategories[1];
 			});
-			stats.cnv = {'p': tTest(valuesGroup1, valuesGroup2)};
+			result.cnv = {'p': tTest(valuesGroup1, valuesGroup2)};
 		} else if (sorterCategories.length > 2) {
 			// Sorter = more than two categories & data = numeric
 			// ==> ANOVA
@@ -465,14 +465,15 @@ var calculateStatistics = function(samples, sorter) {
 				});
 				valuesGroups.push(groupValues);
 			}
-			stats.cnv = {'p': anova(valuesGroups)};
+			result.cnv = {'p': anova(valuesGroups)};
 		} else {
-			stats.cnv = null;
+			result.cnv = null;
 		}
 	} else {
-		stats.cnv = null;
+		result.cnv = null;
 	}
-	return stats;
+	result.sorter = sorter;
+	return result;
 };
 
 var calculateTextWidth = function(text, font) {
@@ -1335,7 +1336,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 	// calculated based on the expression data, i.e. correlation between expression and DNA
 	// methylation, correlation between expression and numerical clinical parameters, t-test or
 	// ANOVA comparing expression in different groups for categorical clinical parameters.
-	var stats = calculateStatistics(samples, sorter);
+	stats = calculateStatistics(samples, sorter);
 	console.log('stats');
 	console.log(stats);
 

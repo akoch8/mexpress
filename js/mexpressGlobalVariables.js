@@ -3,6 +3,7 @@
 var cancerTypeAnnotation;
 var cancerTypeData;
 var cancerTypeDataFiltered;
+var stats;
 var plotWidth;
 var svg;
 

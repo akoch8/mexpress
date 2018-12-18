@@ -460,66 +460,125 @@ $(function() {
 	});
 	$('.toolbar--select-download').change(function() {
 		var format = $(this).val();
+		var dataType = $(this).find(':selected').parent().attr('label');
 		var data, link;
 		link = document.createElement('a');
 		if (format === 'json') {
-			data = 'text/json;charset=utf-8,' +
-				encodeURIComponent(JSON.stringify(cancerTypeDataFiltered));
-			link.href = 'data:' + data;
-			link.download = 'plottedData.json';
+			if (dataType === 'the plotted data') {
+				data = 'text/json;charset=utf-8,' +
+					encodeURIComponent(JSON.stringify(cancerTypeDataFiltered));
+				link.href = 'data:' + data;
+				link.download = 'plottedData.json';
+			} else if (dataType === 'the analysis results') {
+				data = 'text/json;charset=utf-8,' +
+					encodeURIComponent(JSON.stringify(stats));
+				link.href = 'data:' + data;
+				link.download = 'analysisResults.json';
+			}
 			link.click();
 		} else if (format === 'tsv') {
 			// Format the data in such a way that we can push them into a tab-separated text file.
 			data = '';
-			data += '# region type = ' + cancerTypeDataFiltered.region_annotation.region_type + '\n';
-			data += '# region name = ' + cancerTypeDataFiltered.region_annotation.name + '\n';
-			data += '# region coordinates = chr' + cancerTypeDataFiltered.region_annotation.chr +
-				':' + cancerTypeDataFiltered.region_annotation.start + '-' +
-				cancerTypeDataFiltered.region_annotation.end + '\n';
-			var samples = cancerTypeDataFiltered.samples_filtered_sorted;
-			data += 'data_type\t' + samples.join('\t') + '\n';
-			data += 'cnv\t';
-			$.each(samples, function(index, sample) {
-				if (sample in cancerTypeDataFiltered.cnv) {
-					data += cancerTypeDataFiltered.cnv[sample] + '\t';
-				} else {
-					data += 'null\t';
-				}
-			});
-			data = data.trim() + '\n';
-			$.each(cancerTypeDataFiltered.dna_methylation_data, function(key, value) {
-				data += key + '\t';
+			if (dataType === 'the plotted data') {
+				data += '# region type = ' + cancerTypeDataFiltered.region_annotation.region_type + '\n';
+				data += '# region name = ' + cancerTypeDataFiltered.region_annotation.name + '\n';
+				data += '# region coordinates = chr' + cancerTypeDataFiltered.region_annotation.chr +
+					':' + cancerTypeDataFiltered.region_annotation.start + '-' +
+					cancerTypeDataFiltered.region_annotation.end + '\n';
+				var samples = cancerTypeDataFiltered.samples_filtered_sorted;
+				data += 'data_type\t' + samples.join('\t') + '\n';
+				data += 'cnv\t';
 				$.each(samples, function(index, sample) {
-					if (sample in value) {
-						data += value[sample] + '\t';
+					if (sample in cancerTypeDataFiltered.cnv) {
+						data += cancerTypeDataFiltered.cnv[sample] + '\t';
 					} else {
 						data += 'null\t';
 					}
 				});
 				data = data.trim() + '\n';
-			});
-			$.each(cancerTypeDataFiltered.phenotype, function(key, value) {
-				data += key + '\t';
+				$.each(cancerTypeDataFiltered.dna_methylation_data, function(key, value) {
+					data += key + '\t';
+					$.each(samples, function(index, sample) {
+						if (sample in value) {
+							data += value[sample] + '\t';
+						} else {
+							data += 'null\t';
+						}
+					});
+					data = data.trim() + '\n';
+				});
+				$.each(cancerTypeDataFiltered.phenotype, function(key, value) {
+					data += key + '\t';
+					$.each(samples, function(index, sample) {
+						if (sample in value) {
+							data += value[sample] + '\t';
+						} else {
+							data += 'null\t';
+						}
+					});
+					data = data.trim() + '\n';
+				});
+				data += 'expression\t';
 				$.each(samples, function(index, sample) {
-					if (sample in value) {
-						data += value[sample] + '\t';
+					if (sample in cancerTypeDataFiltered.region_expression) {
+						data += cancerTypeDataFiltered.region_expression[sample] + '\t';
 					} else {
 						data += 'null\t';
 					}
 				});
 				data = data.trim() + '\n';
-			});
-			data += 'expression\t';
-			$.each(samples, function(index, sample) {
-				if (sample in cancerTypeDataFiltered.region_expression) {
-					data += cancerTypeDataFiltered.region_expression[sample] + '\t';
-				} else {
-					data += 'null\t';
+				link.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(data);
+				link.download = 'plottedData.txt';
+			} else if (dataType === 'the analysis results') {
+				data += '# all comparisons were made against the ' + stats.sorter + ' data\n';
+				data += 'variable\tp_value\tpearson_r\n';
+				$.each(stats.phenotype, function(key, value) {
+					if (value) {
+						data += key + '\t' + value.p + '\t';
+						if ('r' in value) {
+							data += value.r;
+						} else {
+							data += 'NA';
+						}
+						data += '\n';
+					} else {
+						data += key + '\tNA\tNA\n';
+					}
+				});
+				if (stats.region_expression) {
+					data += 'region_expression\t' + stats.region_expression.p + '\t';
+					if ('r' in stats.region_expression) {
+						data += stats.region_expression.r;
+					} else {
+						data += 'NA';
+					}
+					data += '\n';
 				}
-			});
-			data = data.trim() + '\n';
-			link.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(data);
-			link.download = 'plottedData.txt';
+				if (stats.cnv) {
+					data += 'cnv\t' + stats.cnv.p + '\t';
+					if ('r' in stats.cnv) {
+						data += stats.cnv.r;
+					} else {
+						data += 'NA';
+					}
+					data += '\n';
+				}
+				$.each(stats.dna_methylation_data, function(key, value) {
+					if (value) {
+						data += key + '\t' + value.p + '\t';
+						if ('r' in value) {
+							data += value.r;
+						} else {
+							data += 'NA';
+						}
+						data += '\n';
+					} else {
+						data += key + '\tNA\tNA\n';
+					}
+				});
+				link.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(data);
+				link.download = 'analysisResults.txt';
+			}
 			link.click();
 		} else if (format === 'png') {
 			$('.png-conversion').removeClass('hidden');

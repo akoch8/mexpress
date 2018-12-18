@@ -266,7 +266,7 @@ function pAdjust(stats) {
 	var s = $.extend(true, {}, stats);
 	var allPValues = [];
 	$.each(s, function(key1, value1) {
-		if (value1) {
+		if (key1 !== 'sorter' && value1) {
 			if ('p' in value1) {
 				if (value1.p) {
 					allPValues.push(value1.p);
@@ -297,7 +297,7 @@ function pAdjust(stats) {
 	});
 	var adjustedPvalues = [];
 	$.each(s, function(key1, value1) {
-		if (value1) {
+		if (key1 !== 'sorter' && value1) {
 			if ('p' in value1) {
 				if (value1.p) {
 					s[key1].pAdj = value1.p * allPValuesSorted.length / (allPValuesSorted.lastIndexOf(value1.p) + 1);
