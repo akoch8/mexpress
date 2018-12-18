@@ -731,7 +731,15 @@ var drawDataTrack = function(data, sortedSamples, allSamples, color, xPosition, 
 		} else {
 			categoryColors = allCategories.map(function(x) {
 				if (x) {
-					return categoricalColors[allCategories.indexOf(x)];
+					if (variable === 'sample_type') {
+						if (x in sampleTypeColors) {
+							return sampleTypeColors[x];
+						} else {
+							return missingValueColor;
+						}
+					} else {
+						return categoricalColors[allCategories.indexOf(x)];
+					}
 				} else {
 					return missingValueColor;
 				}
@@ -1892,7 +1900,15 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 		} else {
 			categoryColors = allCategories.map(function(x) {
 				if (x) {
-					return categoricalColors[allCategories.indexOf(x)];
+					if (value === 'sample_type') {
+						if (x in sampleTypeColors) {
+							return sampleTypeColors[x];
+						} else {
+							return missingValueColor;
+						}
+					} else {
+						return categoricalColors[allCategories.indexOf(x)];
+					}
 				} else {
 					return missingValueColor;
 				}
