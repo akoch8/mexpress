@@ -622,3 +622,14 @@ li.toolbar-summary {
 .introjs-helperLayer {
 	display: none;
 }
+
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+	/* Target IE10 and 11.*/
+	.ie-error {
+		display: inline-block;
+	}
+
+	.plot-window, .toolbar, aside, .toggle-sidebar {
+		display: none;
+	}
+}

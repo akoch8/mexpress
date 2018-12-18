@@ -46,6 +46,13 @@ a:hover {
 	display: none;
 }
 
+.ie-error {
+	background: #ff6666;
+	color: #fbe8d3;
+	display: none;
+	padding: 1em 2em 1em 1em;
+}
+
 h1 {
 	font-family: 'Montserrat';
 	font-size: 2rem;

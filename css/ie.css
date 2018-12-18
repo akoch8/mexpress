@@ -1,0 +1,7 @@
+.ie-error {
+	display: inline-block;
+}
+
+.plot-window, .toolbar, aside, .toggle-sidebar {
+	display: none;
+}
