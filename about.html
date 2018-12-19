@@ -51,6 +51,51 @@
 				</p>
 			</section>
 			<section>
+				<h2>Compatibility</h2>
+				<p>
+					We advise you to use MEXPRESS with a modern browser like Chrome or Firefox. MEXPRESS does <strong>not</strong> work in Internet Explorer!
+				</p>
+				<table>
+					<tbody>
+						<tr>
+							<th>Browser</th>
+							<th class="browser-version">Version</th>
+							<th>Supported</th>
+						</tr>
+						<tr>
+							<td>Google Chrome</td>
+							<td class="browser-version">71.0.3578.98</td>
+							<td class="supported">yes</td>
+						</tr>
+						<tr>
+							<td>Firefox</td>
+							<td class="browser-version">64.0</td>
+							<td class="supported">yes</td>
+						</tr>
+						<tr>
+							<td>Safari</td>
+							<td class="browser-version">12.0.1</td>
+							<td class="supported">yes</td>
+						</tr>
+						<tr>
+							<td>Opera</td>
+							<td class="browser-version">57.0.3098.102</td>
+							<td class="supported">yes</td>
+						</tr>
+						<tr>
+							<td>Edge</td>
+							<td class="browser-version">???</td>
+							<td>???</td>
+						</tr>
+						<tr>
+							<td>Internet Explorer</td>
+							<td class="browser-version">&le;11</td>
+							<td class="not-supported">no</td>
+						</tr>
+					</tbody>
+				</table>
+			</section>
+			<section>
 				<h2>Getting started</h2>
 				<p>
 					This is the MEXPRESS start screen:
@@ -59,10 +104,10 @@
 					<img alt="The MEXPRESS start screen." src="img/startScreen.png">
 				</figure>
 				<p>
-					On the left side you will notice the text input field where you can enter a gene or miRNA name (HGNC symbols, Ensembl gene IDs and Entrez IDs are recognized) as well as the list of cancer types you can choose from. Let's say you are interested in the expression and methylation data of the <em>CDO1</em> gene in bladder cancer. Simply enter <em>CDO1</em> in the text field and select BLCA (bladder urothelial carcinoma).
+					On the left side you will notice the text input field where you can enter a gene or miRNA name (HGNC symbols, Ensembl gene IDs and Entrez IDs are recognized) as well as the list of cancer types you can choose from. If you want to be guided through an example analysis, simply click the "step-by-step example" button above the gene input box. Let's say you are interested in the expression and methylation data of the <em>CDO1</em> gene in bladder cancer. Simply enter <em>CDO1</em> in the text field and select BLCA (bladder urothelial carcinoma).
 				</p>
 				<p>
-					All that is left to do after selecting a gene and cancer type is clicking the <span class="fake-button">plot</span> button and the data you selected will be visualised:
+					All that's left to do after selecting a gene and cancer type is clicking the <span class="fake-button">plot</span> button and the data you selected will be visualised:
 				</p>
 				<figure>
 					<img alt="MEXPRESS visualization" src="img/visualization.png">
@@ -80,7 +125,7 @@
 					<img alt="A figure created with MEXPRESS" src="img/figure.png">
 				</figure>
 				<p>
-					On the left side of the DNA methylation data you can see the genomic annotation. Here, all the genes, transcripts, miRNAs, CpGs and CpG islands that are located within the plot window are drawn.
+					On the left side of the DNA methylation data you can see the genomic annotation. Here, all the genes, transcripts, miRNAs, CpG dinucleotides and CpG islands that are located within the plot window are drawn.
 				</p>
 				<p>
 					Samples are arranged from left to right. By default, the samples are ordered by the expression of the gene you entered. So in this case, samples with low <em>CDO1</em> expression are located on the left side of the plot, whereas samples with high <em>CDO1</em> expression are on the right.
@@ -92,7 +137,7 @@
 			<section>
 				<h2>Zooming in</h2>
 				<p>
-					If you are looking at a long gene or a gene with many DNA methylation probes, the plot can become quite large and complex. You can reduce the size of the figure by zooming on a specific part. To do this, you just have to click on the genomic annotation at the left side of the figure and drag a box over the area you would like to zoom in on.
+					If you are looking at a long gene or a gene with many DNA methylation probes, the plot can become quite large and complex. You can reduce the size of the figure by zooming on a specific part. To do this, you just have to click on the genomic annotation at the left side of the figure and drag a box over the area you would like to zoom in on. You can always zoom out again by clicking the "Zoom out" button.
 				</p>
 				<figure>
 					<img alt="Zooming in on the figure" src="img/zooming.png">
@@ -134,10 +179,13 @@
 				</figure>
 				<ul>
 					<li>
+						<strong>Zoom out:</strong> whenever you zoomed in, you can always zoom back out to see the full gene or miRNA by clicking this button.
+					</li>
+					<li>
 						<strong>Reset the plot:</strong> click this button to recreate the default plot.
 					</li>
 					<li>
-						<strong>Download:</strong> select one of the options from the drop down list to download the figure (as a PNG or SVG image) or the data (as a text file or in JSON format). Note that generating a PNG image might take a few seconds.
+						<strong>Download:</strong> select one of the options from the drop down list to download the figure (as a PNG or SVG image), the data (as a text file or in JSON format), or the results of the statistical analysis (as a text file or in JSON format). Note that generating a PNG image might take a few seconds.
 					</li>
 					<li>
 						<strong>Show information about:</strong> select a data type from the drop down list and you will see a pop up window describing this data type in more detail.
@@ -154,6 +202,9 @@
 				</p>
 				<p>
 					We implemented the necessary statistical functions in JavaScript (check the code on <a href="https://github.com/akoch8/mexpress/blob/master/js/statistics.js" target="_blank">GitHub</a>) and we used numerical approximations to calculate the p values, so it is possible that you might obtain slightly different p values when you recalculate them yourself using other tools (such as <a href="https://www.r-project.org/" target="_blank">R</a>).
+				</p>
+				<p>
+					You can always download the results of the statistical analysis through the download drop-down menu.
 				</p>
 			</section>
 		</article>

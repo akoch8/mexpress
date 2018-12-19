@@ -65,3 +65,27 @@ section img {
 	text-transform: uppercase;
 	user-select: none;
 }
+
+table {
+	border: 1px solid #dcdcdc;
+	padding: 0.5em 1em;
+}
+
+th, td {
+	padding-right: 1em;
+	text-align: left;
+}
+
+.supported {
+	color: #4e6487;
+}
+
+.not-supported {
+	color: #ff6666;
+}
+
+.browser-version {
+	color: #8c8c8c;
+	font-style: italic;
+}
+
