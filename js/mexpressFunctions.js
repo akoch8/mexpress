@@ -657,7 +657,7 @@ var drawDataTrack = function(data, sortedSamples, allSamples, color, xPosition, 
 			dataValues.push(null);
 		}
 	});
-
+	
 	// If all the values are null, we can just draw a single rectangle instead of an separate
 	// missing value rectangle for each sample. This will reduce the number of DOM elements, which
 	// in turn will help reduce the "lagginess" that can appear when a lot of data has to be
@@ -675,6 +675,9 @@ var drawDataTrack = function(data, sortedSamples, allSamples, color, xPosition, 
 	} else if (parameterIsNumerical(dataValues)) {
 		dataValues = dataValues.map(makeNumeric);
 		var factor = maximum(dataValues) / dataTrackHeight;
+		if (variable === 'methylation') {
+			factor = 1 / dataTrackHeight;
+		}
 		if (factor === 0) {
 			factor = 1;
 		}
@@ -756,7 +759,7 @@ var drawDataTrack = function(data, sortedSamples, allSamples, color, xPosition, 
 				.attr('height', dataTrackHeight);
 		});
 	}
-	if (variable) {
+	if (variable !== 'methylation') {
 		var parameterText = variable.replace(/_/g, ' ');
 		if (parameterText.length > 40) {
 			parameterText = parameterText.substr(0, 37) + '...';
@@ -1756,7 +1759,8 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 					transcriptEnd > cancerTypeDataFiltered.plot_data.start) {
 					if (transcriptStart < cancerTypeDataFiltered.plot_data.start) {
 						transcriptStart = cancerTypeDataFiltered.plot_data.start;
-					} else if (transcriptEnd > cancerTypeDataFiltered.plot_data.end) {
+					}
+					if (transcriptEnd > cancerTypeDataFiltered.plot_data.end) {
 						transcriptEnd = cancerTypeDataFiltered.plot_data.end;
 					}
 					svg.append('rect')
@@ -1775,36 +1779,38 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 	// Draw the main region (miRNA or gene with its transcripts).
 	var mainRegionStart = cancerTypeDataFiltered.region_annotation.start;
 	var mainRegionEnd = cancerTypeDataFiltered.region_annotation.end;
-	if (mainRegionStart < cancerTypeDataFiltered.plot_data.start) {
-		mainRegionStart = cancerTypeDataFiltered.plot_data.start;
-	}
-	if (mainRegionEnd > cancerTypeDataFiltered.plot_data.end) {
-		mainRegionEnd = cancerTypeDataFiltered.plot_data.end;
-	}
-	svg.append('rect')
-		.attr('fill', regionColor)
-		.attr('x', xPosition)
-		.attr('y', y(mainRegionStart))
-		.attr('width', regionWidth)
-		.attr('height', Math.abs(y(mainRegionStart) - y(mainRegionEnd)));
-	svg.append('text')
-		.attr('x', xPosition)
-		.attr('y', y(mainRegionStart) - 5)
-		.attr('font-weight', 700)
-		.attr('font-size', '12px')
-		.attr('fill', regionColor)
-		.attr('text-anchor', 'start')
-		.attr('alignment-baseline', 'baseline')
-		.text(cancerTypeDataFiltered.region_annotation.name);
-	xPosition += regionWidth;
-	if (cancerTypeDataFiltered.region_annotation.strand === '+' &&
-		cancerTypeDataFiltered.region_annotation.end < cancerTypeDataFiltered.plot_data.end) {
-		drawArrow(y, xPosition - regionWidth, cancerTypeDataFiltered.region_annotation,
-			regionColor);
-	} else if (cancerTypeDataFiltered.region_annotation.strand === '-' &&
-		cancerTypeDataFiltered.region_annotation.start > cancerTypeDataFiltered.plot_data.start) {
-		drawArrow(y, xPosition - regionWidth, cancerTypeDataFiltered.region_annotation,
-			regionColor);
+	if (mainRegionStart < cancerTypeDataFiltered.plot_data.end && mainRegionEnd > cancerTypeDataFiltered.plot_data.start) {
+		if (mainRegionStart < cancerTypeDataFiltered.plot_data.start) {
+			mainRegionStart = cancerTypeDataFiltered.plot_data.start;
+		}
+		if (mainRegionEnd > cancerTypeDataFiltered.plot_data.end) {
+			mainRegionEnd = cancerTypeDataFiltered.plot_data.end;
+		}
+		svg.append('rect')
+			.attr('fill', regionColor)
+			.attr('x', xPosition)
+			.attr('y', y(mainRegionStart))
+			.attr('width', regionWidth)
+			.attr('height', Math.abs(y(mainRegionStart) - y(mainRegionEnd)));
+		svg.append('text')
+			.attr('x', xPosition)
+			.attr('y', y(mainRegionStart) - 5)
+			.attr('font-weight', 700)
+			.attr('font-size', '12px')
+			.attr('fill', regionColor)
+			.attr('text-anchor', 'start')
+			.attr('alignment-baseline', 'baseline')
+			.text(cancerTypeDataFiltered.region_annotation.name);
+		xPosition += regionWidth;
+		if (cancerTypeDataFiltered.region_annotation.strand === '+' &&
+			cancerTypeDataFiltered.region_annotation.end < cancerTypeDataFiltered.plot_data.end) {
+			drawArrow(y, xPosition - regionWidth, cancerTypeDataFiltered.region_annotation,
+				regionColor);
+		} else if (cancerTypeDataFiltered.region_annotation.strand === '-' &&
+			cancerTypeDataFiltered.region_annotation.start > cancerTypeDataFiltered.plot_data.start) {
+			drawArrow(y, xPosition - regionWidth, cancerTypeDataFiltered.region_annotation,
+				regionColor);
+		}
 	}
 	if (cancerTypeDataFiltered.region_annotation.region_type === 'gene') {
 		// Add the transcripts.
@@ -2091,7 +2097,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 						index * (dataTrackHeight + dataTrackSeparator) +
 						nrVariants * (dataTrackHeightVariants + dataTrackSeparator);
 		var methylationValues = cancerTypeDataFiltered.dna_methylation_data[value];
-		drawDataTrack(methylationValues, samples, allSamples, otherRegionColor, xPosition, yPosition);
+		drawDataTrack(methylationValues, samples, allSamples, otherRegionColor, xPosition, yPosition, 'methylation');
 
 		// Draw a transparent rectangle on top of the DNA methylation track that shows the probe
 		// annotation when clicked by a user.
@@ -2544,7 +2550,8 @@ var plotSummary = function(sorter, showVariants, plotStart, plotEnd) {
 					transcriptEnd > cancerTypeDataFiltered.plot_data.start) {
 					if (transcriptStart < cancerTypeDataFiltered.plot_data.start) {
 						transcriptStart = cancerTypeDataFiltered.plot_data.start;
-					} else if (transcriptEnd > cancerTypeDataFiltered.plot_data.end) {
+					}
+					if (transcriptEnd > cancerTypeDataFiltered.plot_data.end) {
 						transcriptEnd = cancerTypeDataFiltered.plot_data.end;
 					}
 					svg.append('rect')
@@ -2563,35 +2570,37 @@ var plotSummary = function(sorter, showVariants, plotStart, plotEnd) {
 	// Draw the main region (miRNA or gene with its transcripts).
 	var mainRegionStart = cancerTypeDataFiltered.region_annotation.start;
 	var mainRegionEnd = cancerTypeDataFiltered.region_annotation.end;
-	if (mainRegionStart < cancerTypeDataFiltered.plot_data.start) {
-		mainRegionStart = cancerTypeDataFiltered.plot_data.start;
-	}
-	if (mainRegionEnd > cancerTypeDataFiltered.plot_data.end) {
-		mainRegionEnd = cancerTypeDataFiltered.plot_data.end;
-	}
-	svg.append('rect')
-		.attr('fill', regionColor)
-		.attr('x', x(mainRegionStart))
-		.attr('y', yPosition)
-		.attr('width', Math.abs(x(mainRegionStart) - x(mainRegionEnd)))
-		.attr('height', regionHeight);
-	svg.append('text')
-		.attr('x', x(mainRegionStart) - 5)
-		.attr('y', yPosition + regionHeight)
-		.attr('font-weight', 700)
-		.attr('fill', regionColor)
-		.attr('text-anchor', 'end')
-		.attr('alignment-baseline', 'baseline')
-		.text(cancerTypeDataFiltered.region_annotation.name);
-	yPosition -= regionHeight;
-	if (cancerTypeDataFiltered.region_annotation.strand === '+' &&
-		cancerTypeDataFiltered.region_annotation.end < cancerTypeDataFiltered.plot_data.end) {
-		drawHorizontalArrow(x, yPosition + regionHeight, cancerTypeDataFiltered.region_annotation,
-			regionColor);
-	} else if (cancerTypeDataFiltered.region_annotation.strand === '-' &&
-		cancerTypeDataFiltered.region_annotation.start > cancerTypeDataFiltered.plot_data.start) {
-		drawHorizontalArrow(x, yPosition + regionHeight, cancerTypeDataFiltered.region_annotation,
-			regionColor);
+	if (mainRegionStart < cancerTypeDataFiltered.plot_data.end && mainRegionEnd > cancerTypeDataFiltered.plot_data.start) {
+		if (mainRegionStart < cancerTypeDataFiltered.plot_data.start) {
+			mainRegionStart = cancerTypeDataFiltered.plot_data.start;
+		}
+		if (mainRegionEnd > cancerTypeDataFiltered.plot_data.end) {
+			mainRegionEnd = cancerTypeDataFiltered.plot_data.end;
+		}
+		svg.append('rect')
+			.attr('fill', regionColor)
+			.attr('x', x(mainRegionStart))
+			.attr('y', yPosition)
+			.attr('width', Math.abs(x(mainRegionStart) - x(mainRegionEnd)))
+			.attr('height', regionHeight);
+		svg.append('text')
+			.attr('x', x(mainRegionStart) - 5)
+			.attr('y', yPosition + regionHeight)
+			.attr('font-weight', 700)
+			.attr('fill', regionColor)
+			.attr('text-anchor', 'end')
+			.attr('alignment-baseline', 'baseline')
+			.text(cancerTypeDataFiltered.region_annotation.name);
+		yPosition -= regionHeight;
+		if (cancerTypeDataFiltered.region_annotation.strand === '+' &&
+			cancerTypeDataFiltered.region_annotation.end < cancerTypeDataFiltered.plot_data.end) {
+			drawHorizontalArrow(x, yPosition + regionHeight, cancerTypeDataFiltered.region_annotation,
+				regionColor);
+		} else if (cancerTypeDataFiltered.region_annotation.strand === '-' &&
+			cancerTypeDataFiltered.region_annotation.start > cancerTypeDataFiltered.plot_data.start) {
+			drawHorizontalArrow(x, yPosition + regionHeight, cancerTypeDataFiltered.region_annotation,
+				regionColor);
+		}
 	}
 	if (cancerTypeDataFiltered.region_annotation.region_type === 'gene') {
 		// Add the transcripts.
