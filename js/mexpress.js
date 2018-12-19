@@ -463,6 +463,7 @@ $(function() {
 		var dataType = $(this).find(':selected').parent().attr('label');
 		var data, link;
 		link = document.createElement('a');
+		link.setAttribute('type', 'hidden');
 		if (format === 'json') {
 			if (dataType === 'the plotted data') {
 				data = 'text/json;charset=utf-8,' +
@@ -475,6 +476,7 @@ $(function() {
 				link.href = 'data:' + data;
 				link.download = 'analysisResults.json';
 			}
+			document.body.appendChild(link);
 			link.click();
 		} else if (format === 'tsv') {
 			// Format the data in such a way that we can push them into a tab-separated text file.
@@ -579,6 +581,7 @@ $(function() {
 				link.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(data);
 				link.download = 'analysisResults.txt';
 			}
+			document.body.appendChild(link);
 			link.click();
 		} else if (format === 'png') {
 			$('.png-conversion').removeClass('hidden');
@@ -595,6 +598,7 @@ $(function() {
 					var imageFileName = 'php/downloads/' + imageName;
 					link.href = imageFileName;
 					link.download = imageName;
+					document.body.appendChild(link);
 					link.click();
 					$('.png-conversion').addClass('hidden');
 					setTimeout(function() {
@@ -606,8 +610,10 @@ $(function() {
 			data = d3.select('.svg-container').html();
 			link.href = 'data:application/octet-stream;base64,' + btoa(data);
 			link.download = 'figure.svg';
+			document.body.appendChild(link);
 			link.click();
 		}
+		link.remove();
 		$('.toolbar--select-download option[value=empty]').prop('selected', true);
 	});
 
