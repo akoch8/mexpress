@@ -60,7 +60,7 @@ var sampleTypeColors = {
 	'recurrent blood derived cancer - bone marrow': '#b15928',
 	'additionl - new primary': '#fb9a99',
 	'metastatic': '#1f78b4',
-	'additional metastatic': '#e31a1c',
+	'additionl metastatic': '#e31a1c',
 	'human tumor original cells': '#b15928',
 	'primary blood derived cancer - bone marrow': '#b15928',
 	'blood derived normal': '#b15928',
