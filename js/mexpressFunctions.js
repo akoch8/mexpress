@@ -2277,6 +2277,7 @@ var plotSummary = function(sorter, showVariants, plotStart, plotEnd) {
 			delete groups[key];
 		}
 	});
+	var groupNames = Object.keys(groups);
 
 	// Count the number of regions (including transcripts in the case of genes) that need to be
 	// drawn.
@@ -2312,18 +2313,26 @@ var plotSummary = function(sorter, showVariants, plotStart, plotEnd) {
 								(nrOtherMirnas - 1) * genomicFeatureLargeMargin +
 								genomicFeatureLargeMargin;
 
+	var legendWidth = 0;	
+	$.each(groupNames, function(index, value) {
+		value = value ? value : 'null';
+		var textWidth = calculateTextWidth(value.replace(/_/g, ' '), '10px arial');
+		legendWidth += textWidth + 2 * legendRectWidth + 5;
+	});
+
 	// Build the SVG.
 	var height = 200;
-	var width = 800;
+	var linePlotWidth = 800;
+	var plotWidth = legendWidth > linePlotWidth ? legendWidth : linePlotWidth;
 	var margin = {top: 120,
 				  left: 140,
 				  bottom: 40 + genomicCoordinatesHeight + genomicFeaturesHeight + genomicFeatureLargeMargin,
-				  right: 100};
-	var x = d3.scaleLinear().domain([plotStart, plotEnd]).range([0, width]);
+				  right: 100 + (plotWidth - linePlotWidth)};
+	var x = d3.scaleLinear().domain([plotStart, plotEnd]).range([0, linePlotWidth]);
 	var y = d3.scaleLinear().domain([0, 1]).range([height, 0]);
 	svg = d3.select('.svg-container')
 		.append('svg')
-			.attr('width', width + margin.left + margin.right)
+			.attr('width', linePlotWidth + margin.left + margin.right)
 			.attr('height', height + margin.top + margin.bottom)
 			.attr('text-rendering', 'geometricPrecision')
 			.attr('font-family', 'arial')
@@ -2336,7 +2345,7 @@ var plotSummary = function(sorter, showVariants, plotStart, plotEnd) {
 	svg.append('rect')
 		.attr('x', -margin.left)
 		.attr('y', -margin.top)
-		.attr('width', width + margin.left + margin.right)
+		.attr('width', linePlotWidth + margin.left + margin.right)
 		.attr('height', height + margin.top + margin.bottom)
 		.attr('fill', '#fff');
 
@@ -2667,7 +2676,6 @@ var plotSummary = function(sorter, showVariants, plotStart, plotEnd) {
 	// Calculate and draw the median DNA methylation value for each group and each probe. In case
 	// the groups are the categories of a phenotype variable, ensure that the groups have the same
 	// colors as the categories in the default plot.
-	var groupNames = Object.keys(groups);
 	var re = new RegExp('^(clinical|pathologic)_|tumor_stage_*|clinical_stage_');
 	var groupColors;
 	if (re.test(sorter)) {
@@ -2868,7 +2876,7 @@ var plotSummary = function(sorter, showVariants, plotStart, plotEnd) {
 	svg.append('line')
 		.attr('x1', -margin.left)
 		.attr('y1', Math.round(yPosition + dataTrackHeight + marginBetweenMainParts))
-		.attr('x2', width + margin.right)
+		.attr('x2', linePlotWidth + margin.right)
 		.attr('y2', Math.round(yPosition + dataTrackHeight + marginBetweenMainParts))
 		.attr('class', 'legend-separator')
 		.attr('stroke', textColorLight);
