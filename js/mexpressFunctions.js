@@ -2,11 +2,19 @@
 //
 var addClinicalParameters = function() {
 	var parametersList = $('.parameters-options');
+	var clinicalParameters = $('#clinical-parameters').text();
+	if (clinicalParameters === undefined || clinicalParameters === 'default') {
+		clinicalParameters = cancerTypeAnnotation.default;
+	} else if (clinicalParameters === '') {
+		clinicalParameters = [];
+	} else {
+		clinicalParameters = clinicalParameters.split('+');
+	}
 	parametersList.empty();
 	$.each(cancerTypeAnnotation.phenotype, function(index, value) {
 		parametersList.append('<li data-value="' + value + '">' + value.replace(/_/g, ' ') +
 			'</li>');
-		if (cancerTypeAnnotation.default.indexOf(value) !== -1) {
+		if (clinicalParameters.indexOf(value) !== -1) {
 			parametersList.find('li').last().addClass('selected');
 		}
 	});
