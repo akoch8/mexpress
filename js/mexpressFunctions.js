@@ -149,6 +149,9 @@ var addVariantAnnotation = function(annotation, xPosition, yPosition) {
 	annotation = annotation.split('__');
 	var maxTextWidth = 0;
 	$.each(annotation, function(index, value) {
+		if (value.length > 50) {
+			value = value.substring(0, 50) + '...';
+		}
 		var textWidth = calculateTextWidth(value, '10px arial');
 		maxTextWidth = textWidth > maxTextWidth ? textWidth : maxTextWidth;
 	});
@@ -169,6 +172,9 @@ var addVariantAnnotation = function(annotation, xPosition, yPosition) {
 			annotationText = value;
 		} else {
 			annotationText = value.replace(/_/g, ' ');
+		}
+		if (annotationText.length > 50) {
+			annotationText = annotationText.substring(0, 50) + '...';
 		}
 		svg.append('text')
 			.attr('x', xPosition + 10)
