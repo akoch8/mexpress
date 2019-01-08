@@ -594,7 +594,7 @@ var drawBarPlot = function(data, element) {
 	$.each(uniqueDataValues, function(index, value) {
 		var valueClass = value ? value : 'null';
 		valueClass = valueClass.replace(/ /g, '_') + '-bar';
-		valueClass = valueClass.replace(/[()'/]/g, '');
+		valueClass = valueClass.replace(/[;()'/]/g, '');
 		barPlotSvg.append('rect')
 			.attr('class', valueClass)
 			.attr('x', 0)

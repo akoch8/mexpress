@@ -432,12 +432,12 @@ $(function() {
 	$(document).on({
 		mouseenter: function() {
 			var categoryClass = $(this).attr('data-value').replace(/ /g, '_') + '-bar';
-			categoryClass = categoryClass.replace(/[()'/]/g, '');
+			categoryClass = categoryClass.replace(/[;()'/]/g, '');
 			d3.selectAll('.' + categoryClass).style('fill', histogramColorFocus);
 		},
 		mouseleave: function() {
 			var categoryClass = $(this).attr('data-value').replace(/ /g, '_') + '-bar';
-			categoryClass = categoryClass.replace(/[()'/]/g, '');
+			categoryClass = categoryClass.replace(/[;()'/]/g, '');
 			d3.selectAll('.' + categoryClass).style('fill', histogramColor);
 		}
 	}, '.filter-categories li');
