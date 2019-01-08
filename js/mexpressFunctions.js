@@ -587,16 +587,17 @@ var drawBarPlot = function(data, element) {
 			.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 	$.each(uniqueDataValues, function(index, value) {
 		var valueClass = value ? value : 'null';
-		valueClass = valueClass.replace(/ /g, '_').replace(/\//g, '-');
+		valueClass = valueClass.replace(/ /g, '_') + '-bar';
+		valueClass = valueClass.replace(/[()'/]/g, '');
 		barPlotSvg.append('rect')
-			.attr('class', valueClass + '-bar')
+			.attr('class', valueClass)
 			.attr('x', 0)
 			.attr('y', y(index))
 			.attr('width', x(dataTable[value]))
 			.attr('height', dataTrackHeight)
 			.attr('fill', histogramColor);
 		barPlotSvg.append('text')
-			.attr('class', valueClass + '-bar')
+			.attr('class', valueClass)
 			.attr('x', -5)
 			.attr('y', y(index) + dataTrackHeight / 2)
 			.attr('font-size', '11px')
