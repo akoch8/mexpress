@@ -2313,7 +2313,8 @@ var plotSummary = function(sorter, showVariants, plotStart, plotEnd) {
 								(nrOtherMirnas - 1) * genomicFeatureLargeMargin +
 								genomicFeatureLargeMargin;
 
-	var legendWidth = 0;	
+	// Calculate the width of the groups legend.
+	var legendWidth = 0;
 	$.each(groupNames, function(index, value) {
 		value = value ? value : 'null';
 		var textWidth = calculateTextWidth(value.replace(/_/g, ' '), '10px arial');
