@@ -4,7 +4,7 @@ var cancerTypeAnnotation;
 var cancerTypeData;
 var cancerTypeDataFiltered;
 var stats;
-var plotWidth;
+//var plotWidth;
 var svg;
 
 // Define the dimensions.

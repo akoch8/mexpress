@@ -1,7 +1,19 @@
 .ie-error {
 	display: inline-block;
+	margin: 1rem 2rem;
 }
 
 .plot-window, .toolbar, aside, .toggle-sidebar {
 	display: none;
+}
+
+table {
+	border: 1px solid #dcdcdc;
+	margin: 1rem 0;
+	padding: 0.5em 1em;
+}
+
+th, td {
+	padding-right: 1em;
+	text-align: left;
 }
