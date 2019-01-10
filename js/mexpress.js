@@ -13,8 +13,6 @@ $(function() {
 		console.log('Object.values is not available');
 	}
 
-	//plotWidth = $('.plot-window').width();
-
 	// Load the JSON file that contains all the cancer types (together with their respective
 	// clinical variables) and place them in a list for the user to choose from.
 	var cancerTypes;
