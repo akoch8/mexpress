@@ -3,14 +3,12 @@
 $(function() {
 	// Start by checking if the Object.values method is available. Without this function, which is
 	// not available in older browser versions, MEXPRESS will NOT work.
-	if (typeof Object.values === 'function') {
+	if (typeof Object.values !== 'function') {
 		$('<link>', {
 			rel: 'stylesheet',
 			type: 'text/css',
 			href: 'css/ie.css',
 		}).appendTo('head');
-	} else {
-		console.log('Object.values is not available');
 	}
 
 	// Load the JSON file that contains all the cancer types (together with their respective
