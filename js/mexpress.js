@@ -469,6 +469,12 @@ $(function() {
 	$('.toolbar--select-download').change(function() {
 		var format = $(this).val();
 		var dataType = $(this).find(':selected').parent().attr('label');
+		var newline = '\n';
+
+		// If the user is using a windows operating system, we need to adapt the newline character.
+		if (window.navigator.platform.toUpperCase().indexOf('WIN') === 0) {
+			newline = '\r\n';
+		}
 		var blob, data, link;
 		link = document.createElement('a');
 		link.setAttribute('type', 'hidden');
@@ -488,13 +494,16 @@ $(function() {
 			// Format the data in such a way that we can push them into a tab-separated text file.
 			data = '';
 			if (dataType === 'the plotted data') {
-				data += '# region type = ' + cancerTypeDataFiltered.region_annotation.region_type + '\n';
-				data += '# region name = ' + cancerTypeDataFiltered.region_annotation.name + '\n';
-				data += '# region coordinates = chr' + cancerTypeDataFiltered.region_annotation.chr +
-					':' + cancerTypeDataFiltered.region_annotation.start + '-' +
-					cancerTypeDataFiltered.region_annotation.end + '\n';
+				data += '# region type = ' + cancerTypeDataFiltered.region_annotation.region_type +
+					newline;
+				data += '# region name = ' + cancerTypeDataFiltered.region_annotation.name +
+					newline;
+				data += '# region coordinates = chr' +
+					cancerTypeDataFiltered.region_annotation.chr + ':' +
+					cancerTypeDataFiltered.region_annotation.start + '-' +
+					cancerTypeDataFiltered.region_annotation.end + newline;
 				var samples = cancerTypeDataFiltered.samples_filtered_sorted;
-				data += 'data_type\t' + samples.join('\t') + '\n';
+				data += 'data_type\t' + samples.join('\t') + newline;
 				data += 'cnv\t';
 				$.each(samples, function(index, sample) {
 					if (sample in cancerTypeDataFiltered.cnv) {
@@ -503,7 +512,7 @@ $(function() {
 						data += 'null\t';
 					}
 				});
-				data = data.trim() + '\n';
+				data = data.trim() + newline;
 				$.each(cancerTypeDataFiltered.dna_methylation_data, function(key, value) {
 					data += key + '\t';
 					$.each(samples, function(index, sample) {
@@ -513,7 +522,7 @@ $(function() {
 							data += 'null\t';
 						}
 					});
-					data = data.trim() + '\n';
+					data = data.trim() + newline;
 				});
 				$.each(cancerTypeDataFiltered.phenotype, function(key, value) {
 					data += key + '\t';
@@ -524,7 +533,7 @@ $(function() {
 							data += 'null\t';
 						}
 					});
-					data = data.trim() + '\n';
+					data = data.trim() + newline;
 				});
 				data += 'expression\t';
 				$.each(samples, function(index, sample) {
@@ -534,13 +543,14 @@ $(function() {
 						data += 'null\t';
 					}
 				});
-				data = data.trim() + '\n';
+				data = data.trim() + newline;
 				blob = new Blob([data], {type: 'text/tsv'});
 				link.download = 'plottedData.txt';
 				link.href = window.URL.createObjectURL(blob);
 			} else if (dataType === 'the analysis results') {
-				data += '# all comparisons were made against the ' + stats.sorter + ' data\n';
-				data += 'variable\tp_value\tpearson_r\n';
+				data += '# all comparisons were made against the ' + stats.sorter + ' data' +
+					newline;
+				data += 'variable\tp_value\tpearson_r' + newline;
 				$.each(stats.phenotype, function(key, value) {
 					if (value) {
 						data += key + '\t' + value.p + '\t';
@@ -549,9 +559,9 @@ $(function() {
 						} else {
 							data += 'NA';
 						}
-						data += '\n';
+						data += newline;
 					} else {
-						data += key + '\tNA\tNA\n';
+						data += key + '\tNA\tNA' + newline;
 					}
 				});
 				if (stats.region_expression) {
@@ -561,7 +571,7 @@ $(function() {
 					} else {
 						data += 'NA';
 					}
-					data += '\n';
+					data += newline;
 				}
 				if (stats.cnv) {
 					data += 'cnv\t' + stats.cnv.p + '\t';
@@ -570,7 +580,7 @@ $(function() {
 					} else {
 						data += 'NA';
 					}
-					data += '\n';
+					data += newline;
 				}
 				$.each(stats.dna_methylation_data, function(key, value) {
 					if (value) {
@@ -580,9 +590,9 @@ $(function() {
 						} else {
 							data += 'NA';
 						}
-						data += '\n';
+						data += newline;
 					} else {
-						data += key + '\tNA\tNA\n';
+						data += key + '\tNA\tNA' + newline;
 					}
 				});
 				blob = new Blob([data], {type: 'text/tsv'});
