@@ -469,20 +469,18 @@ $(function() {
 	$('.toolbar--select-download').change(function() {
 		var format = $(this).val();
 		var dataType = $(this).find(':selected').parent().attr('label');
-		var data, link;
+		var blob, data, link;
 		link = document.createElement('a');
 		link.setAttribute('type', 'hidden');
 		if (format === 'json') {
 			if (dataType === 'the plotted data') {
-				data = 'text/json;charset=utf-8,' +
-					encodeURIComponent(JSON.stringify(cancerTypeDataFiltered));
-				link.href = 'data:' + data;
+				blob = new Blob([JSON.stringify(cancerTypeDataFiltered)], {type: 'application/json'});
 				link.download = 'plottedData.json';
+				link.href = window.URL.createObjectURL(blob);
 			} else if (dataType === 'the analysis results') {
-				data = 'text/json;charset=utf-8,' +
-					encodeURIComponent(JSON.stringify(stats));
-				link.href = 'data:' + data;
+				blob = new Blob([JSON.stringify(stats)], {type: 'application/json'});
 				link.download = 'analysisResults.json';
+				link.href = window.URL.createObjectURL(blob);
 			}
 			document.body.appendChild(link);
 			link.click();
@@ -537,8 +535,9 @@ $(function() {
 					}
 				});
 				data = data.trim() + '\n';
-				link.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(data);
+				blob = new Blob([data], {type: 'text/tsv'});
 				link.download = 'plottedData.txt';
+				link.href = window.URL.createObjectURL(blob);
 			} else if (dataType === 'the analysis results') {
 				data += '# all comparisons were made against the ' + stats.sorter + ' data\n';
 				data += 'variable\tp_value\tpearson_r\n';
@@ -586,8 +585,9 @@ $(function() {
 						data += key + '\tNA\tNA\n';
 					}
 				});
-				link.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(data);
+				blob = new Blob([data], {type: 'text/tsv'});
 				link.download = 'analysisResults.txt';
+				link.href = window.URL.createObjectURL(blob);
 			}
 			document.body.appendChild(link);
 			link.click();
@@ -616,8 +616,9 @@ $(function() {
 			});
 		} else if (format === 'svg') {
 			data = d3.select('.svg-container').html();
-			link.href = 'data:application/octet-stream;base64,' + btoa(data);
+			blob = new Blob([data], {type: 'image/svg'});
 			link.download = 'figure.svg';
+			link.href = window.URL.createObjectURL(blob);
 			document.body.appendChild(link);
 			link.click();
 		}
