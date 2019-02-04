@@ -156,7 +156,7 @@ try {
 		$idToRemove = array_shift($data);
 		$dnaMethData450[$probe] = $data;
 	}
-	$result['dna_methylation_data'] = $dnaMethData450;
+	$result['dna_methylation_data_450'] = $dnaMethData450;
 
 	// Add the expression data.
 	if ($regionType == 'gene') {

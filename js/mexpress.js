@@ -513,7 +513,7 @@ $(function() {
 					}
 				});
 				data = data.trim() + newline;
-				$.each(cancerTypeDataFiltered.dna_methylation_data, function(key, value) {
+				$.each(cancerTypeDataFiltered.dna_methylation_data_450, function(key, value) {
 					data += key + '\t';
 					$.each(samples, function(index, sample) {
 						if (sample in value) {
@@ -582,7 +582,7 @@ $(function() {
 					}
 					data += newline;
 				}
-				$.each(stats.dna_methylation_data, function(key, value) {
+				$.each(stats.dna_methylation_data_450, function(key, value) {
 					if (value) {
 						data += key + '\t' + value.p + '\t';
 						if ('r' in value) {
