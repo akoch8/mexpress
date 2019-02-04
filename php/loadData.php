@@ -128,35 +128,76 @@ try {
 	}
 	$result['cpgi_annotation'] = $cpgIslands;
 
-	// Add the Infinium probe annotation and the DNA methylation data.
-	// TO DO: incorporate 27k data
-	$query = $db -> prepare("SELECT * FROM infinium450k_annotation WHERE chr = :chr AND cpg_location BETWEEN :plotStart AND :plotEnd");
-	$query -> execute(array(':chr' => $chromosome, ':plotStart' => $plotStart,
-		':plotEnd' => $plotEnd));
-	$probes450 = array();
-	while ($row = $query -> fetch(PDO::FETCH_ASSOC)) {
-		$probeId = $row['probe_id'];
-		$data = $row;
-		$idToRemove = array_shift($data);
-		$probes450[$probeId] = $data;
-	}
-	$result['probe_annotation_450'] = $probes450;
-	$dnaMethData450 = array();
-	$tableName = 'dna_methylation_450_'.$cancer;
-	foreach ($probes450 as $probe => $probe_annotation) {
-		// Table and column names can't be replaced by parameters in PDO, so we have to add the
-		// table name the old fashioned way.
-		$query = $db -> prepare("SELECT * FROM $tableName WHERE probe_id = :probe");
-		$query -> execute(array(':probe' => $probe));
-		$row = $query -> fetchAll(PDO::FETCH_ASSOC);
-		$data = $row[0];
-		
-		// Remove the probe ID from the data array. We already have it, so we don't need to keep it
-		// in there.
-		$idToRemove = array_shift($data);
-		$dnaMethData450[$probe] = $data;
+	// Add the Infinium probe annotation and the DNA methylation data. There is no 450k data
+	// available for ovarian cancer, so we check the cancer type before trying to download the
+	// data.
+	if ($cancer != 'ov') {
+		$query = $db -> prepare("SELECT * FROM infinium450k_annotation WHERE chr = :chr AND cpg_location BETWEEN :plotStart AND :plotEnd");
+		$query -> execute(array(':chr' => $chromosome, ':plotStart' => $plotStart,
+			':plotEnd' => $plotEnd));
+		$probes450 = array();
+		while ($row = $query -> fetch(PDO::FETCH_ASSOC)) {
+			$probeId = $row['probe_id'];
+			$data = $row;
+			$idToRemove = array_shift($data);
+			$probes450[$probeId] = $data;
+		}
+		$result['probe_annotation_450'] = $probes450;
+		$dnaMethData450 = array();
+		$tableName = 'dna_methylation_450_'.$cancer;
+		foreach ($probes450 as $probe => $probe_annotation) {
+			// Table and column names can't be replaced by parameters in PDO, so we have to add the
+			// table name the old fashioned way.
+			$query = $db -> prepare("SELECT * FROM $tableName WHERE probe_id = :probe");
+			$query -> execute(array(':probe' => $probe));
+			$row = $query -> fetchAll(PDO::FETCH_ASSOC);
+			$data = $row[0];
+			
+			// Remove the probe ID from the data array. We already have it, so we don't need to keep it
+			// in there.
+			$idToRemove = array_shift($data);
+			$dnaMethData450[$probe] = $data;
+		}
+	} else {
+		$dnaMethData450 = null;
 	}
 	$result['dna_methylation_data_450'] = $dnaMethData450;
+
+	// Check if there is 27k data available (not the case for all cancer types).
+	$tableName = 'dna_methylation_27_'.$cancer;
+	$query = $db -> prepare("SHOW TABLES LIKE '$tableName'");
+	$query -> execute();
+	$table = $query -> fetchColumn();
+	if ($table != '') {
+		$query = $db -> prepare("SELECT * FROM infinium27k_annotation WHERE chr = :chr AND cpg_location BETWEEN :plotStart AND :plotEnd");
+		$query -> execute(array(':chr' => $chromosome, ':plotStart' => $plotStart,
+			':plotEnd' => $plotEnd));
+		$probes27 = array();
+		while ($row = $query -> fetch(PDO::FETCH_ASSOC)) {
+			$probeId = $row['probe_id'];
+			$data = $row;
+			$idToRemove = array_shift($data);
+			$probes27[$probeId] = $data;
+		}
+		$result['probe_annotation_27'] = $probes27;
+		$dnaMethData27 = array();
+		foreach ($probes27 as $probe => $probe_annotation) {
+			// Table and column names can't be replaced by parameters in PDO, so we have to add the
+			// table name the old fashioned way.
+			$query = $db -> prepare("SELECT * FROM $tableName WHERE probe_id = :probe");
+			$query -> execute(array(':probe' => $probe));
+			$row = $query -> fetchAll(PDO::FETCH_ASSOC);
+			$data = $row[0];
+			
+			// Remove the probe ID from the data array. We already have it, so we don't need to keep it
+			// in there.
+			$idToRemove = array_shift($data);
+			$dnaMethData27[$probe] = $data;
+		}
+	} else {
+		$dnaMethData27 = null;
+	}
+	$result['dna_methylation_data_27'] = $dnaMethData27;
 
 	// Add the expression data.
 	if ($regionType == 'gene') {
