@@ -1298,14 +1298,14 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 		var filteredDnaMethylationData = {};
 		var filteredProbeAnnotation = {};
 		$.each(cancerTypeDataFiltered.dna_methylation_data, function(probe, data) {
-			var probeLocation = cancerTypeDataFiltered.probe_annotation_450[probe].cpg_location;
+			var probeLocation = cancerTypeDataFiltered.probe_annotation[probe].cpg_location;
 			if (probeLocation >= plotStart && probeLocation <= plotEnd) {
 				filteredDnaMethylationData[probe] = data;
-				filteredProbeAnnotation[probe] = cancerTypeDataFiltered.probe_annotation_450[probe];
+				filteredProbeAnnotation[probe] = cancerTypeDataFiltered.probe_annotation[probe];
 			}
 		});
 		nrDnaMethylationTracks = Object.keys(filteredDnaMethylationData).length;
-		cancerTypeDataFiltered.probe_annotation_450 = filteredProbeAnnotation;
+		cancerTypeDataFiltered.probe_annotation = filteredProbeAnnotation;
 		cancerTypeDataFiltered.dna_methylation_data = filteredDnaMethylationData;
 		filteredVariants = {};
 		$.each(variants, function(location, data) {
@@ -1491,7 +1491,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 					genomicFeatureSmallMargin;
 	var probeCounter = 0;
 	var probeLocations = [];
-	$.each(cancerTypeDataFiltered.probe_annotation_450, function(key, value) {
+	$.each(cancerTypeDataFiltered.probe_annotation, function(key, value) {
 		var yPosition = value.cpg_location;
 		probeLocations.push(yPosition);
 		var nrVariants = 0;
@@ -2095,12 +2095,12 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 	}
 
 	// Draw the DNA methylation data.
-	var orderedProbes = Object.keys(cancerTypeDataFiltered.probe_annotation_450).sort(function(a,b) {
-		return cancerTypeDataFiltered.probe_annotation_450[a].cpg_location -
-			cancerTypeDataFiltered.probe_annotation_450[b].cpg_location;
+	var orderedProbes = Object.keys(cancerTypeDataFiltered.probe_annotation).sort(function(a,b) {
+		return cancerTypeDataFiltered.probe_annotation[a].cpg_location -
+			cancerTypeDataFiltered.probe_annotation[b].cpg_location;
 	});
 	$.each(orderedProbes, function(index, value) {
-		var probeLocation = cancerTypeDataFiltered.probe_annotation_450[value].cpg_location;
+		var probeLocation = cancerTypeDataFiltered.probe_annotation[value].cpg_location;
 		var nrVariants = 0;
 		if (showVariants) {
 			// We need to leave enough room to plot the somatic mutations.
@@ -2137,7 +2137,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 			})
 			.on('mouseup', function(event) {
 				var probeId = $(this).attr('id');
-				var probeAnnotation = cancerTypeDataFiltered.probe_annotation_450[probeId];
+				var probeAnnotation = cancerTypeDataFiltered.probe_annotation[probeId];
 				var xPositionAnnotation = d3.event.clientX -
 					$('.svg-container').find('svg')[0].getBoundingClientRect().x -
 					margin.left + 20;
@@ -2193,7 +2193,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 		}
 		$.each(stats.dna_methylation_data, function(key, value) {
 			var probeIndex = orderedProbes.indexOf(key);
-			var probeLocation = cancerTypeDataFiltered.probe_annotation_450[key].cpg_location;
+			var probeLocation = cancerTypeDataFiltered.probe_annotation[key].cpg_location;
 			var nrVariants = 0;
 			if (showVariants) {
 				// We need to skip any variant tracks.
@@ -2714,7 +2714,7 @@ var plotSummary = function(sorter, showVariants, plotStart, plotEnd) {
 		groupsLineData[key] = [];
 	});
 	$.each(cancerTypeDataFiltered.dna_methylation_data, function(key, value) {
-		var probeLocation = cancerTypeDataFiltered.probe_annotation_450[key].cpg_location;
+		var probeLocation = cancerTypeDataFiltered.probe_annotation[key].cpg_location;
 		var groupData = [];
 		$.each(groups, function(group, samples) {
 			var groupValues = [];

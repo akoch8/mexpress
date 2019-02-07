@@ -129,21 +129,25 @@ try {
 	$result['cpgi_annotation'] = $cpgIslands;
 
 	// Add the Infinium probe annotation and the DNA methylation data.
-	// TO DO: incorporate 27k data
-	$query = $db -> prepare("SELECT * FROM infinium450k_annotation WHERE chr = :chr AND cpg_location BETWEEN :plotStart AND :plotEnd");
+	$infiniumType = '450';
+	if ($cancer == 'ov') {
+		$infiniumType = '27';
+	}
+	$probeAnnotationTable = 'infinium'.$infiniumType.'k_annotation';
+	$query = $db -> prepare("SELECT * FROM $probeAnnotationTable WHERE chr = :chr AND cpg_location BETWEEN :plotStart AND :plotEnd");
 	$query -> execute(array(':chr' => $chromosome, ':plotStart' => $plotStart,
 		':plotEnd' => $plotEnd));
-	$probes450 = array();
+	$probes = array();
 	while ($row = $query -> fetch(PDO::FETCH_ASSOC)) {
 		$probeId = $row['probe_id'];
 		$data = $row;
 		$idToRemove = array_shift($data);
-		$probes450[$probeId] = $data;
+		$probes[$probeId] = $data;
 	}
-	$result['probe_annotation_450'] = $probes450;
-	$dnaMethData450 = array();
-	$tableName = 'dna_methylation_450_'.$cancer;
-	foreach ($probes450 as $probe => $probe_annotation) {
+	$result['probe_annotation'] = $probes;
+	$dnaMethData = array();
+	$tableName = 'dna_methylation_'.$infiniumType.'_'.$cancer;
+	foreach ($probes as $probe => $probe_annotation) {
 		// Table and column names can't be replaced by parameters in PDO, so we have to add the
 		// table name the old fashioned way.
 		$query = $db -> prepare("SELECT * FROM $tableName WHERE probe_id = :probe");
@@ -154,9 +158,9 @@ try {
 		// Remove the probe ID from the data array. We already have it, so we don't need to keep it
 		// in there.
 		$idToRemove = array_shift($data);
-		$dnaMethData450[$probe] = $data;
+		$dnaMethData[$probe] = $data;
 	}
-	$result['dna_methylation_data'] = $dnaMethData450;
+	$result['dna_methylation_data'] = $dnaMethData;
 
 	// Add the expression data.
 	if ($regionType == 'gene') {
