@@ -19,11 +19,11 @@ We advise you to use MEXPRESS with a modern browser like Chrome or Firefox. MEXP
 
 | Browser | Version tested | Supported |
 | :--- | :--- | :--- |
-| Google Chrome | 71.0.3578.98 | yes |
-| Firefox | 64.0 | yes |
-| Safari | 12.0.1 | yes |
-| Opera | 57.0.3098.102 | yes |
-| Edge | ? | ? |
+| Google Chrome | 71 | yes |
+| Firefox | 64 | yes |
+| Safari | 12 | yes |
+| Opera | 57 | yes |
+| Edge | 40 | yes |
 | Internet explorer | &le;11 | no |
 
 ### Contact
