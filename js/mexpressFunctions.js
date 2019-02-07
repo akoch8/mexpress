@@ -1290,6 +1290,12 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 	var nrVariantTracks = 0;
 	var variants = showVariants ? variantsByStartValue(cancerTypeDataFiltered.snv) : {};
 	var filteredVariants = variants;
+	var dnaMethylationData;
+	if (infiniumArrayType === 450) {
+		dnaMethylationData = cancerTypeDataFiltered.dna_methylation_data_450;
+	} else if (infiniumArrayType === 27) {
+		dnaMethylationData = cancerTypeDataFiltered.dna_methylation_data_27;
+	}
 	if (plotStart && plotEnd) {
 		// Filter the DNA methylation probes and somatic mutations based on the provided genomic
 		// window.
