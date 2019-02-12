@@ -2916,6 +2916,10 @@ var setToolbar = function(type) {
 };
 
 var showDataTypeInformation = function(dataType) {
+	var methylationFile = 'data/' + cancerTypeAnnotation.short_name + '/HumanMethylation450.json';
+	if (cancerTypeAnnotation.short_name === 'ov') {
+		methylationFile = 'data/' + cancerTypeAnnotation.short_name + '/HumanMethylation27.json';
+	}
 	var dataInformation = {
 		'gene expression data': 'data/' + cancerTypeAnnotation.short_name + '/htseq_fpkm-uq.tsv.json',
 		'mirna expression data': 'data/' + cancerTypeAnnotation.short_name + '/mirna.tsv.json',
@@ -2923,7 +2927,7 @@ var showDataTypeInformation = function(dataType) {
 			'/Gistic2_CopyNumber_Gistic2_all_thresholded.by_genes.json',
 		'phenotype data': 'data/' + cancerTypeAnnotation.short_name + '/GDC_phenotype.tsv.json',
 		'survival data': 'data/' + cancerTypeAnnotation.short_name + '/survival.tsv.json',
-		'methylation 450 data': 'data/' + cancerTypeAnnotation.short_name + '/HumanMethylation450.json',
+		'methylation data': methylationFile,
 		'somatic mutations': 'data/' + cancerTypeAnnotation.short_name + '/mutect2_snv.tsv.json',
 		'statistics': 'data/statistics.json',
 		'genomic annotation': 'data/genomicAnnotation.json'
