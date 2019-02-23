@@ -355,7 +355,7 @@ var pearsonCorrelation = function(x, y) {
 	var newX = [];
 	var newY = [];
 	for (c in y) {
-		if (!isNaN(y[c]) && !isNaN(x[c])) {
+		if (!isNaN(y[c]) && !isNaN(x[c]) && typeof x[c] == 'number' && typeof y[c] == 'number') {
 			newY.push(+y[c]);
 			newX.push(+x[c]);
 		}
