@@ -362,7 +362,7 @@ $(function() {
 				$(this).attr('stroke', probeLineColor);
 				$(this).removeClass('highlighted-promoter');
 			} else {
-				$(this).attr('stroke', otherRegionColor);
+				$(this).attr('stroke', regionColor);
 				$(this).addClass('highlighted-promoter');
 			}
 		});
