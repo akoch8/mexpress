@@ -40,6 +40,7 @@ var otherRegionColor = '#928a97';
 var otherTranscriptColor = '#928a97';
 var cpgColor = '#7fa99b';
 var probeLineColor = '#dcdcdc';
+var probeLineColorPromoter = '#a9a9a9';
 var histogramColor = '#e4f1fe';
 var histogramColorFocus = '#ff6666';
 

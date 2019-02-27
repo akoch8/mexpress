@@ -356,6 +356,17 @@ $(function() {
 			plot(sampleSorter, sampleFilter, showVariants);
 		}, 100);
 	});
+	$('.button--highlight-promoter').on('click', function() {
+		$('.promoter').each(function() {
+			if ($(this).hasClass('highlighted-promoter')) {
+				$(this).attr('stroke', probeLineColor);
+				$(this).removeClass('highlighted-promoter');
+			} else {
+				$(this).attr('stroke', otherRegionColor);
+				$(this).addClass('highlighted-promoter');
+			}
+		});
+	});
 	$('.button--plot-summary').on('click', function() {
 		// Close any potentially open window and show the parameter selection window.
 		$('.plot-window').find('.overlay').hide();

@@ -1491,9 +1491,21 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 					genomicFeatureSmallMargin;
 	var probeCounter = 0;
 	var probeLocations = [];
+	var promoterStart, promoterEnd;
+	if (cancerTypeDataFiltered.region_annotation.strand === '+') {
+		promoterStart = cancerTypeDataFiltered.region_annotation.start - 1000;
+		promoterEnd = cancerTypeDataFiltered.region_annotation.start + 500;
+	} else {
+		promoterStart = cancerTypeDataFiltered.region_annotation.end - 500;
+		promoterEnd = cancerTypeDataFiltered.region_annotation.end + 1000;
+	}
 	$.each(cancerTypeDataFiltered.probe_annotation, function(key, value) {
 		var yPosition = value.cpg_location;
 		probeLocations.push(yPosition);
+		var probeClass = 'not-promoter';
+		if (yPosition >= promoterStart && yPosition <= promoterEnd) {
+			probeClass = 'promoter';
+		}
 		var nrVariants = 0;
 		if (showVariants) {
 			// We need to leave enough room to plot the somatic mutations.
@@ -1512,8 +1524,8 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 				.attr('x2', genomicFeaturesWidth)
 				.attr('y1', y(yPosition))
 				.attr('y2', y(yPosition))
-				.attr('class', key)
-				.style('stroke', probeLineColor)
+				.attr('class', key + ' ' + probeClass)
+				.attr('stroke', probeLineColor)
 				.attr('stroke-width', 1);
 
 			// Draw the sloped line that connects the DNA methylation data track with the probe
@@ -1523,7 +1535,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 				.attr('x2', genomicFeaturesWidth + marginBetweenMainParts * 5)
 				.attr('y1', y(yPosition))
 				.attr('y2', yPositionDataTrack)
-				.attr('class', key)
+				.attr('class', key + ' ' + probeClass)
 				.attr('stroke', probeLineColor)
 				.attr('stroke-width', 1);
 			probeCounter += 1;
