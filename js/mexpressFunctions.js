@@ -2139,29 +2139,38 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 			.attr('class', 'clickable')
 			.on('mouseover', function() {
 				var probeId = $(this).attr('id');
-				$('.' + probeId).css({'stroke': textColor});
+				var probePath = $('.' + probeId);
+				if (!probePath.hasClass('highlighted-promoter')) {
+					probePath.css({'stroke': textColor});
+				}
 			})
 			.on('mouseout', function() {
 				var probeId = $(this).attr('id');
-				if (!$('.' + probeId).hasClass('highlighted')) {
-					$('.' + probeId).css({'stroke': probeLineColor});
+				var probePath = $('.' + probeId);
+				if (!probePath.hasClass('highlighted') && !probePath.hasClass('highlighted-promoter')) {
+					probePath.css({'stroke': probeLineColor});
 				}
 			})
 			.on('mouseup', function(event) {
 				var probeId = $(this).attr('id');
+				var probePath = $('.' + probeId);
 				var probeAnnotation = cancerTypeDataFiltered.probe_annotation[probeId];
 				var xPositionAnnotation = d3.event.clientX -
 					$('.svg-container').find('svg')[0].getBoundingClientRect().x -
 					margin.left + 20;
 				$('.probe-annotation').remove();
-				if ($('.' + probeId).hasClass('highlighted')) {
-					$('.' + probeId).removeClass('highlighted');
-					$('.' + probeId).css({'stroke': probeLineColor});
+				if (probePath.hasClass('highlighted')) {
+					probePath.removeClass('highlighted');
+					if (!probePath.hasClass('highlighted-promoter')) {
+						probePath.css({'stroke': probeLineColor});
+					}
 				} else {
 					$('.highlighted').css({'stroke': probeLineColor});
 					$('.highlighted').removeClass('highlighted');
-					$('.' + probeId).addClass('highlighted');
-					$('.' + probeId).css({'stroke': textColor});
+					probePath.addClass('highlighted');
+					if (!probePath.hasClass('highlighted-promoter')) {
+						probePath.css({'stroke': textColor});
+					}
 					addProbeAnnotation(probeId, probeAnnotation, xPositionAnnotation, yPosition);
 				}
 			});
