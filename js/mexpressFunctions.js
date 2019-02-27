@@ -54,7 +54,10 @@ var addCloseButton = function(x, y, svgClass) {
 		.on('mouseup', function() {
 			$('.' + svgClass).remove();
 			if (svgClass === 'probe-annotation') {
-				$('.highlighted').css({'stroke': probeLineColor});
+				var probePath = $('.highlighted');
+				if (!probePath.hasClass('highlighted-promoter')) {
+					$('.highlighted').css({'stroke': probeLineColor});
+				}
 				$('.highlighted').removeClass('highlighted');
 			}
 		});
