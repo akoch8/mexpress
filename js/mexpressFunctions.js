@@ -1387,7 +1387,7 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 		.append('svg')
 			.attr('width', width + margin.left + margin.right)
 			.attr('height', locationLinkedTracksHeight + margin.top + margin.bottom)
-			.attr('text-rendering', 'geometricPrecision')
+			.attr('text-rendering', 'optimizeLegibility')
 			.attr('font-family', 'arial')
 			.attr('font-size', '10px')
 			.attr('fill', textColor)
