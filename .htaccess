@@ -1,6 +1,9 @@
 # Define the default character set
 AddDefaultCharset utf-8
 
+# Set index.html as the default page
+DirectoryIndex index.html
+
 # Remove .html extensions
 RewriteEngine on
 RewriteCond %{REQUEST_FILENAME} !-d
