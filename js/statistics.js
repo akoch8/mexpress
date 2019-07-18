@@ -82,6 +82,9 @@ var anova = function(x) {
 	// Using the mean sum of squares, calculate the F statistic and the associated p value.
 	var f = mst / msr;
 	var p = fDistribution(f, dfBetween, dfWithin);
+	if (p > 1) {
+		p = 1;
+	}
 	return p;
 };
 
