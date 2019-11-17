@@ -28,4 +28,4 @@ We advise you to use MEXPRESS with a modern browser like Chrome or Firefox. MEXP
 
 ### Contact
 
-Please get in touch if you have any questions or comments! a.koch@maastrichtuniversity.nl or [@monsieurKoch](https://twitter.com/monsieurKoch)
+Please get in touch if you have any questions or comments! info@alexanderkoch.be or [@monsieurKoch](https://twitter.com/monsieurKoch)
