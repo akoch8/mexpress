@@ -219,8 +219,8 @@ var addToolbar = function() {
 	}
 	$.each(clinicalParameters, function(index, value) {
 		var parameterText = value.replace(/_/g, ' ');
-		if (parameterText.length > 40) {
-			parameterText = parameterText.substr(0, 37) + '...';
+		if (parameterText.length > 35) {
+			parameterText = parameterText.substr(0, 32) + '...';
 		}
 		$('.toolbar--select-filter').append('<option value="' + value + '" data-type="clinical">' +
 			parameterText + '</option>');
@@ -779,8 +779,8 @@ var drawDataTrack = function(data, sortedSamples, allSamples, color, xPosition, 
 	}
 	if (variable !== 'methylation') {
 		var parameterText = variable.replace(/_/g, ' ');
-		if (parameterText.length > 40) {
-			parameterText = parameterText.substr(0, 37) + '...';
+		if (parameterText.length > 35) {
+			parameterText = parameterText.substr(0, 32) + '...';
 		}
 		svg.append('text')
 			.attr('x', xPosition - marginBetweenMainParts / 2)
@@ -1904,8 +1904,8 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 	yPosition += dataTrackHeight;
 	$.each(categoricalClinicalParameters, function(index, value) {
 		parameterText = value.replace(/_/g, ' ');
-		if (parameterText.length > 40) {
-			parameterText = parameterText.substr(0, 37) + '...';
+		if (parameterText.length > 35) {
+			parameterText = parameterText.substr(0, 32) + '...';
 		}
 		svg.append('text')
 			.attr('x', xPosition - marginBetweenMainParts / 2)
@@ -3125,8 +3125,8 @@ var updateDropdowns = function(parameters) {
 	$('.toolbar--select-sorter').find('option[data-type="clinical"]').remove();
 	$.each(parameters.sort(sortAlphabetically), function(index, value) {
 		var parameterText = value.replace(/_/g, ' ');
-		if (parameterText.length > 40) {
-			parameterText = parameterText.substr(0, 37) + '...';
+		if (parameterText.length > 35) {
+			parameterText = parameterText.substr(0, 32) + '...';
 		}
 		$('.toolbar--select-filter').append('<option value="' + value +
 			'" data-type="clinical">' + parameterText + '</option>');
