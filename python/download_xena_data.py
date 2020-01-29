@@ -57,7 +57,7 @@ def download_data(cancer_type):
 		if not os.path.isdir('data/' + cancer_type):
 			print 'Could not create the folder data/{0}/'.format(cancer_type)
 			raise
-	base_url_gdc = ('https://gdc.xenahubs.net/download/TCGA-{0}/Xena_Matrices/TCGA-{0}.'
+	base_url_gdc = ('https://gdc.xenahubs.net/download/TCGA-{0}.'
 		.format(cancer_type.upper()))
 	base_url_tcga = ('https://tcga.xenahubs.net/download/TCGA.{0}.sampleMap/'
 		.format(cancer_type.upper()))
