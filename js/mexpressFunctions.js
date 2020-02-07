@@ -1168,8 +1168,8 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 			delete cancerTypeDataFiltered.cnv[sample];
 		}
 	});
-	console.log('cancerTypeDataFiltered');
-	console.log(cancerTypeDataFiltered);
+	//console.log('cancerTypeDataFiltered');
+	//console.log(cancerTypeDataFiltered);
 
 	// Count the number of regions (including transcripts in the case of genes) that need to be
 	// drawn.
@@ -1358,8 +1358,8 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 	// methylation, correlation between expression and numerical clinical parameters, t-test or
 	// ANOVA comparing expression in different groups for categorical clinical parameters.
 	stats = calculateStatistics(samples, sorter);
-	console.log('stats');
-	console.log(stats);
+	//console.log('stats');
+	//console.log(stats);
 
 	// Adjust the p values for multiple hypothesis testing.
 	stats = pAdjust(stats);
