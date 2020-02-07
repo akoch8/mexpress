@@ -1990,22 +1990,32 @@ var plot = function(sorter, sampleFilter, showVariants, plotStart, plotEnd) {
 				return missingValueColor;
 			}
 		});
-		$.each(variantCategories, function(index, value) {
-			value = value ? value : 'null';
-			var textWidth = calculateTextWidth(value.replace(/_/g, ' '), '10px arial');
-			svg.append('circle')
-				.attr('cx', xPosition + xPositionLegend + legendRectWidth / 2)
-				.attr('cy', yPosition + Math.floor(dataTrackHeight / 2))
-				.attr('r', legendCircleR)
-				.attr('fill', variantColors[index]);
+		if (variantCategories.length === 0) {
 			svg.append('text')
-				.attr('x', xPosition + legendRectWidth + 5 + xPositionLegend)
+				.attr('fill', textColorLight)
+				.attr('x', xPosition + xPositionLegend)
 				.attr('y', yPosition + dataTrackHeight / 2)
 				.attr('text-anchor', 'start')
 				.attr('alignment-baseline', 'middle')
-				.text(value.replace(/_/g, ' '));
-			xPositionLegend += textWidth + 2 * legendRectWidth + 5;
-		});
+				.text('None');
+		} else {
+			$.each(variantCategories, function(index, value) {
+				value = value ? value : 'null';
+				var textWidth = calculateTextWidth(value.replace(/_/g, ' '), '10px arial');
+				svg.append('circle')
+					.attr('cx', xPosition + xPositionLegend + legendRectWidth / 2)
+					.attr('cy', yPosition + Math.floor(dataTrackHeight / 2))
+					.attr('r', legendCircleR)
+					.attr('fill', variantColors[index]);
+				svg.append('text')
+					.attr('x', xPosition + legendRectWidth + 5 + xPositionLegend)
+					.attr('y', yPosition + dataTrackHeight / 2)
+					.attr('text-anchor', 'start')
+					.attr('alignment-baseline', 'middle')
+					.text(value.replace(/_/g, ' '));
+				xPositionLegend += textWidth + 2 * legendRectWidth + 5;
+			});
+		}
 		yPosition += dataTrackHeight + dataTrackSeparator;
 	}
 	var xPositionLegend = 0;
