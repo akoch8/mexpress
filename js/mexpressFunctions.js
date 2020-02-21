@@ -209,6 +209,7 @@ var addToolbar = function() {
 	} else {
 		$('.toolbar--select-data-type option[value=cnv]').attr('disabled', true);
 	}
+	$('.toolbar--select-filter').append('<option value="dna_methylation_data">DNA methylation</option>');
 	var clinicalParameters = $('#clinical-parameters').text();
 	if (clinicalParameters === undefined || clinicalParameters === 'default') {
 		clinicalParameters = cancerTypeAnnotation.default;
@@ -2996,9 +2997,21 @@ var showFilterOptions = function(sampleFilter) {
 		}
 	}
 	clearFilterSelection();
-	var filterOptions;
+	var filterOptions, dataSummaryText;
 	var dataValues = Object.values(dataToFilter);
-	if (parameterIsNumerical(dataValues)) {
+	if (sampleFilter === 'dna_methylation_data') {
+		dataSummaryText = '<span class="filter-tip">Select a value</span>' +
+			'<ul class="summary-values filter-list list-border">' +
+			'<input type="text">' +
+			'<li data-summary-variable="null" data-value="null">null</li>' +
+			'</ul>';
+		$('.filter-value-container').empty();
+		filterWindow.find('.data-summary').append(dataSummaryText);
+		filterOptions = '<span class="filter-tip">Select an operator</span>' +
+			'<ul class="filter-options filter-list list-border">' +
+			'<li data-value="ne">&ne;&emsp;not equal to</li>' +
+			'</ul>';
+	} else if (parameterIsNumerical(dataValues)) {
 		// Add a summary of the data and plot the data distribution so the user can more easily
 		// select an appropriate filter value.
 		var dataSummary;
@@ -3008,7 +3021,7 @@ var showFilterOptions = function(sampleFilter) {
 		} else {
 			dataSummary = summary(dataValues, true);
 		}
-		var dataSummaryText = '<span class="filter-tip">Select a value</span>' +
+		dataSummaryText = '<span class="filter-tip">Select a value</span>' +
 			'<ul class="summary-values filter-list list-border">' +
 			'<input type="text">';
 		$.each(dataSummary, function(key, value) {
