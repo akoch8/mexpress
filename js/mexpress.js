@@ -241,10 +241,6 @@ $(function() {
 				setTimeout(function() {
 					$('.toolbar--select-filter option').first().prop('selected', true);
 					clearFilterSelection();
-
-					// CONTINUE HERE
-					// Make the plot function recognize the new filter method (DNAm)
-
 					plot(sampleSorter, newFilters, showVariants, plotStart, plotEnd);
 				}, 100);
 			});

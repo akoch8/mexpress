@@ -979,51 +979,67 @@ var filterSamples = function(sampleFilter, allSamples) {
 				console.log('ERROR: cannot find "' + parameterToFilter + '" in the data object keys.');
 				return false;
 			}
-			filteredSamples = filteredSamples.filter(function(sample) {
-				var filterResult = 0;
-				$.each(filterValues, function(index, value) {
-					if (value !== 'null') {
-						if (isNumber(value)) {
-							if (filterCommand === 'lt') {
-								filterResult += dataToFilter[sample] < +value;
-							} else if (filterCommand === 'le') {
-								filterResult += dataToFilter[sample] <= +value;
-							} else if (filterCommand === 'eq') {
-								filterResult += dataToFilter[sample] == +value;
-							} else if (filterCommand === 'ne') {
-								filterResult += dataToFilter[sample] != +value;
-							} else if (filterCommand === 'ge') {
-								filterResult += dataToFilter[sample] >= +value;
-							} else if (filterCommand === 'gt') {
-								filterResult += dataToFilter[sample] > +value;
+			if (parameterToFilter === 'dna_methylation_data') {
+				filteredSamples = filteredSamples.filter(function(sample) {
+					var nullCount = 0;
+					$.each(dataToFilter, function(key, value) {
+						if (sample in value) {
+							if (value[sample] === null) {
+								nullCount++;
 							}
 						} else {
+							nullCount++;
+						}
+					});
+					return nullCount < Object.keys(dataToFilter).length;
+				});
+			} else {
+				filteredSamples = filteredSamples.filter(function(sample) {
+					var filterResult = 0;
+					$.each(filterValues, function(index, value) {
+						if (value !== 'null') {
+							if (isNumber(value)) {
+								if (filterCommand === 'lt') {
+									filterResult += dataToFilter[sample] < +value;
+								} else if (filterCommand === 'le') {
+									filterResult += dataToFilter[sample] <= +value;
+								} else if (filterCommand === 'eq') {
+									filterResult += dataToFilter[sample] == +value;
+								} else if (filterCommand === 'ne') {
+									filterResult += dataToFilter[sample] != +value;
+								} else if (filterCommand === 'ge') {
+									filterResult += dataToFilter[sample] >= +value;
+								} else if (filterCommand === 'gt') {
+									filterResult += dataToFilter[sample] > +value;
+								}
+							} else {
+								if (filterCommand === 'eq') {
+									filterResult += dataToFilter[sample] == value;
+								} else if (filterCommand === 'ne') {
+									filterResult += dataToFilter[sample] != value;
+								}
+							}
+						} else if (value === 'null') {
 							if (filterCommand === 'eq') {
-								filterResult += dataToFilter[sample] == value;
+								filterResult += dataToFilter[sample] === null ||
+									dataToFilter[sample] === undefined;
 							} else if (filterCommand === 'ne') {
-								filterResult += dataToFilter[sample] != value;
+								filterResult += dataToFilter[sample] !== null &&
+									dataToFilter[sample] !== undefined;
 							}
 						}
-					} else if (value === 'null') {
-						if (filterCommand === 'eq') {
-							filterResult += dataToFilter[sample] === null ||
-								dataToFilter[sample] === undefined;
-						} else if (filterCommand === 'ne') {
-							filterResult += dataToFilter[sample] !== null &&
-								dataToFilter[sample] !== undefined;
-						}
+					});
+					if (filterCommand === 'ne') {
+						// The 'not equal to' case is special, because it represents a logical 'AND',
+						// meaning that all checks need to be true before we can add a sample to our list
+						// of filtered samples.
+						return filterResult === filterValues.length;
+					} else {
+						return filterResult;
 					}
-				});
-				if (filterCommand === 'ne') {
-					// The 'not equal to' case is special, because it represents a logical 'AND',
-					// meaning that all checks need to be true before we can add a sample to our list
-					// of filtered samples.
-					return filterResult === filterValues.length;
-				} else {
 					return filterResult;
-				}
-				return filterResult;
-			});
+				});
+			}
 		});
 		return filteredSamples;
 	}
