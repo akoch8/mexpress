@@ -125,18 +125,18 @@ def create_table(login_info, table, file, file_path):
 						cur.execute(s)
 			conn.commit()
 		except Exception as e:
-			print 'ERROR: SQL query failed'
-			print sql
+			print('ERROR: SQL query failed')
+			print(sql)
 			raise e
 	else:
-		print 'ERROR: Not enough column names found'
-		print '- table: {0}'.format(table)
-		print '- file: {0}'.format(file)
+		print('ERROR: Not enough column names found')
+		print('- table: {0}'.format(table))
+		print('- file: {0}'.format(file))
 		sys.exit(0)
 
 
 def help():
-	print __doc__
+	print(__doc__)
 	sys.exit(0)
 
 
@@ -144,7 +144,7 @@ def main(argv):
 	try:
 		opts, args = getopt.getopt(argv, 'i:c:h', ['ini=', 'cancer='])
 	except getopt.GetoptError as err:
-		print str(err)
+		print(str(err))
 		help()
 	config_file = ''
 	cancer_type = ''
@@ -160,24 +160,24 @@ def main(argv):
 		elif opt in ('-c', '--cancer'):
 			cancer_type = arg.lower()
 	if config_file == '':
-		print 'Please check that you did not forget the database config file.'
+		print('Please check that you did not forget the database config file.')
 		help()
 	elif cancer_type not in accepted_cancer_types and cancer_type != 'all':
-		print
-		print 'The cancer type should be "all" or one of the following:'
-		print ', '.join(accepted_cancer_types)
-		print
+		print()
+		print('The cancer type should be "all" or one of the following:')
+		print(', '.join(accepted_cancer_types))
+		print()
 		sys.exit(0)
 	login_info = ds.get_database_info(config_file)
-	print 'Uploading data for:'
+	print('Uploading data for:')
 	if cancer_type == 'all':
 		for c in accepted_cancer_types:
-			print c.upper()
+			print(c.upper())
 			upload_tcga_files(login_info, c)
 	else:
-		print cancer_type.upper()
+		print(cancer_type.upper())
 		upload_tcga_files(login_info, cancer_type)
-	print 'Done!'
+	print('Done!')
 
 
 def upload_tcga_files(login_info, cancer_type):
@@ -194,15 +194,15 @@ def upload_tcga_files(login_info, cancer_type):
 	if os.path.exists(data_dir):
 		for file in os.listdir(data_dir):
 			if file in data_tables:
-				print file
+				print(file)
 				file_path = data_dir + file
 				table_name = data_tables[file] + cancer_type
-				print '- creating table...'
+				print('- creating table...')
 				create_table(login_info, table_name, file, file_path)
-				print '- uploading data...'
+				print('- uploading data...')
 				uad.upload_file(login_info, table_name, file_path)
 	else:
-		print 'Could not find the folder {0}. Moving on...'.format(data_dir)
+		print('Could not find the folder {0}. Moving on...'.format(data_dir))
 
 
 if __name__ == '__main__':

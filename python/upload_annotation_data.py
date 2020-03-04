@@ -43,7 +43,7 @@ from contextlib import closing
 
 
 def help():
-	print __doc__
+	print(__doc__)
 	sys.exit(0)
 
 
@@ -52,7 +52,7 @@ def main(argv):
 		opts, args = getopt.getopt(argv, 'i:c:m:g:e:h',
 			['ini=', 'cpgi=', 'mirna=', 'gene=', 'exon=', 'inf450=', 'inf27='])
 	except getopt.GetoptError as err:
-		print str(err)
+		print(str(err))
 		help()
 	config_file = ''
 	cpgi_file = ''
@@ -80,22 +80,22 @@ def main(argv):
 			inf_27_file = arg
 	if (config_file == '' or cpgi_file == '' or mirna_file == '' or gene_file == '' or
 		exon_file == '' or inf_450_file == '' or inf_27_file == ''):
-		print 'Please check that you did not forget any files.'
+		print('Please check that you did not forget any files.')
 		help()
 	login_info = ds.get_database_info(config_file)
-	print 'Uploading annotation data for:'
-	print 'CpG islands...'
+	print('Uploading annotation data for:')
+	print('CpG islands...')
 	upload_file(login_info, 'cpgi_annotation', cpgi_file)
-	print 'non-coding RNA...'
+	print('non-coding RNA...')
 	upload_file(login_info, 'mirna_annotation', mirna_file)
-	print 'genes and transcripts...'
+	print('genes and transcripts...')
 	upload_file(login_info, 'gene_transcript_annotation', gene_file)
-	print 'exons...'
+	print('exons...')
 	upload_file(login_info, 'transcript_exon_annotation', exon_file)
-	print 'Infinium probes...'
+	print('Infinium probes...')
 	upload_file(login_info, 'infinium450k_annotation', inf_450_file)
 	upload_file(login_info, 'infinium27k_annotation', inf_27_file)
-	print 'Done!'
+	print('Done!')
 
 
 def upload_file(login_info, table, file):

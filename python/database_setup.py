@@ -37,7 +37,7 @@ def execute_sql_commands(login_info, commands):
 
 
 def help():
-	print __doc__
+	print(__doc__)
 	sys.exit(0)
 
 
@@ -56,7 +56,7 @@ def main(argv):
 	try:
 		opts, args = getopt.getopt(argv, 's:i:h', ['sql=', 'ini='])
 	except getopt.GetoptError as err:
-		print str(err)
+		print(str(err))
 		help()
 	sql_file = ''
 	config_file = ''
@@ -68,13 +68,13 @@ def main(argv):
 		elif opt in ('-i', '--ini'):
 			config_file = arg
 	if sql_file == '' or config_file == '':
-		print 'Please check that you did not forget any files.'
+		print('Please check that you did not forget any files.')
 		help()
-	print 'Setting up the MEXPRESS database...'
+	print('Setting up the MEXPRESS database...')
 	sql_commands = read_sql_file(sql_file)
 	login_info = get_database_info(config_file)
 	execute_sql_commands(login_info, sql_commands)
-	print 'Done!'
+	print('Done!')
 
 
 def read_sql_file(file):

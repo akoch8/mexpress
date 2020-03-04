@@ -55,38 +55,38 @@ def download_data(cancer_type):
 		os.makedirs('data/' + cancer_type)
 	except OSError:
 		if not os.path.isdir('data/' + cancer_type):
-			print 'Could not create the folder data/{0}/'.format(cancer_type)
+			print('Could not create the folder data/{0}/'.format(cancer_type))
 			raise
 	base_url_gdc = ('https://gdc.xenahubs.net/download/TCGA-{0}.'
 		.format(cancer_type.upper()))
 	base_url_tcga = ('https://tcga.xenahubs.net/download/TCGA.{0}.sampleMap/'
 		.format(cancer_type.upper()))
-	print '-> gene expression RNA-seq'
+	print('-> gene expression RNA-seq')
 	download_file(cancer_type, base_url_gdc, 'htseq_fpkm-uq.tsv.gz')
 	download_file(cancer_type, base_url_gdc, 'htseq_fpkm-uq.tsv.json')
-	print '-> DNA methylation'
+	print('-> DNA methylation')
 	download_file(cancer_type, base_url_tcga, 'HumanMethylation450.gz')
 	download_file(cancer_type, base_url_tcga, 'HumanMethylation450.json')
 	download_file(cancer_type, base_url_tcga, 'HumanMethylation27.gz')
 	download_file(cancer_type, base_url_tcga, 'HumanMethylation27.json')
-	#print '-> copy number'
+	#print('-> copy number')
 	#download_file(cancer_type, base_url_gdc, 'masked_cnv.tsv.gz')
 	#download_file(cancer_type, base_url_gdc, 'masked_cnv.tsv.json')
-	print '-> copy number'
+	print('-> copy number')
 	download_file(cancer_type, base_url_tcga,
 		'Gistic2_CopyNumber_Gistic2_all_thresholded.by_genes.gz')
 	download_file(cancer_type, base_url_tcga,
 		'Gistic2_CopyNumber_Gistic2_all_thresholded.by_genes.json')
-	print '-> miRNA expression'
+	print('-> miRNA expression')
 	download_file(cancer_type, base_url_gdc, 'mirna.tsv.gz')
 	download_file(cancer_type, base_url_gdc, 'mirna.tsv.json')
-	print '-> somatic mutation'
+	print('-> somatic mutation')
 	download_file(cancer_type, base_url_gdc, 'mutect2_snv.tsv.gz')
 	download_file(cancer_type, base_url_gdc, 'mutect2_snv.tsv.json')
-	print '-> phenotype'
+	print('-> phenotype')
 	download_file(cancer_type, base_url_gdc, 'GDC_phenotype.tsv.gz')
 	download_file(cancer_type, base_url_gdc, 'GDC_phenotype.tsv.json')
-	print '-> survival'
+	print('-> survival')
 	download_file(cancer_type, base_url_gdc, 'survival.tsv.gz')
 	download_file(cancer_type, base_url_gdc, 'survival.tsv.json')
 
@@ -102,17 +102,17 @@ def download_file(cancer_type, base_url, file):
 	try:
 		r = requests.get(url, stream=True)
 	except Exception as e:
-		print 'Data download request failed'
-		print 'cancer_type = {0}'.format(cancer_type)
-		print 'url = {0}'.format(url)
+		print('Data download request failed')
+		print('cancer_type = {0}'.format(cancer_type))
+		print('url = {0}'.format(url))
 		raise e
 	file_path = 'data/' + cancer_type + '/' + file
 	try:
 		open(file_path, 'wb').write(r.content)
 	except Exception as e:
-		print 'Could not write downloaded data to disk'
-		print 'cancer_type = {0}'.format(cancer_type)
-		print 'file = {0}'.format(cancer_type + '/' + file)
+		print('Could not write downloaded data to disk')
+		print('cancer_type = {0}'.format(cancer_type))
+		print('file = {0}'.format(cancer_type + '/' + file))
 		raise e
 
 	# If the file is compressed and not empty, unzip it. The Xena data
@@ -133,7 +133,7 @@ def download_file(cancer_type, base_url, file):
 
 
 def help():
-	print __doc__
+	print(__doc__)
 	sys.exit(0)
 
 
@@ -141,7 +141,7 @@ def main(argv):
 	try:
 		opts, args = getopt.getopt(argv, 'c:h', ['cancer='])
 	except getopt.GetoptError as err:
-		print str(err)
+		print(str(err))
 		help()
 	cancer_type = ''
 	accepted_cancer_types = ('acc', 'blca', 'brca', 'cesc', 'chol', 'coad', 'dlbc',
@@ -156,29 +156,29 @@ def main(argv):
 	if cancer_type == '':
 		help()
 	elif cancer_type not in accepted_cancer_types and cancer_type != 'all':
-		print
-		print 'The cancer type should be "all" or one of the following:'
-		print ', '.join(accepted_cancer_types)
-		print
+		print()
+		print('The cancer type should be "all" or one of the following:')
+		print(', '.join(accepted_cancer_types))
+		print()
 		sys.exit(0)
 	start = datetime.now()
 	try:
 		os.makedirs('data')
 	except OSError:
 		if not os.path.isdir('data'):
-			print 'Could not create the folder data/'
+			print('Could not create the folder data/')
 			raise
-	print 'Downloading data for:'
+	print('Downloading data for:')
 	if cancer_type == 'all':
 		for c in accepted_cancer_types:
-			print c.upper()
+			print(c.upper())
 			download_data(c)
 	else:
-		print cancer_type.upper()
+		print(cancer_type.upper())
 		download_data(cancer_type)
-	print 'Done!'
+	print('Done!')
 	time = datetime.now() - start
-	print 'Total runtime = {0}'.format(str(time).split('.')[0])
+	print('Total runtime = {0}'.format(str(time).split('.')[0]))
 
 
 if __name__ == '__main__':
