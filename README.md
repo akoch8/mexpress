@@ -35,6 +35,7 @@ MEXPRESS currently runs on an Apache web server (Apache 2.4.18 Ubuntu Server), u
 If you want to set up your own version of MEXPRESS locally, you'll need to:
 1. Create a MySQL database
 2. Complete the database config file ([ini/database_config.ini](https://github.com/akoch8/mexpress/blob/master/ini/database_config_EMPTY.ini)) 
+3. Run the python scripts to complete the database setup, download the TCGA data, and upload them to your MEXPRESS database
 
 ### Contact
 
