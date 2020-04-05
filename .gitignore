@@ -1,7 +1,7 @@
 .DS_Store
 .Rapp.history
 data/
-*.ini
+database_config.ini
 img/design/
 img/feather/
 *.ai
