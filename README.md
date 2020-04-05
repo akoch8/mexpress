@@ -30,6 +30,12 @@ We advise you to use MEXPRESS with a modern browser like Chrome or Firefox. MEXP
 
 MEXPRESS currently runs on an Apache web server (Apache 2.4.18 Ubuntu Server), uses PHP version 5.6.29 and mysql version 14.14 (distrib 5.7.29). All necessary javascript scripts are available in the [js/](https://github.com/akoch8/mexpress/tree/master/js) folder; there is no need to install or download any javascript. The python dependencies can be found in the [environment.yml](https://github.com/akoch8/mexpress/blob/master/environment.yml) file.
 
+### Database setup
+
+If you want to set up your own version of MEXPRESS locally, you'll need to:
+1. Create a MySQL database
+2. Complete the database config file ([ini/database_config.ini](https://github.com/akoch8/mexpress/blob/master/ini/database_config_EMPTY.ini)) 
+
 ### Contact
 
 Please get in touch if you have any questions or comments! info@alexanderkoch.be or [@monsieurKoch](https://twitter.com/monsieurKoch)
