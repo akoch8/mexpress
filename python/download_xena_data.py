@@ -119,7 +119,7 @@ def download_file(cancer_type, base_url, file):
 	# hubs return an empty file instead of an error when a file doesn't
 	# exist.
 	if file_path.lower().endswith('.gz'):
-		if os.path.getsize(file_path) > 0:
+		if os.path.getsize(file_path) > 20:
 			with gzip.open(file_path, 'rb') as fh_in:
 				fh_in_content = fh_in.read()
 				out_file = file_path.replace('.gz', '')
