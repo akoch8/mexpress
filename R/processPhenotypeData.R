@@ -211,7 +211,7 @@ for (i in 1:length(cancerTypes)) {
 			
 			# Process the survival data.
 			surv$sample = gsub('[A-Z]$', '', surv$sample)
-			surv = surv[,c('sample', '_OS_IND', '_OS')]
+			surv = surv[,c('sample', 'OS', 'OS.time')]
 			colnames(surv) = c('sample', 'os_event', 'os')
 			surv = unique(surv)
 			surv = surv[which(surv$os > 0),]
