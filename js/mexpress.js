@@ -515,14 +515,16 @@ $(function() {
 					cancerTypeDataFiltered.region_annotation.end + newline;
 				var samples = cancerTypeDataFiltered.samples_filtered_sorted;
 				data += 'data_type\t' + samples.join('\t') + newline;
-				data += 'cnv\t';
-				$.each(samples, function(index, sample) {
-					if (sample in cancerTypeDataFiltered.cnv) {
-						data += cancerTypeDataFiltered.cnv[sample] + '\t';
-					} else {
-						data += 'null\t';
-					}
-				});
+				if (cancerTypeDataFiltered.cnv !== null) {
+					data += 'cnv\t';
+					$.each(samples, function(index, sample) {
+						if (sample in cancerTypeDataFiltered.cnv) {
+							data += cancerTypeDataFiltered.cnv[sample] + '\t';
+						} else {
+							data += 'null\t';
+						}
+					});
+				}
 				data = data.trim() + newline;
 				$.each(cancerTypeDataFiltered.dna_methylation_data, function(key, value) {
 					data += key + '\t';
