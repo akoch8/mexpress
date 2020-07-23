@@ -19,12 +19,12 @@ We advise you to use MEXPRESS with a modern browser like Chrome or Firefox. MEXP
 
 | Browser | Version tested | Supported |
 | :--- | :--- | :--- |
-| Google Chrome | 71 | yes |
-| Firefox | 64 | yes |
-| Safari | 12 | yes |
-| Opera | 57 | yes |
-| Edge | 40 | yes |
-| Internet explorer | &le;11 | no |
+| Google Chrome | 71 | :white_check_mark: yes |
+| Firefox | 64 | :white_check_mark: yes |
+| Safari | 12 | :white_check_mark: yes |
+| Opera | 57 | :white_check_mark: yes |
+| Edge | 40 | :white_check_mark: yes |
+| Internet explorer | &le;11 | :no_entry: no |
 
 ### Dependencies
 
